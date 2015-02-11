@@ -221,6 +221,8 @@ var Nibbler = function (options) {
 	construct();
 };
 
+//our base32 encodings
+//I tried to use Nibbler for Base32/Ascii85 but I didn't have any luck at the time getting "standard" output...
 base32rfc = new Nibbler({
     dataBits: 8,
     codeBits: 5,

@@ -10,17 +10,17 @@
 <script src="xlate.js"></script>
 <script src="xlate.format.js"></script>
 <script>
-if(typeof addcredits  == 'function') addcredits("jxlate.html",1.8,"crashdemons","JavaScript Binary Translator UI.")
+if(typeof addcredits  == 'function') addcredits("jxlate.html",1.9,"crashdemons","JavaScript Binary Translator UI.")
 var oForm=null;
 var mode=0;
-var mode_bases=[256,'mc',2,8,10,16,'32r','32h','32c',64,85,'ue'];
-var mode_names=['Text','Morse','Binary','Octal','Decimal','Hexadecimal','Base32Rfc','Base32Hex','Base32Ckr','Base64','Ascii85','UrlEncode']
-function xlate_text(s,baseFrom,baseTo){
-	var a=input2buffer(s,baseFrom)
-	a=array_base2base(a,baseFrom,baseTo)
-	return buffer2output(a,baseTo)
+var mode_bases=[256,'mc',2,8,10,16,'32r','32h','32c',64,85,'ue'];//values used internally to represent each base in shorthand.
+//var mode_names=['Text','Morse','Binary','Octal','Decimal','Hexadecimal','Base32Rfc','Base32Hex','Base32Ckr','Base64','Ascii85','UrlEncode'];//unused array
+function xlate_text(s,baseFrom,baseTo){//translate a string from one base to another
+	var a=input2buffer(s,baseFrom);//preformat the input into an array of units in that base
+	a=array_base2base(a,baseFrom,baseTo);//process the array for conversion
+	return buffer2output(a,baseTo);//postformat the output back into readable form.
 }
-function xlate_switch(mode,newmode){
+function xlate_switch(mode,newmode){//mode is changing - retrieve all of the parameters needed to start a translation and prepare the form.
 	text=oForm.elements["text"].value;
 	if(text=="") return;
 
@@ -35,28 +35,28 @@ function xlate_switch(mode,newmode){
 	oForm.elements["text"].focus();
 
 }
-function xlate_poll(){
+function xlate_poll(){//poll the UI for mode radio-box changes.
 	//console.log("x");
 	var newmode=getCheckedRadioValue("mode");
-	if(newmode!=mode){
+	if(newmode!=mode){//check if the selected radio button has been changed
 		console.log("changed! "+mode+"->"+newmode);
-		xlate_switch(mode,newmode);
-		mode=newmode;
+		xlate_switch(mode,newmode);//trigger a translation
+		mode=newmode;//change the current mode value.
 	}
 }
-function xlate_init(){
+function xlate_init(){//set initial values and states
 	if(oForm==null){
 		oForm=document.getElementById('frmInput');
 		document.getElementById("rad0").checked=true;//clearing old form input
 		oForm.elements["text"].value="";//clearing old form input
 		oForm.elements["text"].focus();
 	}
-	document.getElementById('header').innerHTML = "JXlate "+fov("jxlate.html");
+	document.getElementById('header').innerHTML = "JXlate "+fov("jxlate.html");//set the version text header
 
 
 
 	var options = document.getElementById("options");
-	if (options.addEventListener) {
+	if (options.addEventListener) {// add a listener for scrolling over the mode selector - allowing easier conversion
 		options.addEventListener("mousewheel", MouseWheelHandler, false);// IE9, Chrome, Safari, Opera
 		options.addEventListener("DOMMouseScroll", MouseWheelHandler, false);// Firefox
 	}
@@ -65,31 +65,30 @@ function xlate_init(){
 
 
 
-	setInterval("xlate_poll()",100);
-
+	setInterval("xlate_poll()",100);//poll the radio selector for changes, using an event for this has some issues between browsers.
 }
 
-function getCheckedRadioValue(sname){
+function getCheckedRadioValue(sname){//get the current value of a radio selector
 	var radios = document.getElementsByName(sname);
 	for (var i = 0, length = radios.length; i < length; i++) if (radios[i].checked) return radios[i].value;
 	return undefined;
 }
 
-function MouseWheelHandler(e) {
+function MouseWheelHandler(e) {//handle scrollwheel events
 	// cross-browser wheel delta
 	var e = window.event || e; // old IE support
-	var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+	var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));//calculate the number of steps the wheel has moved. (signed for direction)
 
 	var target=-1;
 	var radios = document.getElementsByName("mode");
-	for (var i = 0, length = radios.length; i < length; i++)
+	for (var i = 0, length = radios.length; i < length; i++)//find the current selected radio input
 		if (radios[i].checked){
 			//console.log("i="+i);
-			target=modp(i-delta,mode_bases.length); radios[i].checked=false;
+			target=modp(i-delta,mode_bases.length); radios[i].checked=false;//target the (current-scrollclicks) radio, in visual order.
 		}
 	//console.log(target);
 
-	for (var i = 0, length = radios.length; i < length; i++)
+	for (var i = 0, length = radios.length; i < length; i++)//find the targetted radio input and check it (will force a mode change and translation)
 		if (i==target) radios[i].checked=true;
 
 
@@ -97,7 +96,7 @@ function MouseWheelHandler(e) {
 	return false;
 
 }
-function modp(n,d){
+function modp(n,d){//modulo that causes smaller negatives (|n|<d) to count from the righthand side (max value) instead of the stock behavior.
 	while(n<0) n+=d;
 	return (n%d);
 }

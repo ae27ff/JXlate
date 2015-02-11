@@ -7,21 +7,21 @@ fill_bases();
 
 function fill_bases(){ for(var b=32;b>=0;b--) base_charsets[b]=b32hex.substr(0,b).split(""); }//set some charset options for use in conversion functions.
 
-
+//check if the base ID is a numeral conversion or an encoding (external function)
 function isEncodedBase(base){ return (base==="32r" ||base==="32h" ||base==="32c" || base===64 || base===85 || base==="mc" || base==="ue");}
 
 
-
-function array_prepareEncodings(a,baseFrom,baseTo){//resolves any encodings before regular numeral conversions.
+//resolves any encodings before regular numeral conversions.
+function array_prepareEncodings(a,baseFrom,baseTo){
 	var fromEncoded=isEncodedBase(baseFrom);
 	var toEncoded=isEncodedBase(baseTo);
-	if( (!fromEncoded) && (!toEncoded) ) return [a,baseFrom,baseTo];
+	if( (!fromEncoded) && (!toEncoded) ) return [a,baseFrom,baseTo];//if the input unit array is neither encoded nor being encoded, just return it to array_base2base for numeral conversion.
 	var s="";
 
-	if(fromEncoded){
+	if(fromEncoded){//catch all of the encoded strings coming in that need to be decoded before translation.
 		try{
 			if(     baseFrom===64   ) s=atob(a[0]);
-			else if(baseFrom==="ue" ) s=unescape(a[0]);
+			else if(baseFrom==="ue" ) s=unescape(a[0]);//I know this is deprecated, but decodeURI does not do what I need.
 			else if(baseFrom==="32r") s=base32rfc.decode(a[0]);
 			else if(baseFrom==="32h") s=base32hex.decode(a[0]);
 			else if(baseFrom==="32c") s=base32ckr.decode(a[0]);
@@ -30,11 +30,11 @@ function array_prepareEncodings(a,baseFrom,baseTo){//resolves any encodings befo
 		}catch(e){
 			console.log("Encoding Error - Invalid encoded string");//do nothing - invalid baseX string should yield no output.
 		}
-		a=s.split("");//decode the single BaseX entry into chars
+		a=s.split("");//decode the single BaseX entry into chars (base256)
 		baseFrom=256;//set up the parameter for the char->numeral array conversion.
 	}
-	if(toEncoded){
-		a=array_base2base(a,baseFrom,256);//translate the array into char values
+	if(toEncoded){//if the input is due to be translated to another base, let's do it here.
+		a=array_base2base(a,baseFrom,256);//translate the array into char values if it isn't already.
 		s=a.join("")
 		if(     baseTo===64   ) a=[btoa(s)];
 		else if(baseTo==="ue" ) a=[urlencode(s)];
@@ -43,19 +43,19 @@ function array_prepareEncodings(a,baseFrom,baseTo){//resolves any encodings befo
 		else if(baseTo==="32c") a=[base32ckr.encode(s)];
 		else if(baseTo===85   ) a=[  ascii85.encode(s)];
 		else if(baseTo==="mc" ) a=[    morse_encode(s)];
-		baseFrom=baseTo;//disable any base conversion in array_base2base
+		baseFrom=baseTo;//we've encoded this to the new base, so lets set From to the current state - which disables any base conversion in array_base2base
 	}
 
 	return [a,baseFrom,baseTo];//output modified parameters.
 }
 function array_base2base(a,baseFrom,baseTo){//convert arrays of numerals from one base to another - implements support for Base64
 	var params=array_prepareEncodings(a,baseFrom,baseTo);//resolves any encodings before regular numeral conversions.
-	a=params[0];
+	a=params[0];//our prep function returns the parameters as an array after it's done, let's get them back where they need to be.
 	baseFrom=params[1];
 	baseTo=params[2];
 
-	if(baseFrom===baseTo) return a;
-	for(var i=0,len=a.length;i<len;i++) a[i]=base2base(a[i], baseFrom, baseTo);
+	if(baseFrom===baseTo) return a;//the from and to bases are the same - no conversion necessary!
+	for(var i=0,len=a.length;i<len;i++) a[i]=base2base(a[i], baseFrom, baseTo);//do a base conversion on each array element (unit in the From Base) to the To base.
 	return a;
 }
 
@@ -98,7 +98,7 @@ function numeral2dec(snum,sbase){
 
 
 function dec2numeral(d,sbase){
-	base=parseInt(String(sbase).replace(/\D/g,''));
+	base=parseInt(String(sbase).replace(/\D/g,''));//replace any non-digit chars and cast/interpret to an Integer.
 
 	if(base===10) return d.toString();//decimal to decimal, nothing to do except to ensure a String
 	if(base===256) return String.fromCharCode(d);//decimal to byte, enough said
@@ -118,11 +118,19 @@ function dec2numeral(d,sbase){
 function numeraldigit2dec(sdig,base){//retrieve the decimal value of a single digit in a numeral system
 	var idx=base_charsets[base].indexOf(sdig);
 	// there will be a problem here when your indexOf is the first character, since
-	// you return 0 if it's not found, but indexOf will return 0 if the first char 
-	// is the matched item
+	// you return 0 if it's not found, but indexOf will return 0 if the first char
+	// is the matched item -CZ
+
+	// No problem there, that's what I intended as far as Base2 through 16: Invalid digits become null in valid (0 value).
+	// If this becomes a problem later we can return -1 and add a check to numeral2dec() and maybe not append it at all
+	// -CD
+
 	return (idx === -1) ? 0 : idx;
 }
 
+//encodeURI is the sucessor to this, but it encodes LESS chars, some of which urlencode() does
+//of particular interest, & and /  don't get encoded, which can lead to urlencoded inputs breaking URLs.
+//escape() is deprecated (why?) but it catches more of these cases
 function urlencode(s){
-	return escape(s).replace("+","%2B");
+	return escape(s).replace("+","%2B");//inputs with + should be encoded as well... (escape converts spaces to %20)
 }
