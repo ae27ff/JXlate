@@ -1,3 +1,4 @@
+/* @P1@ */
 var manifest=[];
 if(typeof addcredits  == 'function') addcredits("foo.js",1.0,"crashdemons","Credits and Easter Egg script");
 

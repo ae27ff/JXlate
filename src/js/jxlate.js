@@ -1,16 +1,4 @@
-<!doctype html>
-<html>
-<head>
-<title>JXlate by Crashdemons</title>
-<link rel="stylesheet" type="text/css" href="jxlate.css">
-<script src="foo.js"></script>
-<script src="morse.js"></script>
-<script src="ascii85.js"></script>
-<script src="base32.js"></script>
-<script src="xlate.js"></script>
-<script src="xlate.format.js"></script>
-<script>
-if(typeof addcredits  == 'function') addcredits("jxlate.html",1.9,"crashdemons","JavaScript Binary Translator UI.")
+if(typeof addcredits  == 'function') addcredits("jxlate.js",1.9,"crashdemons","JXlate main script and operations")
 var oForm=null;
 var mode=0;
 var mode_bases=[256,'mc',2,8,10,16,'32r','32h','32c',64,85,'ue'];//values used internally to represent each base in shorthand.
@@ -110,32 +98,3 @@ functions generateOptions(){
 
 }
 */
-</script>
-</head>
-<body class="monospace bw" onload="xlate_init()">
-<form action="#" id="frmInput">
-	<div class="container">
-		<div class="child selector">
-			<ul class="options" id="options">
-				<li class="header" id="header">JXlate</li>
-				<li><input type="radio" name="mode" value="0" id="rad0" checked><label for="rad0">Text</label></li><!-- BR has been deprecated -->
-				<li><input type="radio" name="mode" value="2" id="rad2"><label for="rad2">Binary</label></li>
-				<li><input type="radio" name="mode" value="3" id="rad3"><label for="rad3">Octal</label></li>
-				<li><input type="radio" name="mode" value="4" id="rad4"><label for="rad4">Decimal</label></li>
-				<li><input type="radio" name="mode" value="5" id="rad5"><label for="rad5">Hexadecimal</label></li>
-				<li><input type="radio" name="mode" value="11" id="rad11"><label for="rad11">UrlEncode</label></li>
-				<li><input type="radio" name="mode" value="6" id="rad6"><label for="rad6">Base32Rfc</label></li>
-				<li><input type="radio" name="mode" value="7" id="rad7"><label for="rad7">Base32Hex</label></li>
-				<li><input type="radio" name="mode" value="8" id="rad8"><label for="rad8">Base32Ckr</label></li>
-				<li><input type="radio" name="mode" value="9" id="rad9"><label for="rad9">Base64</label></li>
-				<li><input type="radio" name="mode" value="10" id="rad10"><label for="rad10">Ascii85</label></li>
-				<li><input type="radio" name="mode" value="1" id="rad1"><label for="rad1">Morse</label></li>
-			</ul>
-		</div>
-		<div class="child workspace">
-			<textarea name="text" spellcheck="false" wrap="hard" placeholder="Enter your data here" class="grey"></textarea>
-		</div>
-	</div>
-</form>
-</body>
-</html>
