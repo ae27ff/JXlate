@@ -47,6 +47,13 @@ FileWrite('dist/monolithic/index.html',$html_monolithic)
 FileCopy('src/jxlate.css','dist/full/jxlate.css')
 FileCopy('src/jxlate.css','dist/single/jxlate.css')
 
+;create image files
+DirCopy('src/img','dist/full/img')
+DirCopy('src/img','dist/single/img')
+DirRemove('dist/full/img/design',1)
+DirRemove('dist/single/img/design',1)
+
+
 ;create JS files
 DirCopy('src/js','dist/full/js')
 FileWrite('dist/single/jxlate_single.js',$js)

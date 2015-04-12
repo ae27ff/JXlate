@@ -56,6 +56,113 @@ function foc(s){
 	}
 	return foa
 }
+/* @P2@ */
+if(typeof addcredits  == 'function') addcredits("ui.js",2.0,"crashdemons","JXlate UI script and overarching operations.")
+var oForm=null;
+var mode=0;
+var mode_bases=[256,'mc',2,8,10,16,'32r','32h','32c',64,85,'ue'];//values used internally to represent each base in shorthand.
+//var mode_names=['Text','Morse','Binary','Octal','Decimal','Hexadecimal','Base32Rfc','Base32Hex','Base32Ckr','Base64','Ascii85','UrlEncode'];//unused array
+function xlate_text(s,baseFrom,baseTo){//translate a string from one base to another
+	var a=input2buffer(s,baseFrom);//preformat the input into an array of units in that base
+	a=array_base2base(a,baseFrom,baseTo);//process the array for conversion
+	return buffer2output(a,baseTo);//postformat the output back into readable form.
+}
+function xlate_switch(mode,newmode){//mode is changing - retrieve all of the parameters needed to start a translation and prepare the form.
+	text=oForm.elements["text"].value;
+	if(text=="") return;
+
+	base=mode_bases[mode];
+	newbase=mode_bases[newmode];
+
+
+	if(base=="32r" && newbase==64 && text=="uuddlrlrba") return foo(oForm.elements["text"]);
+
+	text=xlate_text(text,base,newbase);
+	tbox_switch(newbase);
+	oForm.elements["text"].value=text;
+	oForm.elements["text"].focus();
+
+}
+function xlate_poll(){//poll the UI for mode radio-box changes.
+	//console.log("x");
+	var newmode=getCheckedRadioValue("mode");
+	if(newmode!=mode){//check if the selected radio button has been changed
+		console.log("changed! "+mode+"->"+newmode);
+		xlate_switch(mode,newmode);//trigger a translation
+		mode=newmode;//change the current mode value.
+	}
+}
+function xlate_init(){//set initial values and states
+	if(oForm==null){
+		oForm=document.getElementById('frmInput');
+		document.getElementById("rad0").checked=true;//clearing old form input
+		oForm.elements["text"].value="";//clearing old form input
+		oForm.elements["text"].focus();
+	}
+	document.getElementById('header').innerHTML = "JXlate "+fov("jxlate.html");//set the version text header
+
+
+
+	var options = document.getElementById("options");
+	if (options.addEventListener) {// add a listener for scrolling over the mode selector - allowing easier conversion
+		options.addEventListener("mousewheel", MouseWheelHandler, false);// IE9, Chrome, Safari, Opera
+		options.addEventListener("DOMMouseScroll", MouseWheelHandler, false);// Firefox
+	}
+	else options.attachEvent("onmousewheel", MouseWheelHandler);// IE 6/7/8
+
+
+	tbox_init(oForm.elements["text"]);
+	tbox_addtooln(0);
+	tbox_addtooln(1);
+	tbox_addtooln(2);
+	tbox_addtooln(3);
+	tbox_addtooln(4);
+
+	setInterval("xlate_poll()",100);//poll the radio selector for changes, using an event for this has some issues between browsers.
+}
+
+function getCheckedRadioValue(sname){//get the current value of a radio selector
+	var radios = document.getElementsByName(sname);
+	for (var i = 0, length = radios.length; i < length; i++) if (radios[i].checked) return radios[i].value;
+	return undefined;
+}
+
+function MouseWheelHandler(e) {//handle scrollwheel events
+	// cross-browser wheel delta
+	var e = window.event || e; // old IE support
+	var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));//calculate the number of steps the wheel has moved. (signed for direction)
+
+	var target=-1;
+	var radios = document.getElementsByName("mode");
+	for (var i = 0, length = radios.length; i < length; i++)//find the current selected radio input
+		if (radios[i].checked){
+			//console.log("i="+i);
+			target=modp(i-delta,mode_bases.length); radios[i].checked=false;//target the (current-scrollclicks) radio, in visual order.
+		}
+	//console.log(target);
+
+	for (var i = 0, length = radios.length; i < length; i++)//find the targetted radio input and check it (will force a mode change and translation)
+		if (i==target) radios[i].checked=true;
+
+
+
+	return false;
+
+}
+function modp(n,d){//modulo that causes smaller negatives (|n|<d) to count from the righthand side (max value) instead of the stock behavior.
+	while(n<0) n+=d;
+	return (n%d);
+}
+
+/*
+function generateOption(parent){
+	var el=document.createElement("li");
+}
+functions generateOptions(){
+	var parent=document.getElementById("options");
+
+}
+*/
 if(typeof addcredits  == 'function') addcredits("ascii85.js",2009,"Jacob Rus","Ascii85 Encoder")
 
 /*
@@ -430,6 +537,64 @@ base32hex = new Nibbler({
 
 
 
+// Caesarian Shift
+
+// This code was written by Tyler Akins and is placed in the public domain.
+// It would be nice if this header remained intact.  http://rumkin.com
+
+// Requires util.js
+
+if(typeof addcredits  == 'function') addcredits("caesar.js",2014,"Tyler Akins","Caesar cipher class")
+
+
+//SwapSpaces(HTMLEscape(Caesar(1, document.encoder.text.value, document.encoder.N.value * 1)));
+
+// Perform a Caesar cipher (ROT-N) encoding on the text
+// encdec = -1 for decode, 1 for encode (kinda silly, but kept it like this
+//    to be the same as the other encoders)
+// text = the text to encode/decode
+// inc = how far to shift the letters.
+// key = the key to alter the alphabet
+// alphabet = The alphabet to use if not A-Z
+function Caesar(encdec, text, inc, key, alphabet)
+{
+   var s = "", b, i, idx;
+
+   if (typeof(alphabet) != 'string')
+      alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+   inc = inc * 1;
+
+   key = MakeKeyedAlphabet(key, alphabet);
+
+   if (encdec < 0)
+   {
+      inc = alphabet.length - inc;
+      b = key;
+      key = alphabet;
+      alphabet = b;
+   }
+
+   for (i = 0; i < text.length; i++)
+   {
+      b = text.charAt(i);
+      if ((idx = alphabet.indexOf(b)) >= 0)
+      {
+         idx = (idx + inc) % alphabet.length;
+	 b = key.charAt(idx);
+      }
+      else if ((idx = alphabet.indexOf(b.toUpperCase())) >= 0)
+      {
+         idx = (idx + inc) % alphabet.length;
+	 b = key.charAt(idx).toLowerCase();
+      }
+      s += b;
+   }
+   return s;
+}
+
+document.Caesar_Loaded = 1;
+
 function invertall() {
     var percent = '100%';
     /*if (!window.counter) {
@@ -473,106 +638,6 @@ function navegador(){
   M= M? [M[1], M[2]]: [N, navigator.appVersion,'-?'];
   return M;
  }
-if(typeof addcredits  == 'function') addcredits("jxlate.js",1.9,"crashdemons","JXlate main script and operations")
-var oForm=null;
-var mode=0;
-var mode_bases=[256,'mc',2,8,10,16,'32r','32h','32c',64,85,'ue'];//values used internally to represent each base in shorthand.
-//var mode_names=['Text','Morse','Binary','Octal','Decimal','Hexadecimal','Base32Rfc','Base32Hex','Base32Ckr','Base64','Ascii85','UrlEncode'];//unused array
-function xlate_text(s,baseFrom,baseTo){//translate a string from one base to another
-	var a=input2buffer(s,baseFrom);//preformat the input into an array of units in that base
-	a=array_base2base(a,baseFrom,baseTo);//process the array for conversion
-	return buffer2output(a,baseTo);//postformat the output back into readable form.
-}
-function xlate_switch(mode,newmode){//mode is changing - retrieve all of the parameters needed to start a translation and prepare the form.
-	text=oForm.elements["text"].value;
-	if(text=="") return;
-
-	base=mode_bases[mode];
-	newbase=mode_bases[newmode];
-
-
-	if(base=="32r" && newbase==64 && text=="uuddlrlrba") return foo(oForm.elements["text"]);
-
-	text=xlate_text(text,base,newbase)
-	oForm.elements["text"].value=text;
-	oForm.elements["text"].focus();
-
-}
-function xlate_poll(){//poll the UI for mode radio-box changes.
-	//console.log("x");
-	var newmode=getCheckedRadioValue("mode");
-	if(newmode!=mode){//check if the selected radio button has been changed
-		console.log("changed! "+mode+"->"+newmode);
-		xlate_switch(mode,newmode);//trigger a translation
-		mode=newmode;//change the current mode value.
-	}
-}
-function xlate_init(){//set initial values and states
-	if(oForm==null){
-		oForm=document.getElementById('frmInput');
-		document.getElementById("rad0").checked=true;//clearing old form input
-		oForm.elements["text"].value="";//clearing old form input
-		oForm.elements["text"].focus();
-	}
-	document.getElementById('header').innerHTML = "JXlate "+fov("jxlate.html");//set the version text header
-
-
-
-	var options = document.getElementById("options");
-	if (options.addEventListener) {// add a listener for scrolling over the mode selector - allowing easier conversion
-		options.addEventListener("mousewheel", MouseWheelHandler, false);// IE9, Chrome, Safari, Opera
-		options.addEventListener("DOMMouseScroll", MouseWheelHandler, false);// Firefox
-	}
-	else options.attachEvent("onmousewheel", MouseWheelHandler);// IE 6/7/8
-
-
-
-
-	setInterval("xlate_poll()",100);//poll the radio selector for changes, using an event for this has some issues between browsers.
-}
-
-function getCheckedRadioValue(sname){//get the current value of a radio selector
-	var radios = document.getElementsByName(sname);
-	for (var i = 0, length = radios.length; i < length; i++) if (radios[i].checked) return radios[i].value;
-	return undefined;
-}
-
-function MouseWheelHandler(e) {//handle scrollwheel events
-	// cross-browser wheel delta
-	var e = window.event || e; // old IE support
-	var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));//calculate the number of steps the wheel has moved. (signed for direction)
-
-	var target=-1;
-	var radios = document.getElementsByName("mode");
-	for (var i = 0, length = radios.length; i < length; i++)//find the current selected radio input
-		if (radios[i].checked){
-			//console.log("i="+i);
-			target=modp(i-delta,mode_bases.length); radios[i].checked=false;//target the (current-scrollclicks) radio, in visual order.
-		}
-	//console.log(target);
-
-	for (var i = 0, length = radios.length; i < length; i++)//find the targetted radio input and check it (will force a mode change and translation)
-		if (i==target) radios[i].checked=true;
-
-
-
-	return false;
-
-}
-function modp(n,d){//modulo that causes smaller negatives (|n|<d) to count from the righthand side (max value) instead of the stock behavior.
-	while(n<0) n+=d;
-	return (n%d);
-}
-
-/*
-function generateOption(parent){
-	var el=document.createElement("li");
-}
-functions generateOptions(){
-	var parent=document.getElementById("options");
-
-}
-*/
 if(typeof addcredits === 'function') addcredits("morse.js",2,"crashdemons","Morse code translator functions")
 
 var morse_cs=" ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";//morse code charset
@@ -639,6 +704,697 @@ function morse_encode(arr){
 	return morse;
 }
 
+if(typeof addcredits  == 'function') addcredits("toolbox.js",1.0,"crashdemons","Text formatting tools")
+
+
+var tools=[
+	['replace','Replace one phrase with another'],
+	['case','Toggle letter case'],
+	['length','Find the total length'],
+	['reverse','Reverse all characters'],
+	['shift','Apply Caesar shift'],
+	['invert','Invert bit values'],
+	['greverse','Reverse groupings only'],
+	['stripspaces','Remove spaces'],
+];
+
+var toolsets=[];
+
+var tbox;
+var tbox_textarea;
+var tbox_shown=false;
+var tbox_case=true;
+
+function tbox_init(textarea){
+	tbox=document.getElementById('tbox');
+	tbox_textarea=textarea;
+	tbox_hide();
+
+	toolsets[0]=[2];
+	toolsets[2]=[0,2,3,5,6,7];//TODO: add word-reversal.
+	toolsets[8]=[0,2,3,5,6];
+	toolsets[10]=[0,2,3,5,6];
+	toolsets[16]=[0,1,2,3,5,6,7];
+	toolsets[32]=[2,7];
+	toolsets[64]=[2,7];
+	toolsets[85]=[2];
+	toolsets[256]=[0,1,2,3,4];
+}
+function tbox_switch(modestr){
+	tbox_clear();
+	var m=parseInt(modestr);
+	if(isNaN(m)) m=0;
+	var ts=toolsets[m];
+	for(var i=0;i<ts.length;i++) tbox_addtooln(ts[i]);
+}
+
+function tbox_show(){
+	tbox.style.display='block';
+}
+function tbox_hide(){
+	tbox.style.display='none';
+}
+function tbox_toggle(){
+	if(tbox_shown) tbox_hide();
+	else           tbox_show();
+	tbox_shown=!tbox_shown;
+}
+
+function tbox_setpos(x,y){
+	var t = tbox;
+	t.style.left=x+"px";
+	t.style.top=y+"px";
+}
+function tbox_clear(){
+	var t = tbox;
+	while (t.lastChild) {
+		t.removeChild(t.lastChild);
+	}
+}
+
+function tbox_addtooln(i){ tbox_addtool(tools[i][0],tools[i][1]); }
+function tbox_addtool(sname,sdesc){
+	var sfunc="tbox_action_"+sname;
+
+	var t = tbox;
+
+	var tool=document.createElement("div");
+	tool.className="tool";
+
+
+	var img=document.createElement("img");
+	img.title=sdesc;
+	img.alt=sname;
+	img.src="img/"+sname+".png";
+	img.style.borderStyle="none";
+	img.onclick=eval(sfunc);
+
+	t.appendChild(tool);
+	tool.appendChild(img);
+
+}
+
+function tbox_action_debug(){
+	alert("wat");
+}
+
+function tbox_action_replace(){
+	var search=prompt("Enter the string to replace","");
+	if(search===null) return;
+	var replace=prompt("Enter the string to replace with","");
+	if(replace===null) return;
+	tbox_textarea.value=replaceAll(search,replace,tbox_textarea.value);
+}
+function tbox_action_case(){
+	if(tbox_case) tbox_textarea.value=tbox_textarea.value.toUpperCase();
+	else          tbox_textarea.value=tbox_textarea.value.toLowerCase();
+	tbox_case=!tbox_case;
+}
+function tbox_action_length(){
+	var l=tbox_textarea.value.length;
+	var sl= strippedlen(tbox_textarea.value);
+	var out="Total length: "+l;
+	var base=mode_bases[mode];
+	if(base===2){
+		out+="\nBit length: "+sl;
+		out+="\nBytes: "+(sl/8);
+	}else if(base===16){
+		out+="\nDigits: "+sl+" (nibbles)";
+		out+="\nBytes: "+(sl/2);
+	}
+	alert(out);
+}
+function tbox_action_reverse(){
+	tbox_textarea.value=reverse(tbox_textarea.value);
+}
+function tbox_action_shift(){
+	var shift=prompt("Please enter the caesar shift value","13");
+	if(shift===null) return;
+	shift=parseInt(shift);
+	if(shift===0) return;
+	tbox_textarea.value=Caesar(1,tbox_textarea.value,shift);
+}
+
+function tbox_action_invert(){//NOTE: uses 'mode' and 'mode_bases' global from ui.js
+	var  base=mode_bases[mode];
+	var tmp = xlate_text(tbox_textarea.value,base,2);
+	tmp=invertbits(tmp);
+	tbox_textarea.value = xlate_text(tmp,2,base);
+}
+function tbox_action_greverse(){
+	tbox_textarea.value=tbox_textarea.value.split("").reverse().join("").split(" ").reverse().join(" ")
+}
+function tbox_action_stripspaces(){
+	tbox_textarea.value=replaceAll(" ","",tbox_textarea.value);
+	tbox_textarea.value=replaceAll("\t","",tbox_textarea.value);
+	tbox_textarea.value=replaceAll("\r","",tbox_textarea.value);
+	tbox_textarea.value=replaceAll("\n","",tbox_textarea.value);
+}
+//==============================================
+
+
+function strippedlen(str){
+	str=replaceAll(" ","",str);
+	str=replaceAll("\t","",str);
+	str=replaceAll("\r","",str);
+	str=replaceAll("\n","",str);
+	return str.length;
+}
+
+function invertbits(str){
+	str=replaceAll("0","X",str);
+	str=replaceAll("1","Y",str);
+	str=replaceAll("X","1",str);
+	str=replaceAll("Y","0",str);
+	return str;
+}
+
+
+
+function reverse(s){
+    return s.split("").reverse().join("");
+}
+function replaceAll(find, replace, str) {
+  return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+}
+function escapeRegExp(string) {
+    return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+}
+// Utility functions
+
+// Code was written by Tyler Akins and is placed in the public domain
+// It would be nice if you left this header.  http://rumkin.com
+
+if(typeof addcredits  == 'function') addcredits("util.js",2014,"Tyler Akins","Utility functions")
+
+// Remove whitespace from beginning and end of text
+function Trim(s)
+{
+   while (s.length && " \t\r\n".indexOf(s.charAt(0)) >= 0)
+   {
+      s = s.slice(1, s.length);
+   }
+   while (s.length && " \t\r\n".indexOf(s.charAt(s.length - 1)) >= 0)
+   {
+      s = s.slice(0, s.length - 1);
+   }
+
+   return s;
+}
+
+
+// Exchange characters in F for ones in T for the string S.  If T is not
+// specified or not long enough, the characters are removed.
+// "aaabbbC!!" = Tr("AaaBbbCcc", "ABc", "ab!")
+// "Test thing" = Tr("Test\n thing", "\r\n")
+function Tr(s, f, t)
+{
+   var o = '';
+
+   if (typeof(t) != 'string')
+   {
+      t = '';
+   }
+
+   for (var i = 0; i < s.length; i ++)
+   {
+      var c = s.charAt(i);
+      var idx = f.indexOf(c);
+      if (idx >= 0)
+      {
+         if (idx < t.length)
+	 {
+            o += t.charAt(idx);
+	 }
+      }
+      else
+      {
+         o += c;
+      }
+   }
+
+   return o;
+}
+
+
+// Insert CR and LF characters into e, based on the position of those
+// characters in T.
+// If T = "ab\ncd" and E = "zyxw", the result will be "zy\nxw"
+function InsertCRLF(t, e)
+{
+   var o = "", i, j;
+
+   for (i = 0, j = 0; i < t.length; i ++)
+   {
+      if ("\r\n".indexOf(t.charAt(i)) >= 0)
+      {
+         o += t.charAt(i);
+      }
+      else
+      {
+         o += e.charAt(j ++);
+      }
+   }
+
+   return o;
+}
+
+
+// Returns an alphabet with a key in front.
+// Passing the key of "Four. Score! And Seven Days Ago?"
+// will return  "FOURSCEANDVYGBHIJKLMPQTWXZ"
+// key = the letters to include in the beginning
+// alphaet = the alphabet to use (if not A-Z)
+function MakeKeyedAlphabet(key, alphabet)
+{
+   var out = "";
+
+   if (typeof(alphabet) != 'string')
+      alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+   else
+      alphabet = alphabet.toUpperCase();
+
+   if (typeof(key) != 'string')
+      return alphabet;
+
+   key = key.toUpperCase() + alphabet;
+   for (var i = 0; i < key.length; i ++)
+   {
+      if (out.indexOf(key.charAt(i)) < 0 &&
+          alphabet.indexOf(key.charAt(i)) >= 0)
+      {
+         out += key.charAt(i);
+      }
+   }
+
+   return out;
+}
+
+
+// Make any string contain just alpha characters
+function OnlyAlpha(str)
+{
+   var out = "";
+
+   for (i = 0; i < str.length; i ++)
+   {
+      var b = str.charAt(i);
+      if (b.toUpperCase() >= 'A' && b.toUpperCase() <= 'Z')
+      {
+         out += b;
+      }
+   }
+
+   return out;
+}
+
+
+// Change a string into valid HTML text
+function HTMLEscape(str)
+{
+   var out = "";
+
+   for (var i = 0; i < str.length; i ++)
+   {
+      var c = str.charAt(i);
+      if (c == '&')
+         c = '&amp;';
+      if (c == '>')
+         c = '&gt;';
+      if (c == '<')
+         c = '&lt;';
+      if (c == "\n")
+         c = "<br>\n";
+      out += c;
+   }
+
+   return out;
+}
+
+
+// Pass it a textarea object, get it resized automagically
+function ResizeTextArea(obj)
+{
+   var s = obj.value + "\n";
+   var newlines = 0;
+   var max_chars = 0;
+   var i, chars = 0, wide = 0;
+   var obj_max_cols = 100, obj_min_cols = 40, obj_max_rows = 15;
+   var scrollbar_width = 2;
+
+   for (i = 0; i < s.length; i ++)
+   {
+      var c = s.charAt(i);
+      if (c == "\n")
+      {
+         if (max_chars < chars)
+	    max_chars = chars;
+	 chars = 0;
+	 newlines ++;
+      }
+      else
+      {
+         if (chars == obj_max_cols - scrollbar_width)
+         {
+	    max_chars = chars;
+            j = i;
+	    var c2 = s.charAt(j);
+	    while (c2 != "\n" && c2 != ' ' && c2 != "\t" && j > 0)
+	    {
+	       j --;
+	       c2 = s.charAt(j);
+	    }
+	    if (c2 != "\n" && j > 0)
+	    {
+	       // Not one big long line
+	       newlines ++;
+	       chars = 0;
+	       i = j;
+	    }
+	    else
+	    {
+	       wide = 1;
+	    }
+         }
+         else
+         {
+            chars ++;
+         }
+      }
+
+      // Short-circuit
+      if (obj_max_rows <= newlines + wide + 1 &&
+         obj_max_cols <= max_chars + scrollbar_width)
+      {
+         obj.rows = obj_max_rows;
+	 obj.cols = obj_max_cols;
+	 return;
+      }
+   }
+
+   obj.rows = Math.min(obj_max_rows, newlines + wide + 1);
+   obj.cols = Math.min(Math.max(obj_min_cols, max_chars + scrollbar_width), obj_max_cols);
+}
+
+
+function Reverse_String(s)
+{
+   var o = '', i = s.length;
+
+   while (i --)
+   {
+      o += s.charAt(i);
+   }
+
+   return o;
+}
+
+
+// Returns 1 if there was no change, 0 if it is not the same
+// Saves value in the element if it was changed, so subsequent calls
+// to this function will return 1 until it changes again.
+// Don't use this function like this:
+//   if (IsUnchanged(x) && IsUnchanged(y) && IsUnchanged(z)) { ... }
+// The logic code could short-circuit on X or Z (depending on how it
+// gets parsed) and will jump to the 'if' block without evaluating
+// all of the variables.  Use this instead:
+//   if (IsUnchanged(x) * IsUnchanged(y) * IsUnchanged(z)) { ... }
+//   if (IsUnchanged(x) + IsUnchanged(y) + IsUnchanged(z) == 3) { ... }
+function IsUnchanged(e)
+{
+   var v;
+
+   if (e.type == 'checkbox')
+   {
+      v = e.checked.toString();
+   }
+   else
+   {
+      v = e.value;
+   }
+
+   if (v != e.getAttribute('_oldValue'))
+   {
+      e.setAttribute('_oldValue', v);
+      return 0;
+   }
+
+   return 1;
+}
+
+
+// Makes a tableau out of a passed in key
+// Key should be 25 characters!
+function HTMLTableau(key)
+{
+   var out = '';
+
+   for (var i = 0; i < 25; i ++)
+   {
+      if (i > 0 && i % 5 == 0)
+      {
+         out += "<br>\n";
+      }
+      if (i % 5)
+      {
+         out += " ";
+      }
+      out += key.charAt(i);
+   }
+
+   return "<tt>" + out + "</tt>";
+}
+
+
+// Change multiple spaces into &nbsp; to preserve padding.
+function SwapSpaces(in_str)
+{
+   var out = '';
+   var multi = 1;
+
+   for (var i = 0; i < in_str.length; i ++)
+   {
+      var c = in_str.charAt(i);
+
+      if (c == ' ')
+      {
+         if (multi)
+	 {
+	    out += '&nbsp;';
+	    multi = 0;
+	 }
+	 else
+	 {
+	    out += ' ';
+	    multi = 1;
+	 }
+      }
+      else if (multi && (c == '\r' || c == '\n' || c == '\t'))
+      {
+         out = out.slice(0, out.length - 1) + '&nbsp;' + c;
+         multi = 0;
+      }
+      else
+      {
+         out += c;
+	 multi = 0;
+      }
+   }
+
+   if (out.charAt(out.length - 1) == ' ')
+   {
+      out = out.slice(0, out.length - 1) + '&nbsp;';
+   }
+
+   return out;
+}
+
+
+// Return a letter frequency count
+// Caches information for faster retrieval by multiple functions
+// and faster calculation when text is being typed into the forms.
+var LetterFrequency_LastText = '';
+var LetterFrequency_LastFreq = new Array();
+function LetterFrequency(text)
+{
+   var n = new Array();
+   var i = 0, j;
+
+   if (LetterFrequency_LastText == text)
+   {
+      return LetterFrequency_LastFreq;
+   }
+
+   if (text.slice(0, LetterFrequency_LastText.length) ==
+       LetterFrequency_LastText)
+   {
+      n = LetterFrequency_LastFreq;
+      i = LetterFrequency_LastText.length;
+   }
+
+   for (j = text.length; i < j; i ++)
+   {
+      var c = text.charAt(i);
+      if (! n[c])
+      {
+         n[c] = 1;
+      }
+      else
+      {
+         n[c] ++;
+      }
+   }
+
+   LetterFrequency_LastText = text;
+   LetterFrequency_LastFreq = n;
+
+   return n;
+}
+
+
+// Returns true if the number passed in is prime
+// 2 is considered the first prime.
+var PrimeList = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47,
+   53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+function IsPrime(n)
+{
+   // Get rid of the baddies.
+   if (n < 2 || n != Math.floor(n)) {
+      return false;
+   }
+
+   // Quick check for all numbers < 100
+   for (var i = 0; i < PrimeList.length; i ++) {
+      if (PrimeList[i] == n) {
+         return true;
+      }
+      if (PrimeList[i] > n) {
+         return false;
+      }
+   }
+
+   // Build list of primes needed to do the check
+   var m = Math.floor(Math.sqrt(n));
+   var m2 = PrimeList[PrimeList.length - 1];
+   if (m2 < m) {
+      while (m2 <= m) {
+	 m2 += 2;
+         if (IsPrime(m2)) {
+	    PrimeList[PrimeList.length] = m2;
+	 }
+      }
+   }
+
+   // Now we just cycle through the primes
+   for (var i = 0; PrimeList[i] <= m; i ++) {
+      var d = n / PrimeList[i];
+      if (d == Math.floor(d)) {
+         return false;
+      }
+   }
+
+   return true;
+}
+
+
+// Returns the prime factors of a number as an array
+// I don't work with negative numbers or zero or non-integers.
+function GetFactors(n)
+{
+   var factors = new Array();
+   if (n < 1 || n != Math.floor(n))
+   {
+      return factors;
+   }
+
+   // Check if the number is prime
+   if (IsPrime(n)) {
+      factors[factors.length] = n;
+      return factors;
+   }
+
+   // Start building a list of factors
+   // This also populates PrimeList with enough primes for us to use
+   var index = 0;
+   var skipCheck = 0;
+   while (skipCheck || ! IsPrime(n)) {
+      var d = n / PrimeList[index];
+      if (d == Math.floor(d)) {
+         if (PrimeList[index] != factors[factors.length - 1]) {
+	    factors[factors.length] = PrimeList[index];
+	 }
+	 n = d;
+	 skipCheck = 0;
+      } else {
+         index ++;
+	 skipCheck = 1;
+      }
+   }
+   if (n != factors[factors.length - 1]) {
+      factors[factors.length] = n;
+   }
+
+   return factors;
+}
+
+
+// Returns true if the numbers we are comparing are coprime.
+// Returns false if either one is a non-integer or zero.
+// Returns true if either is one.
+var CoprimeCache = new Array();
+var CoprimeCacheNum = new Array();
+function IsCoprime(a, b)
+{
+   var a_factors = false, b_factors = false;
+
+   if (a < 1 || b < 1 || a != Math.floor(a) || b != Math.floor(b)) {
+      return false;
+   }
+   if (a == 1 || b == 1) {
+      return true;
+   }
+
+   // Check if we cached either "a" or "b" so we don't need to refactor
+   // them again.
+   for (var i = 0; i < CoprimeCacheNum.length; i ++) {
+      if (CoprimeCacheNum[i] == a) {
+         a_factors = CoprimeCache[i];
+      }
+      if (CoprimeCacheNum[i] == b) {
+         b_factors = CoprimeCache[i];
+      }
+   }
+
+   // Get factors
+   if (! a_factors) {
+      a_factors = GetFactors(a);
+   }
+   if (! b_factors) {
+      b_factors = GetFactors(b);
+   }
+
+   // Set up the cache again
+   CoprimeCache = [a_factors, b_factors];
+   CoprimeCacheNum = [a, b];
+
+   var a_idx = 0;
+   var b_idx = 0;
+   while (a_idx < a_factors.length && b_idx < b_factors.length)
+   {
+      if (a_factors[a_idx] < b_factors[b_idx]) {
+         a_idx ++;
+      } else if (a_factors[a_idx] > b_factors[b_idx]) {
+         b_idx ++;
+      } else {
+         // Common factor
+         return false;
+      }
+   }
+   return true;
+}
+
+
+document.Util_Loaded = 1;
 
 if(typeof addcredits  == 'function') addcredits("xlate.format.js",8,"crashdemons","Numeral System formatting functions")
 
