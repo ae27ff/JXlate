@@ -69,16 +69,17 @@ function xlate_text(s,baseFrom,baseTo){//translate a string from one base to ano
 }
 function xlate_switch(mode,newmode){//mode is changing - retrieve all of the parameters needed to start a translation and prepare the form.
 	text=oForm.elements["text"].value;
-	if(text=="") return;
 
 	base=mode_bases[mode];
 	newbase=mode_bases[newmode];
+
+	tbox_switch(newbase);
+	if(text=="") return;
 
 
 	if(base=="32r" && newbase==64 && text=="uuddlrlrba") return foo(oForm.elements["text"]);
 
 	text=xlate_text(text,base,newbase);
-	tbox_switch(newbase);
 	oForm.elements["text"].value=text;
 	oForm.elements["text"].focus();
 
