@@ -40,14 +40,19 @@ function xlate_poll(){//poll the UI for mode radio-box changes.
 		console.log("changed! "+mode+"->"+newmode);
 		var oldmode=mode;
 		mode=newmode;//change the current mode value.
-		xlate_switch(oldmode,newmode);//trigger a translation
+		try{
+			xlate_switch(oldmode,newmode);//trigger a translation
+		}catch(e){
+			setMode(oldmode);
+			alert("This value could not be converted as specified.\nPlease make sure it is valid.")
+		}
 		console.log("conversion complete");
 	}
 }
 function xlate_init(){//set initial values and states
 	if(oForm==null){
 		oForm=document.getElementById('frmInput');
-		document.getElementById("rad0").checked=true;//clearing old form input
+		setMode(0);
 		oForm.elements["text"].value="";//clearing old form input
 		oForm.elements["text"].focus();
 	}
@@ -110,6 +115,10 @@ function iso8859info(){
 	alert("This mode displays ISO-8859-1 text - single bytes.\n"+
 	"If you input unicode into this mode, it will be interpreted as two bytes."
 	)
+}
+function setMode(i){
+	mode=i;
+	document.getElementById("rad"+i).checked=true
 }
 
 /*

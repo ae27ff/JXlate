@@ -56,5 +56,6 @@ function isReadable(a){//graphing ASCII chars, determined by charcode value
 	return ( (a>=0x20 && a<=0x7E) || a==0x0d || a==0x0a || a==0x09 );
 }
 function isGraphable(a){//additional graphing ISO-8859-1 chars, determined by charcode value
-	return ( isReadable(a) || (a>=0xA0 && a<=0xFF));
+	return (a!=0);
+	//return ( isReadable(a) || (a>=0xA0 && a<=0xFF));
 }
