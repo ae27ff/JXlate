@@ -299,8 +299,9 @@ function modp(n,d){//modulo that causes smaller negatives (|n|<d) to count from 
 }
 
 function iso8859info(){
-	alert("This mode displays ISO-8859-1 text - single bytes.\n"+
-	"If you input unicode into this mode, it will be interpreted as two bytes."
+	alert("This mode displays ISO-8859-1 (Latin-1) text - single bytes 00-FF (256)\n"+
+	"If you input unicode into this mode, it will be interpreted as two bytes.\n"+
+	"Use UCS-2 (Unicode code point values) or UTF-8 modes instead for unicode."
 	)
 }
 function setMode(i){
@@ -749,49 +750,6 @@ function Caesar(encdec, text, inc, key, alphabet)
 
 document.Caesar_Loaded = 1;
 
-function invertall() {
-    var percent = '100%';
-    /*if (!window.counter) {
-        window.counter = 1;
-    } else {
-      window.counter++;
-      if (window.counter % 2 == 0) {
-          percent = '0%'
-      }
-    };   */
-
-    var head = document.getElementsByTagName('head')[0];
-    var style = document.createElement('style');
-
-    var css = 'html {-webkit-filter: invert('+percent+');' +
-        '-moz-filter: invert('+percent+');' +
-        '-o-filter: invert('+percent+');' +
-        '-ms-filter: invert('+percent+'); ' +
-        'filter: invert('+percent+'); ';
-
-    if (navegador()[0] == 'Firefox') {
-        css += 'filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'invert\'><feColorMatrix in=\'SourceGraphic\' type=\'matrix\' values=\'-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0\'/></filter></svg>#invert"); }';
-    } else {
-        css += ' } ';
-    }
-
-    style.type = 'text/css';
-    if (style.styleSheet) {
-      style.styleSheet.cssText = css;
-    } else {
-      style.appendChild(document.createTextNode(css));
-    }
-
-    head.appendChild(style);
-}
-
-function navegador(){
-  var N= navigator.appName, ua= navigator.userAgent, tem;
-  var M= ua.match(/(opera|chrome|safari|firefox|msie)\/?\s*(\.?\d+(\.\d+)*)/i);
-  if(M && (tem= ua.match(/version\/([\.\d]+)/i))!= null) M[2]= tem[1];
-  M= M? [M[1], M[2]]: [N, navigator.appVersion,'-?'];
-  return M;
- }
 if(typeof addcredits === 'function') addcredits("morse.js",2,"crashdemons","Morse code translator functions")
 
 var morse_cs=" ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";//morse code charset
@@ -898,6 +856,7 @@ function tbox_switch(modestr){
 	tbox_clear();
 	var m=parseInt(modestr);
 	if(isNaN(m)) m=0;
+	if(modestr==="ucs2" || modestr==="utf8") m=256;//allow text tools for unicode text modes.
 	var ts=toolsets[m];
 	for(var i=0;i<ts.length;i++) tbox_addtooln(ts[i]);
 }
@@ -1684,19 +1643,15 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 	var s="";
 
 	if(fromEncoded){//catch all of the encoded strings coming in that need to be decoded before translation.
-		//try{
-			if(     baseFrom===64   )  s=atob(a[0]);
-			else if(baseFrom==="ue" )  s=unescape(a[0]);//I know this is deprecated, but decodeURI does not do what I need.
-			else if(baseFrom==="32r")  s=base32rfc.decode(a[0]);
-			else if(baseFrom==="32h")  s=base32hex.decode(a[0]);
-			else if(baseFrom==="32c")  s=base32ckr.decode(a[0]);
-			else if(baseFrom===85   )  s=  ascii85.decode(a[0]);
-			else if(baseFrom==="mc" )  s=morse_decode(a);
-			else if(baseFrom==="ucs2") s=convert_encoding(a[0],'ucs2','iso88591');
-			else if(baseFrom==="utf8") s=convert_encoding(a[0],'utf8','iso88591');
-		//}catch(e){
-		//	console.log("Encoding Error - Invalid encoded string");//do nothing - invalid baseX string should yield no output.
-		//}
+		if(     baseFrom===64   )  s=atob(a[0]);
+		else if(baseFrom==="ue" )  s=unescape(a[0]);//I know this is deprecated, but decodeURI does not do what I need.
+		else if(baseFrom==="32r")  s=base32rfc.decode(a[0]);
+		else if(baseFrom==="32h")  s=base32hex.decode(a[0]);
+		else if(baseFrom==="32c")  s=base32ckr.decode(a[0]);
+		else if(baseFrom===85   )  s=  ascii85.decode(a[0]);
+		else if(baseFrom==="mc" )  s=morse_decode(a);
+		else if(baseFrom==="ucs2") s=convert_encoding(a[0],'ucs2','iso88591');
+		else if(baseFrom==="utf8") s=convert_encoding(a[0],'utf8','iso88591');
 		a=s.split("");//decode the single BaseX entry into chars (base256)
 		baseFrom=256;//set up the parameter for the char->numeral array conversion.
 	}
@@ -1807,7 +1762,7 @@ function urlencode(s){
 
 </script>
 <script>
-if(typeof addcredits  == 'function') addcredits("jxlate.html",2.0,"crashdemons","JavaScript Binary Translator UI.")
+if(typeof addcredits  == 'function') addcredits("jxlate.html",2.1,"crashdemons","JavaScript Binary Translator UI.")
 </script>
 </head>
 <body class="monospace bw" onload="xlate_init()">

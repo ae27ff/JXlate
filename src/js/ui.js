@@ -112,8 +112,9 @@ function modp(n,d){//modulo that causes smaller negatives (|n|<d) to count from 
 }
 
 function iso8859info(){
-	alert("This mode displays ISO-8859-1 text - single bytes.\n"+
-	"If you input unicode into this mode, it will be interpreted as two bytes."
+	alert("This mode displays ISO-8859-1 (Latin-1) text - single bytes 00-FF (256)\n"+
+	"If you input unicode into this mode, it will be interpreted as two bytes.\n"+
+	"Use UCS-2 (Unicode code point values) or UTF-8 modes instead for unicode."
 	)
 }
 function setMode(i){

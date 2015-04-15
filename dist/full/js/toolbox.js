@@ -38,6 +38,7 @@ function tbox_switch(modestr){
 	tbox_clear();
 	var m=parseInt(modestr);
 	if(isNaN(m)) m=0;
+	if(modestr==="ucs2" || modestr==="utf8") m=256;//allow text tools for unicode text modes.
 	var ts=toolsets[m];
 	for(var i=0;i<ts.length;i++) tbox_addtooln(ts[i]);
 }

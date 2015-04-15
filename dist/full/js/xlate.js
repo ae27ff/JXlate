@@ -19,19 +19,15 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 	var s="";
 
 	if(fromEncoded){//catch all of the encoded strings coming in that need to be decoded before translation.
-		//try{
-			if(     baseFrom===64   )  s=atob(a[0]);
-			else if(baseFrom==="ue" )  s=unescape(a[0]);//I know this is deprecated, but decodeURI does not do what I need.
-			else if(baseFrom==="32r")  s=base32rfc.decode(a[0]);
-			else if(baseFrom==="32h")  s=base32hex.decode(a[0]);
-			else if(baseFrom==="32c")  s=base32ckr.decode(a[0]);
-			else if(baseFrom===85   )  s=  ascii85.decode(a[0]);
-			else if(baseFrom==="mc" )  s=morse_decode(a);
-			else if(baseFrom==="ucs2") s=convert_encoding(a[0],'ucs2','iso88591');
-			else if(baseFrom==="utf8") s=convert_encoding(a[0],'utf8','iso88591');
-		//}catch(e){
-		//	console.log("Encoding Error - Invalid encoded string");//do nothing - invalid baseX string should yield no output.
-		//}
+		if(     baseFrom===64   )  s=atob(a[0]);
+		else if(baseFrom==="ue" )  s=unescape(a[0]);//I know this is deprecated, but decodeURI does not do what I need.
+		else if(baseFrom==="32r")  s=base32rfc.decode(a[0]);
+		else if(baseFrom==="32h")  s=base32hex.decode(a[0]);
+		else if(baseFrom==="32c")  s=base32ckr.decode(a[0]);
+		else if(baseFrom===85   )  s=  ascii85.decode(a[0]);
+		else if(baseFrom==="mc" )  s=morse_decode(a);
+		else if(baseFrom==="ucs2") s=convert_encoding(a[0],'ucs2','iso88591');
+		else if(baseFrom==="utf8") s=convert_encoding(a[0],'utf8','iso88591');
 		a=s.split("");//decode the single BaseX entry into chars (base256)
 		baseFrom=256;//set up the parameter for the char->numeral array conversion.
 	}
