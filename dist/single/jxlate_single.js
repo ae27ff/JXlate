@@ -96,8 +96,10 @@ function xlate_poll(){//poll the UI for mode radio-box changes.
 	var newmode=getCheckedRadioValue("mode");
 	if(newmode!=mode){//check if the selected radio button has been changed
 		console.log("changed! "+mode+"->"+newmode);
-		xlate_switch(mode,newmode);//trigger a translation
+		var oldmode=mode;
 		mode=newmode;//change the current mode value.
+		xlate_switch(oldmode,newmode);//trigger a translation
+		console.log("conversion complete");
 	}
 }
 function xlate_init(){//set initial values and states
@@ -908,6 +910,8 @@ function utf8_to_iso88591(s) {
   return unescape(encodeURIComponent(s));
 }
 function iso88591_to_utf8(s) {
+	console.log(s);
+	console.log(escape(s));
   return decodeURIComponent(escape(s));
 }
 function ucs2_to_iso88591(s){
