@@ -19,6 +19,8 @@ function iso88591_to_utf8(s) {
 function ucs2_to_iso88591(s){
 	var hex=""
 	var uchars=s.split("")
+	console.log(s);
+	console.log(uchars);
 	for(var i=0;i<s.length;i++){
 		var c=s.charAt(i);
 		var u=s.charCodeAt(i);
@@ -43,9 +45,12 @@ function iso88591_to_ucs2(s){
 	return unescape(esc);
 }
 function convert_encoding(content,a,b){
+	console.log(content);
 	var func=a+"_to_"+b;
 	if( (typeof eval(func))==="function") return eval(func+"(content)");
 	//no direction conversion - do intermediate conversion to bytes then back.
 	var tmp=eval(a+"_to_iso88591(content)");
+	console.log("tmp=");
+	console.log(tmp);
 	return eval("iso88591_to_"+b+"(tmp)");
 }

@@ -118,6 +118,7 @@ Func SortFiles(ByRef $files)
 			If StringInStr($filea,"@P1@") Then $pa=1;I know this is horrible
 			If StringInStr($filea,"@P2@") Then $pa=2
 			If StringInStr($filea,"@P3@") Then $pa=3
+
 			If StringInStr($fileb,"@P1@") Then $pb=1
 			If StringInStr($fileb,"@P2@") Then $pb=2
 			If StringInStr($fileb,"@P3@") Then $pb=3

@@ -1,9 +1,9 @@
-if(typeof addcredits  == 'function') addcredits("xlate.format.js",8,"crashdemons","Numeral System formatting functions")
+if(typeof addcredits  == 'function') addcredits("xlate.format.js",9,"crashdemons","Numeral System formatting functions")
 
 //preformatter function that changes and splits the text to an array of single units for array_base2base to translate.
 //non-numeral strings and encodings tend to have just a single item.
 function input2buffer(s,base){
-	if(base==256){
+	if(base==256 || base=="ucs2" || base=="utf8"){
 		return s.split("");//strings are split by char
 	}else if(base=="ue"){
 		return [s];//urlencode is handled all was 1 item passed to a function
