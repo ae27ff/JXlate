@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>JXlate - Multibase data translator</title>
+<meta charset="UTF-8">
 <meta name="description" content="JXlate - multibase data translator page">
 <meta name="keywords" content="JXlate,Xlate,translate,binary,decimal,octal,hexadecimal,base64,base32,ascii85,morse code,caesar shift">
 <meta name="author" content="crashdemons">
@@ -15,6 +16,17 @@
 .grey{
 	background-color:#0F0F0F; color:#00FF00;
 }
+.infolink{
+	/* text-decoration: underline; */
+	/* border-bottom: 1px dotted white; */
+	color: gray;
+
+}
+.info{
+	font-weight: normal;
+	text-decoration:none;
+}
+
 
 
 html,body {height: 100%;width: 100%;  overflow: hidden; margin: 0;}
@@ -25,7 +37,7 @@ html,body {height: 100%;width: 100%;  overflow: hidden; margin: 0;}
     width: 100%;
 }
 #sidebar {
-    width: 100px;
+    width: 110px;
     height: 100%;
     float: left;
 	font-size:10pt;
@@ -34,7 +46,7 @@ html,body {height: 100%;width: 100%;  overflow: hidden; margin: 0;}
 }
 
 #text {
-    width: calc(100% - 101px);
+    width: calc(100% - 111px);
     height: 100%;
     border: none;
     margin: 0;
@@ -177,8 +189,15 @@ function foc(s){
 if(typeof addcredits  == 'function') addcredits("ui.js",2.0,"crashdemons","JXlate UI script and overarching operations.")
 var oForm=null;
 var mode=0;
-var mode_bases=[256,'mc',2,8,10,16,'32r','32h','32c',64,85,'ue'];//values used internally to represent each base in shorthand.
+var mode_bases=[256,'mc',2,8,10,16,'32r','32h','32c',64,85,'ue','ucs2','utf8'];//values used internally to represent each base in shorthand.
 //var mode_names=['Text','Morse','Binary','Octal','Decimal','Hexadecimal','Base32Rfc','Base32Hex','Base32Ckr','Base64','Ascii85','UrlEncode'];//unused array
+
+function xlate_bytesNF(s,baseFrom){//translate a string from one base to another
+	var a=input2buffer(s,baseFrom);//preformat the input into an array of units in that base
+	a=array_base2base(a,baseFrom,256);//process the array for conversion
+	return a.join("")
+}
+
 function xlate_text(s,baseFrom,baseTo){//translate a string from one base to another
 	var a=input2buffer(s,baseFrom);//preformat the input into an array of units in that base
 	a=array_base2base(a,baseFrom,baseTo);//process the array for conversion
@@ -270,6 +289,12 @@ function MouseWheelHandler(e) {//handle scrollwheel events
 function modp(n,d){//modulo that causes smaller negatives (|n|<d) to count from the righthand side (max value) instead of the stock behavior.
 	while(n<0) n+=d;
 	return (n%d);
+}
+
+function iso8859info(){
+	alert("This mode displays ISO-8859-1 text - single bytes.\n"+
+	"If you input unicode into this mode, it will be interpreted as two bytes."
+	)
 }
 
 /*
@@ -998,6 +1023,55 @@ function replaceAll(find, replace, str) {
 function escapeRegExp(string) {
     return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 }
+if(typeof addcredits === 'function') addcredits("unicode.js",1,"crashdemons","Character encoding conversion functions")
+
+//NOTE - Javascript escape() internally uses UCS-2 (unicode code points 0000-FFFF)
+//UTF-16 handles values over FFFF as does UTF-8
+
+//ISO88591  256
+// UTF8     utf8
+// UCS2     65536
+
+
+function utf8_to_iso88591(s) {
+  return unescape(encodeURIComponent(s));
+}
+function iso88591_to_utf8(s) {
+  return decodeURIComponent(escape(s));
+}
+function ucs2_to_iso88591(s){
+	var hex=""
+	var uchars=s.split("")
+	for(var i=0;i<s.length;i++){
+		var c=s.charAt(i);
+		var u=s.charCodeAt(i);
+		if(u>=0x100){//unicode characters
+			hex+=xlate_text(c,256,16);//char to hex value - euro->20AC
+		}else{//characters under ISO-8859-1 already
+			hex+="00"+xlate_text(c,256,16);//char to null+hex 'z'->005A
+		}
+	}
+
+	return xlate_bytesNF(hex,16);
+}
+function iso88591_to_ucs2(s){
+	var hex=xlate_text(s,256,16);
+	hex=replaceAll(" ","",hex);
+	var esc="";
+	for(var i=0;i<hex.length;i+=4){
+		var uh=hex.substr(i,4);
+		while(uh.length<4){ uh="0"+uh; }//uh+="0"; ? this case is for malformed hex strings.
+		esc+="%u"+uh;
+	}
+	return unescape(esc);
+}
+function convert_encoding(content,a,b){
+	var func=a+"_to_"+b;
+	if( (typeof eval(func))==="function") return eval(func+"(content)");
+	//no direction conversion - do intermediate conversion to bytes then back.
+	var tmp=eval(a+"_to_iso88591(content)");
+	return eval("iso88591_to_"+b+"(tmp)");
+}
 // Utility functions
 
 // Code was written by Tyler Akins and is placed in the public domain
@@ -1575,7 +1649,7 @@ function isGraphable(a){//additional graphing ISO-8859-1 chars, determined by ch
 	return ( isReadable(a) || (a>=0xA0 && a<=0xFF));
 }
 
-if(typeof addcredits === 'function') addcredits("xlate.js",8,"crashdemons","Binary Translation library for numeral systems (extensions added for encoding libraries)")
+if(typeof addcredits === 'function') addcredits("xlate.js",9,"crashdemons","Binary Translation library for numeral systems (extensions added for encoding libraries)")
 
 var b32hex="0123456789ABCDEFGHIJKLMNOPQRSTUV";//Triacontakaidecimal
 var base_charsets=[];
@@ -1585,7 +1659,7 @@ fill_bases();
 function fill_bases(){ for(var b=32;b>=0;b--) base_charsets[b]=b32hex.substr(0,b).split(""); }//set some charset options for use in conversion functions.
 
 //check if the base ID is a numeral conversion or an encoding (external function)
-function isEncodedBase(base){ return (base==="32r" ||base==="32h" ||base==="32c" || base===64 || base===85 || base==="mc" || base==="ue");}
+function isEncodedBase(base){ return (base==="32r" ||base==="32h" ||base==="32c" || base===64 || base===85 || base==="mc" || base==="ue" || base==="ucs2" || base==="utf8");}
 
 
 //resolves any encodings before regular numeral conversions.
@@ -1597,13 +1671,15 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 
 	if(fromEncoded){//catch all of the encoded strings coming in that need to be decoded before translation.
 		try{
-			if(     baseFrom===64   ) s=atob(a[0]);
-			else if(baseFrom==="ue" ) s=unescape(a[0]);//I know this is deprecated, but decodeURI does not do what I need.
-			else if(baseFrom==="32r") s=base32rfc.decode(a[0]);
-			else if(baseFrom==="32h") s=base32hex.decode(a[0]);
-			else if(baseFrom==="32c") s=base32ckr.decode(a[0]);
-			else if(baseFrom===85   ) s=  ascii85.decode(a[0]);
-			else if(baseFrom==="mc" ) s=morse_decode(a);
+			if(     baseFrom===64   )  s=atob(a[0]);
+			else if(baseFrom==="ue" )  s=unescape(a[0]);//I know this is deprecated, but decodeURI does not do what I need.
+			else if(baseFrom==="32r")  s=base32rfc.decode(a[0]);
+			else if(baseFrom==="32h")  s=base32hex.decode(a[0]);
+			else if(baseFrom==="32c")  s=base32ckr.decode(a[0]);
+			else if(baseFrom===85   )  s=  ascii85.decode(a[0]);
+			else if(baseFrom==="mc" )  s=morse_decode(a);
+			else if(baseFrom==="ucs2") s=convert_encoding(a[0],'ucs2','iso88591');
+			else if(baseFrom==="utf8") s=convert_encoding(a[0],'utf8','iso88591');
 		}catch(e){
 			console.log("Encoding Error - Invalid encoded string");//do nothing - invalid baseX string should yield no output.
 		}
@@ -1613,13 +1689,15 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 	if(toEncoded){//if the input is due to be translated to another base, let's do it here.
 		a=array_base2base(a,baseFrom,256);//translate the array into char values if it isn't already.
 		s=a.join("")
-		if(     baseTo===64   ) a=[btoa(s)];
-		else if(baseTo==="ue" ) a=[urlencode(s)];
-		else if(baseTo==="32r") a=[base32rfc.encode(s)];
-		else if(baseTo==="32h") a=[base32hex.encode(s)];
-		else if(baseTo==="32c") a=[base32ckr.encode(s)];
-		else if(baseTo===85   ) a=[  ascii85.encode(s)];
-		else if(baseTo==="mc" ) a=[    morse_encode(s)];
+		if(     baseTo===64   )  a=[btoa(s)];
+		else if(baseTo==="ue" )  a=[urlencode(s)];
+		else if(baseTo==="32r")  a=[base32rfc.encode(s)];
+		else if(baseTo==="32h")  a=[base32hex.encode(s)];
+		else if(baseTo==="32c")  a=[base32ckr.encode(s)];
+		else if(baseTo===85   )  a=[  ascii85.encode(s)];
+		else if(baseTo==="mc" )  a=[    morse_encode(s)];
+		else if(baseTo==="ucs2") a=[convert_encoding(s,'iso88591','ucs2')];
+		else if(baseTo==="utf8") a=[convert_encoding(s,'iso88591','utf8')];
 		baseFrom=baseTo;//we've encoded this to the new base, so lets set From to the current state - which disables any base conversion in array_base2base
 	}
 
@@ -1724,7 +1802,11 @@ if(typeof addcredits  == 'function') addcredits("jxlate.html",2.0,"crashdemons",
 <div id="sidebar">
 <ul class="options" id="options">
 				<li class="header" id="header">JXlate</li>
-				<li><input type="radio" name="mode" value="0" id="rad0" checked><label for="rad0">Text</label></li>
+				<li><input type="radio" name="mode" value="0" id="rad0" checked><label for="rad0">
+					Text <span class="info">(<a href="#" class="infolink" onclick="iso8859info()">L1</a>)</span>
+					</label></li>
+				<li><input type="radio" name="mode" value="12" id="rad12"><label for="rad12">Text (UCS2)</label></li>
+				<li><input type="radio" name="mode" value="13" id="rad13"><label for="rad13">Text (UTF8)</label></li>
 				<li><input type="radio" name="mode" value="2" id="rad2"><label for="rad2">Binary</label></li>
 				<li><input type="radio" name="mode" value="3" id="rad3"><label for="rad3">Octal</label></li>
 				<li><input type="radio" name="mode" value="4" id="rad4"><label for="rad4">Decimal</label></li>

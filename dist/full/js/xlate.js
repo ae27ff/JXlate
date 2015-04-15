@@ -1,4 +1,4 @@
-if(typeof addcredits === 'function') addcredits("xlate.js",8,"crashdemons","Binary Translation library for numeral systems (extensions added for encoding libraries)")
+if(typeof addcredits === 'function') addcredits("xlate.js",9,"crashdemons","Binary Translation library for numeral systems (extensions added for encoding libraries)")
 
 var b32hex="0123456789ABCDEFGHIJKLMNOPQRSTUV";//Triacontakaidecimal
 var base_charsets=[];
@@ -8,7 +8,7 @@ fill_bases();
 function fill_bases(){ for(var b=32;b>=0;b--) base_charsets[b]=b32hex.substr(0,b).split(""); }//set some charset options for use in conversion functions.
 
 //check if the base ID is a numeral conversion or an encoding (external function)
-function isEncodedBase(base){ return (base==="32r" ||base==="32h" ||base==="32c" || base===64 || base===85 || base==="mc" || base==="ue");}
+function isEncodedBase(base){ return (base==="32r" ||base==="32h" ||base==="32c" || base===64 || base===85 || base==="mc" || base==="ue" || base==="ucs2" || base==="utf8");}
 
 
 //resolves any encodings before regular numeral conversions.
@@ -20,13 +20,15 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 
 	if(fromEncoded){//catch all of the encoded strings coming in that need to be decoded before translation.
 		try{
-			if(     baseFrom===64   ) s=atob(a[0]);
-			else if(baseFrom==="ue" ) s=unescape(a[0]);//I know this is deprecated, but decodeURI does not do what I need.
-			else if(baseFrom==="32r") s=base32rfc.decode(a[0]);
-			else if(baseFrom==="32h") s=base32hex.decode(a[0]);
-			else if(baseFrom==="32c") s=base32ckr.decode(a[0]);
-			else if(baseFrom===85   ) s=  ascii85.decode(a[0]);
-			else if(baseFrom==="mc" ) s=morse_decode(a);
+			if(     baseFrom===64   )  s=atob(a[0]);
+			else if(baseFrom==="ue" )  s=unescape(a[0]);//I know this is deprecated, but decodeURI does not do what I need.
+			else if(baseFrom==="32r")  s=base32rfc.decode(a[0]);
+			else if(baseFrom==="32h")  s=base32hex.decode(a[0]);
+			else if(baseFrom==="32c")  s=base32ckr.decode(a[0]);
+			else if(baseFrom===85   )  s=  ascii85.decode(a[0]);
+			else if(baseFrom==="mc" )  s=morse_decode(a);
+			else if(baseFrom==="ucs2") s=convert_encoding(a[0],'ucs2','iso88591');
+			else if(baseFrom==="utf8") s=convert_encoding(a[0],'utf8','iso88591');
 		}catch(e){
 			console.log("Encoding Error - Invalid encoded string");//do nothing - invalid baseX string should yield no output.
 		}
@@ -36,13 +38,15 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 	if(toEncoded){//if the input is due to be translated to another base, let's do it here.
 		a=array_base2base(a,baseFrom,256);//translate the array into char values if it isn't already.
 		s=a.join("")
-		if(     baseTo===64   ) a=[btoa(s)];
-		else if(baseTo==="ue" ) a=[urlencode(s)];
-		else if(baseTo==="32r") a=[base32rfc.encode(s)];
-		else if(baseTo==="32h") a=[base32hex.encode(s)];
-		else if(baseTo==="32c") a=[base32ckr.encode(s)];
-		else if(baseTo===85   ) a=[  ascii85.encode(s)];
-		else if(baseTo==="mc" ) a=[    morse_encode(s)];
+		if(     baseTo===64   )  a=[btoa(s)];
+		else if(baseTo==="ue" )  a=[urlencode(s)];
+		else if(baseTo==="32r")  a=[base32rfc.encode(s)];
+		else if(baseTo==="32h")  a=[base32hex.encode(s)];
+		else if(baseTo==="32c")  a=[base32ckr.encode(s)];
+		else if(baseTo===85   )  a=[  ascii85.encode(s)];
+		else if(baseTo==="mc" )  a=[    morse_encode(s)];
+		else if(baseTo==="ucs2") a=[convert_encoding(s,'iso88591','ucs2')];
+		else if(baseTo==="utf8") a=[convert_encoding(s,'iso88591','utf8')];
 		baseFrom=baseTo;//we've encoded this to the new base, so lets set From to the current state - which disables any base conversion in array_base2base
 	}
 

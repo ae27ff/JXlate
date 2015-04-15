@@ -2,8 +2,15 @@
 if(typeof addcredits  == 'function') addcredits("ui.js",2.0,"crashdemons","JXlate UI script and overarching operations.")
 var oForm=null;
 var mode=0;
-var mode_bases=[256,'mc',2,8,10,16,'32r','32h','32c',64,85,'ue'];//values used internally to represent each base in shorthand.
+var mode_bases=[256,'mc',2,8,10,16,'32r','32h','32c',64,85,'ue','ucs2','utf8'];//values used internally to represent each base in shorthand.
 //var mode_names=['Text','Morse','Binary','Octal','Decimal','Hexadecimal','Base32Rfc','Base32Hex','Base32Ckr','Base64','Ascii85','UrlEncode'];//unused array
+
+function xlate_bytesNF(s,baseFrom){//translate a string from one base to another
+	var a=input2buffer(s,baseFrom);//preformat the input into an array of units in that base
+	a=array_base2base(a,baseFrom,256);//process the array for conversion
+	return a.join("")
+}
+
 function xlate_text(s,baseFrom,baseTo){//translate a string from one base to another
 	var a=input2buffer(s,baseFrom);//preformat the input into an array of units in that base
 	a=array_base2base(a,baseFrom,baseTo);//process the array for conversion
@@ -95,6 +102,12 @@ function MouseWheelHandler(e) {//handle scrollwheel events
 function modp(n,d){//modulo that causes smaller negatives (|n|<d) to count from the righthand side (max value) instead of the stock behavior.
 	while(n<0) n+=d;
 	return (n%d);
+}
+
+function iso8859info(){
+	alert("This mode displays ISO-8859-1 text - single bytes.\n"+
+	"If you input unicode into this mode, it will be interpreted as two bytes."
+	)
 }
 
 /*
