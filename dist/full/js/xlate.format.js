@@ -1,11 +1,11 @@
-if(typeof addcredits  == 'function') addcredits("xlate.format.js",8,"crashdemons","Numeral System formatting functions")
+if(typeof addcredits  == 'function') addcredits("xlate.format.js",10,"crashdemons","Numeral System formatting functions")
 
 //preformatter function that changes and splits the text to an array of single units for array_base2base to translate.
 //non-numeral strings and encodings tend to have just a single item.
 function input2buffer(s,base){
 	if(base==256){
 		return s.split("");//strings are split by char
-	}else if(base=="ue"){
+	}else if(base=="ue" || base=="ucs2" || base=="utf8"){
 		return [s];//urlencode is handled all was 1 item passed to a function
 	}else if(base==2){
 		return s.replace(/ /g,'').match(/.{1,8}/g);//strip spaces and split into 8-bit entries for binary.
@@ -26,7 +26,7 @@ function input2buffer(s,base){
 
 //postformatter function that joins and changes the output from array_base2base to be readable.
 function buffer2output(a,base){
-	if(base==256){
+	if(base==256 || base=="ucs2" || base=="utf8"){
 		return strstripnongraph(a.join(""));//do not display any special/control characters etc.
 	}else if(base==2){
 		for(var i=0;i<a.length;i++) a[i]=pad(a[i],8);//make sure the binary output is in groups of 8 bits all displayed.
