@@ -60,7 +60,7 @@ function foc(s){
 if(typeof addcredits  == 'function') addcredits("ui.js",2.0,"crashdemons","JXlate UI script and overarching operations.")
 var oForm=null;
 var mode=0;
-var mode_bases=[256,'mc',2,8,10,16,'32r','32h','32c',64,85,'ue','ucs2','utf8'];//values used internally to represent each base in shorthand.
+var mode_bases=[256,'mc',2,8,10,16,'32r','32h','32c',64,85,'ue','ucs2','utf8','n'];//values used internally to represent each base in shorthand.
 //var mode_names=['Text','Morse','Binary','Octal','Decimal','Hexadecimal','Base32Rfc','Base32Hex','Base32Ckr','Base64','Ascii85','UrlEncode'];//unused array
 
 function xlate_bytesNF(s,baseFrom){//translate a string from one base to another
@@ -102,7 +102,9 @@ function xlate_poll(){//poll the UI for mode radio-box changes.
 			xlate_switch(oldmode,newmode);//trigger a translation
 		}catch(e){
 			setMode(oldmode);
-			alert("This value could not be converted as specified.\nPlease make sure it is valid.")
+			alert("This value could not be converted as specified.\nPlease make sure it is valid.\n\n"
+			+"Technical Reason: \n"+"   "+e
+			)
 		}
 		console.log("conversion complete");
 	}
@@ -1508,7 +1510,7 @@ fill_bases();
 function fill_bases(){ for(var b=32;b>=0;b--) base_charsets[b]=b32hex.substr(0,b).split(""); }//set some charset options for use in conversion functions.
 
 //check if the base ID is a numeral conversion or an encoding (external function)
-function isEncodedBase(base){ return (base==="32r" ||base==="32h" ||base==="32c" || base===64 || base===85 || base==="mc" || base==="ue" || base==="ucs2" || base==="utf8");}
+function isEncodedBase(base){ return (base==="32r" ||base==="32h" ||base==="32c" || base===64 || base===85 || base==="mc" || base==="ue" || base==="ucs2" || base==="utf8" || base==="n");}
 
 
 //resolves any encodings before regular numeral conversions.
@@ -1528,6 +1530,7 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 		else if(baseFrom==="mc" )  s=morse_decode(a);
 		else if(baseFrom==="ucs2") s=convert_encoding(a[0],'ucs2','iso88591');
 		else if(baseFrom==="utf8") s=convert_encoding(a[0],'utf8','iso88591');
+		else if(baseFrom==="n")    s=array_base2base(a,radix_prompt(),256).join("");
 		a=s.split("");//decode the single BaseX entry into chars (base256)
 		baseFrom=256;//set up the parameter for the char->numeral array conversion.
 	}
@@ -1543,10 +1546,18 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 		else if(baseTo==="mc" )  a=[    morse_encode(s)];
 		else if(baseTo==="ucs2") a=[convert_encoding(s,'iso88591','ucs2')];
 		else if(baseTo==="utf8") a=[convert_encoding(s,'iso88591','utf8')];
+		else if(baseTo==="n")    a=array_base2base(a,256,radix_prompt());
 		baseFrom=baseTo;//we've encoded this to the new base, so lets set From to the current state - which disables any base conversion in array_base2base
 	}
 
 	return [a,baseFrom,baseTo];//output modified parameters.
+}
+function radix_prompt(){
+	var n = prompt("Please enter the radix (base) to convert with. (only 2-32 supported)", "");
+	if (n === null) throw "no entry";
+	n=parseInt(n);
+	if(n<2 || n>32) throw "invalid radix";
+	return n;
 }
 function array_base2base(a,baseFrom,baseTo){//convert arrays of numerals from one base to another - implements support for Base64
 	var params=array_prepareEncodings(a,baseFrom,baseTo);//resolves any encodings before regular numeral conversions.
