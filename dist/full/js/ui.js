@@ -43,8 +43,8 @@ function xlate_poll(){//poll the UI for mode radio-box changes.
 		try{
 			xlate_switch(oldmode,newmode);//trigger a translation
 		}catch(e){
-			alert("This value could not be converted as specified.\nPlease make sure it is valid.")
 			setMode(oldmode);
+			alert("This value could not be converted as specified.\nPlease make sure it is valid.")
 		}
 		console.log("conversion complete");
 	}
