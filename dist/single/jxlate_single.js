@@ -1643,6 +1643,6 @@ function numeraldigit2dec(sdig,base){//retrieve the decimal value of a single di
 //of particular interest, & and /  don't get encoded, which can lead to urlencoded inputs breaking URLs.
 //escape() is deprecated (why?) but it catches more of these cases
 function urlencode(s){
-	return escape(s).replace("+","%2B");//inputs with + should be encoded as well... (escape converts spaces to %20)
+	return escape(s).replace(/\+/g,"%2B");//inputs with + should be encoded as well... (escape converts spaces to %20)
 }
 
