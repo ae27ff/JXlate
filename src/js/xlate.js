@@ -1,14 +1,17 @@
-if(typeof addcredits === 'function') addcredits("xlate.js",9,"crashdemons","Binary Translation library for numeral systems (extensions added for encoding libraries)")
+if(typeof addcredits === 'function') addcredits("xlate.js",10,"crashdemons","Binary Translation library for numeral systems (extensions added for encoding libraries)")
 
-var b32hex="0123456789ABCDEFGHIJKLMNOPQRSTUV";//Triacontakaidecimal
+var b32hex="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";//Triacontakaidecimal+4
 var base_charsets=[];
 fill_bases();
 
 
-function fill_bases(){ for(var b=32;b>=0;b--) base_charsets[b]=b32hex.substr(0,b).split(""); }//set some charset options for use in conversion functions.
+function fill_bases(){
+	for(var b=36;b>=0;b--) base_charsets[b]=b32hex.substr(0,b).split("");
+	base_charsets[26]="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+}//set some charset options for use in conversion functions.
 
 //check if the base ID is a numeral conversion or an encoding (external function)
-function isEncodedBase(base){ return (base==="32r" ||base==="32h" ||base==="32c" || base===64 || base===85 || base==="mc" || base==="ue" || base==="ucs2" || base==="utf8" || base==="n");}
+function isEncodedBase(base){ return (base==="32r" ||base==="32h" ||base==="32c" || base===64 || base===85 || base==="mc" || base==="ue" || base==="ucs2" || base==="utf8");}
 
 
 //resolves any encodings before regular numeral conversions.
@@ -17,6 +20,10 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 	var toEncoded=isEncodedBase(baseTo);
 	if( (!fromEncoded) && (!toEncoded) ) return [a,baseFrom,baseTo];//if the input unit array is neither encoded nor being encoded, just return it to array_base2base for numeral conversion.
 	var s="";
+
+
+
+
 
 	if(fromEncoded){//catch all of the encoded strings coming in that need to be decoded before translation.
 		if(     baseFrom===64   )  s=atob(a[0]);
@@ -28,7 +35,7 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 		else if(baseFrom==="mc" )  s=morse_decode(a);
 		else if(baseFrom==="ucs2") s=convert_encoding(a[0],'ucs2','iso88591');
 		else if(baseFrom==="utf8") s=convert_encoding(a[0],'utf8','iso88591');
-		else if(baseFrom==="n")    s=array_base2base(a,radix_prompt(),256).join("");
+		//else if(baseFrom==="n")    s=array_base2base(a,radix_prompt(),256).join("");
 		a=s.split("");//decode the single BaseX entry into chars (base256)
 		baseFrom=256;//set up the parameter for the char->numeral array conversion.
 	}
@@ -44,24 +51,28 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 		else if(baseTo==="mc" )  a=[    morse_encode(s)];
 		else if(baseTo==="ucs2") a=[convert_encoding(s,'iso88591','ucs2')];
 		else if(baseTo==="utf8") a=[convert_encoding(s,'iso88591','utf8')];
-		else if(baseTo==="n")    a=array_base2base(a,256,radix_prompt());
+		//else if(baseTo==="n")    a=array_base2base(a,256,radix_prompt());
 		baseFrom=baseTo;//we've encoded this to the new base, so lets set From to the current state - which disables any base conversion in array_base2base
 	}
 
 	return [a,baseFrom,baseTo];//output modified parameters.
 }
 function radix_prompt(){
-	var n = prompt("Please enter the radix (base) to convert with. (only 2-32 supported)", "");
+	var n = prompt("Please enter the radix (base) to convert with. (only 2-36 supported)", "");
 	if (n === null) throw "no entry";
 	n=parseInt(n);
-	if(n<2 || n>32) throw "invalid radix";
+	if(n<2 || n>36) throw "invalid radix";
 	return n;
 }
 function array_base2base(a,baseFrom,baseTo){//convert arrays of numerals from one base to another - implements support for Base64
+	if(baseFrom==="n") baseFrom=radix_prompt();
+	if(baseTo  ==="n") baseTo  =radix_prompt();
+
 	var params=array_prepareEncodings(a,baseFrom,baseTo);//resolves any encodings before regular numeral conversions.
 	a=params[0];//our prep function returns the parameters as an array after it's done, let's get them back where they need to be.
 	baseFrom=params[1];
 	baseTo=params[2];
+
 
 	if(baseFrom===baseTo) return a;//the from and to bases are the same - no conversion necessary!
 	for(var i=0,len=a.length;i<len;i++) a[i]=base2base(a[i], baseFrom, baseTo);//do a base conversion on each array element (unit in the From Base) to the To base.
@@ -116,11 +127,12 @@ function dec2numeral(d,sbase){
 	var snum="";
 	while(d>0){
 		var rem=d%base;//find last digit value of numeral
-		var sdig=base_charsets[sbase][rem];//char representation of the digit
+		var sdig=base_charsets[base][rem];//char representation of the digit
 		d=Math.floor(d/base);//remove the last numeral digit from the integer (value-wise)
 		snum=sdig+snum;//prepend because the last digit we process will be the most significant.
 	}
-	return (snum === '') ? "0" : snum;
+	console.log(sbase +" "+base);
+	return (snum === '') ? base_charsets[base][0] : snum;
 }
 
 

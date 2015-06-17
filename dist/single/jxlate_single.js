@@ -57,7 +57,7 @@ function foc(s){
 	return foa
 }
 /* @P2@ */
-if(typeof addcredits  == 'function') addcredits("ui.js",2.0,"crashdemons","JXlate UI script and overarching operations.")
+if(typeof addcredits  == 'function') addcredits("ui.js",2.1,"crashdemons","JXlate UI script and overarching operations.")
 var oForm=null;
 var mode=0;
 var mode_bases=[256,'mc',2,8,10,16,'32r','32h','32c',64,85,'ue','ucs2','utf8','n'];//values used internally to represent each base in shorthand.
@@ -102,9 +102,10 @@ function xlate_poll(){//poll the UI for mode radio-box changes.
 			xlate_switch(oldmode,newmode);//trigger a translation
 		}catch(e){
 			setMode(oldmode);
-			alert("This value could not be converted as specified.\nPlease make sure it is valid.\n\n"
-			+"Technical Reason: \n"+"   "+e
-			)
+			if(e!=="no entry")
+				alert("This value could not be converted as specified.\nPlease make sure it is valid.\n\n"
+				+"Technical Reason: \n"+"   "+e
+				)
 		}
 		console.log("conversion complete");
 	}
@@ -1438,7 +1439,7 @@ function IsCoprime(a, b)
 
 document.Util_Loaded = 1;
 
-if(typeof addcredits  == 'function') addcredits("xlate.format.js",10,"crashdemons","Numeral System formatting functions")
+if(typeof addcredits  == 'function') addcredits("xlate.format.js",11,"crashdemons","Numeral System formatting functions")
 
 //preformatter function that changes and splits the text to an array of single units for array_base2base to translate.
 //non-numeral strings and encodings tend to have just a single item.
@@ -1461,7 +1462,7 @@ function input2buffer(s,base){
 		if(s.substr(-2,2)!="~>") s+="~>";
 		return [s];//single item to pass to decoder.
 	}
-	return s.split(" ");//all other items are split by spaces.
+	return s.toUpperCase().split(" ");//all other items are split by spaces.
 }
 
 //postformatter function that joins and changes the output from array_base2base to be readable.
@@ -1500,17 +1501,20 @@ function isGraphable(a){//additional graphing ISO-8859-1 chars, determined by ch
 	//return ( isReadable(a) || (a>=0xA0 && a<=0xFF));
 }
 
-if(typeof addcredits === 'function') addcredits("xlate.js",9,"crashdemons","Binary Translation library for numeral systems (extensions added for encoding libraries)")
+if(typeof addcredits === 'function') addcredits("xlate.js",10,"crashdemons","Binary Translation library for numeral systems (extensions added for encoding libraries)")
 
-var b32hex="0123456789ABCDEFGHIJKLMNOPQRSTUV";//Triacontakaidecimal
+var b32hex="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";//Triacontakaidecimal+4
 var base_charsets=[];
 fill_bases();
 
 
-function fill_bases(){ for(var b=32;b>=0;b--) base_charsets[b]=b32hex.substr(0,b).split(""); }//set some charset options for use in conversion functions.
+function fill_bases(){
+	for(var b=36;b>=0;b--) base_charsets[b]=b32hex.substr(0,b).split("");
+	base_charsets[26]="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+}//set some charset options for use in conversion functions.
 
 //check if the base ID is a numeral conversion or an encoding (external function)
-function isEncodedBase(base){ return (base==="32r" ||base==="32h" ||base==="32c" || base===64 || base===85 || base==="mc" || base==="ue" || base==="ucs2" || base==="utf8" || base==="n");}
+function isEncodedBase(base){ return (base==="32r" ||base==="32h" ||base==="32c" || base===64 || base===85 || base==="mc" || base==="ue" || base==="ucs2" || base==="utf8");}
 
 
 //resolves any encodings before regular numeral conversions.
@@ -1519,6 +1523,10 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 	var toEncoded=isEncodedBase(baseTo);
 	if( (!fromEncoded) && (!toEncoded) ) return [a,baseFrom,baseTo];//if the input unit array is neither encoded nor being encoded, just return it to array_base2base for numeral conversion.
 	var s="";
+
+
+
+
 
 	if(fromEncoded){//catch all of the encoded strings coming in that need to be decoded before translation.
 		if(     baseFrom===64   )  s=atob(a[0]);
@@ -1530,7 +1538,7 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 		else if(baseFrom==="mc" )  s=morse_decode(a);
 		else if(baseFrom==="ucs2") s=convert_encoding(a[0],'ucs2','iso88591');
 		else if(baseFrom==="utf8") s=convert_encoding(a[0],'utf8','iso88591');
-		else if(baseFrom==="n")    s=array_base2base(a,radix_prompt(),256).join("");
+		//else if(baseFrom==="n")    s=array_base2base(a,radix_prompt(),256).join("");
 		a=s.split("");//decode the single BaseX entry into chars (base256)
 		baseFrom=256;//set up the parameter for the char->numeral array conversion.
 	}
@@ -1546,24 +1554,28 @@ function array_prepareEncodings(a,baseFrom,baseTo){
 		else if(baseTo==="mc" )  a=[    morse_encode(s)];
 		else if(baseTo==="ucs2") a=[convert_encoding(s,'iso88591','ucs2')];
 		else if(baseTo==="utf8") a=[convert_encoding(s,'iso88591','utf8')];
-		else if(baseTo==="n")    a=array_base2base(a,256,radix_prompt());
+		//else if(baseTo==="n")    a=array_base2base(a,256,radix_prompt());
 		baseFrom=baseTo;//we've encoded this to the new base, so lets set From to the current state - which disables any base conversion in array_base2base
 	}
 
 	return [a,baseFrom,baseTo];//output modified parameters.
 }
 function radix_prompt(){
-	var n = prompt("Please enter the radix (base) to convert with. (only 2-32 supported)", "");
+	var n = prompt("Please enter the radix (base) to convert with. (only 2-36 supported)", "");
 	if (n === null) throw "no entry";
 	n=parseInt(n);
-	if(n<2 || n>32) throw "invalid radix";
+	if(n<2 || n>36) throw "invalid radix";
 	return n;
 }
 function array_base2base(a,baseFrom,baseTo){//convert arrays of numerals from one base to another - implements support for Base64
+	if(baseFrom==="n") baseFrom=radix_prompt();
+	if(baseTo  ==="n") baseTo  =radix_prompt();
+
 	var params=array_prepareEncodings(a,baseFrom,baseTo);//resolves any encodings before regular numeral conversions.
 	a=params[0];//our prep function returns the parameters as an array after it's done, let's get them back where they need to be.
 	baseFrom=params[1];
 	baseTo=params[2];
+
 
 	if(baseFrom===baseTo) return a;//the from and to bases are the same - no conversion necessary!
 	for(var i=0,len=a.length;i<len;i++) a[i]=base2base(a[i], baseFrom, baseTo);//do a base conversion on each array element (unit in the From Base) to the To base.
@@ -1618,11 +1630,12 @@ function dec2numeral(d,sbase){
 	var snum="";
 	while(d>0){
 		var rem=d%base;//find last digit value of numeral
-		var sdig=base_charsets[sbase][rem];//char representation of the digit
+		var sdig=base_charsets[base][rem];//char representation of the digit
 		d=Math.floor(d/base);//remove the last numeral digit from the integer (value-wise)
 		snum=sdig+snum;//prepend because the last digit we process will be the most significant.
 	}
-	return (snum === '') ? "0" : snum;
+	console.log(sbase +" "+base);
+	return (snum === '') ? base_charsets[base][0] : snum;
 }
 
 

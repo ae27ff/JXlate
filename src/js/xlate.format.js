@@ -1,4 +1,4 @@
-if(typeof addcredits  == 'function') addcredits("xlate.format.js",10,"crashdemons","Numeral System formatting functions")
+if(typeof addcredits  == 'function') addcredits("xlate.format.js",11,"crashdemons","Numeral System formatting functions")
 
 //preformatter function that changes and splits the text to an array of single units for array_base2base to translate.
 //non-numeral strings and encodings tend to have just a single item.
@@ -21,7 +21,7 @@ function input2buffer(s,base){
 		if(s.substr(-2,2)!="~>") s+="~>";
 		return [s];//single item to pass to decoder.
 	}
-	return s.split(" ");//all other items are split by spaces.
+	return s.toUpperCase().split(" ");//all other items are split by spaces.
 }
 
 //postformatter function that joins and changes the output from array_base2base to be readable.

@@ -1,5 +1,5 @@
 /* @P2@ */
-if(typeof addcredits  == 'function') addcredits("ui.js",2.0,"crashdemons","JXlate UI script and overarching operations.")
+if(typeof addcredits  == 'function') addcredits("ui.js",2.1,"crashdemons","JXlate UI script and overarching operations.")
 var oForm=null;
 var mode=0;
 var mode_bases=[256,'mc',2,8,10,16,'32r','32h','32c',64,85,'ue','ucs2','utf8','n'];//values used internally to represent each base in shorthand.
@@ -44,9 +44,10 @@ function xlate_poll(){//poll the UI for mode radio-box changes.
 			xlate_switch(oldmode,newmode);//trigger a translation
 		}catch(e){
 			setMode(oldmode);
-			alert("This value could not be converted as specified.\nPlease make sure it is valid.\n\n"
-			+"Technical Reason: \n"+"   "+e
-			)
+			if(e!=="no entry")
+				alert("This value could not be converted as specified.\nPlease make sure it is valid.\n\n"
+				+"Technical Reason: \n"+"   "+e
+				)
 		}
 		console.log("conversion complete");
 	}
