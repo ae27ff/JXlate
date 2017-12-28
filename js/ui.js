@@ -43,7 +43,7 @@ function xlate_poll(){//poll the UI for mode radio-box changes.
 	//console.log("x");
 	var newmode=getCheckedRadioValue("mode");
 	if(newmode!=mode){//check if the selected radio button has been changed
-		console.log("changed! "+mode+"->"+newmode+" "+mode_bases[newmode]);
+		console.log("changed! "+mode+"->"+newmode);
 		var oldmode=mode;
 		mode=newmode;//change the current mode value.
 		if(xlate_istextmode(oldmode) && xlate_istextmode(newmode)){
