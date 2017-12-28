@@ -33,13 +33,23 @@ function xlate_switch(mode,newmode){//mode is changing - retrieve all of the par
 	oForm.elements["text"].focus();
 
 }
+
+function xlate_istextmode(m){
+	console.log('istextmode: '+mode_bases[m] + " "+(mode_bases[m]===256 || mode_bases[m]==='ucs2' || mode_bases[m]==='utf8' ));
+	return (mode_bases[m]===256 || mode_bases[m]==='ucs2' || mode_bases[m]==='utf8' );
+}
+
 function xlate_poll(){//poll the UI for mode radio-box changes.
 	//console.log("x");
 	var newmode=getCheckedRadioValue("mode");
 	if(newmode!=mode){//check if the selected radio button has been changed
-		console.log("changed! "+mode+"->"+newmode);
+		console.log("changed! "+mode+"->"+newmode+" "+mode_bases[newmode]);
 		var oldmode=mode;
 		mode=newmode;//change the current mode value.
+		if(xlate_istextmode(oldmode) && xlate_istextmode(newmode)){
+			console.log('text to text conversion has been deprecated. performing no action');
+			return;
+		}
 		try{
 			xlate_switch(oldmode,newmode);//trigger a translation
 		}catch(e){
