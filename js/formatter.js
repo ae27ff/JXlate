@@ -61,10 +61,10 @@ if (typeof jxlate === "undefined") {
             return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
         },
         stripWhitespace:function(str){
-            str = replaceAll(" ", "", str);
-            str = replaceAll("\t", "", str);
-            str = replaceAll("\r", "", str);
-            str = replaceAll("\n", "", str);
+            str = this.replaceAll(" ", "", str);
+            str = this.replaceAll("\t", "", str);
+            str = this.replaceAll("\r", "", str);
+            str = this.replaceAll("\n", "", str);
             return str;
         },
         padZeroes:function(num,size) {//pad a numerical string with 0's to reach a certain length
