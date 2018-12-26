@@ -110,7 +110,7 @@ if (typeof jxlate.ui === "undefined") {
                 var replace = prompt("Enter the string to replace with", "");
                 if (replace === null)
                     return;
-                jxlate.ui.toolbox.textarea.value = jxlate.formatter.replaceAll(search, replace, jxlate.ui.toolbox.textarea.value);
+                jxlate.ui.toolbox.textarea.value =  jxlate.ui.toolbox.textarea.value.replaceAll(search, replace);
             },
             action_case: function () {
                 var textarea = jxlate.ui.toolbox.textarea;
@@ -124,7 +124,7 @@ if (typeof jxlate.ui === "undefined") {
                 var l = jxlate.ui.toolbox.textarea.value.length;
                 var sl = jxlate.ui.toolbox.strippedlen(jxlate.ui.toolbox.textarea.value);
                 var out = "Total length: " + l;
-                var base = jxlate.translator.mode_bases[jxlate.ui.mode];
+                var base = jxlate.ui.mode_bases[jxlate.ui.mode];
                 if (base === 2) {
                     out += "\nBit length: " + sl;
                     out += "\nBytes: " + (sl / 8);
@@ -159,31 +159,21 @@ if (typeof jxlate.ui === "undefined") {
             },
             action_stripspaces: function () {
                 //TODO: operate on existing value instead of re-reading
-                var textarea = jxlate.ui.toolbox.textarea;
-                var text = textarea.value;
-                text = jxlate.formatter.replaceAll(" ", "", text);//TODO: prefer chaining
-                text = jxlate.formatter.replaceAll("\t", "", text);
-                text = jxlate.formatter.replaceAll("\r", "", text);
-                text = jxlate.formatter.replaceAll("\n", "", text);
+                jxlate.ui.toolbox.textarea.value = jxlate.ui.toolbox.textarea.value.stripWhitespace();
             }
         },
 //==============================================
 
 
         strippedlen: function (str) {
-            str = jxlate.formatter.replaceAll(" ", "", str);//TODO: prefer chaining
-            str = jxlate.formatter.replaceAll("\t", "", str);
-            str = jxlate.formatter.replaceAll("\r", "", str);
-            str = jxlate.formatter.replaceAll("\n", "", str);
-            return str.length;
+            return str.stripWhitespace().length;
         },
 
         invertbits: function (str) {
-            str = jxlate.formatter.replaceAll("0", "X", str);//TODO: prefer chaining
-            str = jxlate.formatter.replaceAll("1", "Y", str);
-            str = jxlate.formatter.replaceAll("X", "1", str);
-            str = jxlate.formatter.replaceAll("Y", "0", str);
-            return str;
+            return str
+                    .replaceAll("0","X")
+                    .replaceAll("1","0")
+                    .replaceAll("X","1");
         }
 
     };

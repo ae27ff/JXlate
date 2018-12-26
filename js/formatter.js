@@ -3,7 +3,7 @@ if (typeof addcredits === 'function')
 
 if (typeof jxlate === "undefined") {
     console.error("JXlate module loaded before core.");
-} else
+} else {
     jxlate.formatter = {
         init: function () {},
         //preformatter function that changes and splits the text to an array of single units for array_base2base to translate.
@@ -48,32 +48,18 @@ if (typeof jxlate === "undefined") {
             }
             return a.join(" ");
         },
-        
+
         //general purpose formatting
-        
-        reverse: function (s) {
-            return s.split("").reverse().join("");
-        },
-        replaceAll: function (find, replace, str) {
-            return str.replace(new RegExp(this.escapeRegExp(find), 'g'), replace);
-        },
-        escapeRegExp: function (string) {
-            return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
-        },
-        stripWhitespace:function(str){
-            str = this.replaceAll(" ", "", str);
-            str = this.replaceAll("\t", "", str);
-            str = this.replaceAll("\r", "", str);
-            str = this.replaceAll("\n", "", str);
-            return str;
-        },
-        padZeroes:function(num,size) {//pad a numerical string with 0's to reach a certain length
+        /*escapeRegExp: function (string) {
+         return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+         },*/
+        padZeroes: function (num, size) {//pad a numerical string with 0's to reach a certain length
             var s = num + "";
             while (s.length < size)
                 s = "0" + s;
             return s;
         },
-        strstripnongraph:function(s) {//remove non-graphing chars.
+        strstripnongraph: function (s) {//remove non-graphing chars.
             var out = "";
             for (var i = 0; i < s.length; i++) {
                 var a = s.charCodeAt(i);
@@ -84,11 +70,12 @@ if (typeof jxlate === "undefined") {
             }
             return out;
         },
-        isReadable:function(a) {//graphing ASCII chars, determined by charcode value
+        isReadable: function (a) {//graphing ASCII chars, determined by charcode value
             return ((a >= 0x20 && a <= 0x7E) || a === 0x0d || a === 0x0a || a === 0x09);
         },
-        isGraphable:function(a) {//additional graphing ISO-8859-1 chars, determined by charcode value
+        isGraphable: function (a) {//additional graphing ISO-8859-1 chars, determined by charcode value
             return (a !== 0);
             //return ( isReadable(a) || (a>=0xA0 && a<=0xFF));
         }
     };
+}

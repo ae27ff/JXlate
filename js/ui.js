@@ -6,9 +6,8 @@ if (typeof addcredits === 'function')
 if (typeof jxlate === "undefined") {
     var jxlate={};//suppress warnings
     console.error("JXlate module loaded before core.");
-} else
+} else {
     jxlate.ui = {
-        
         toolbox: null,
         mainForm: null,
         textarea: null,
@@ -153,11 +152,6 @@ if (typeof jxlate === "undefined") {
                         );
             }
         },
-        modp: function (n, d) {//modulo that causes smaller negatives (|n|<d) to count from the righthand side (max value) instead of the stock behavior.
-            while (n < 0)
-                n += d;
-            return (n % d);
-        },
         setModeState: function (i) {
             //called by event - only use static references.
             jxlate.ui.mode = i;
@@ -175,3 +169,4 @@ if (typeof jxlate === "undefined") {
          */
 
     };
+}
