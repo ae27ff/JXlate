@@ -137,7 +137,7 @@ if (typeof jxlate === "undefined") {
                 }
             //console.log(target);
 
-            for (var j = 0, length = radios.length; j < length; j++)//find the targetted radio input and check it (will force a mode change and translation)
+            for (var j = 0, lengthj = radios.length; j < lengthj; j++)//find the targetted radio input and check it (will force a mode change and translation)
                 if (j === target)
                     radios[j].checked = true;
 
