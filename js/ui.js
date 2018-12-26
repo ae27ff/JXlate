@@ -58,7 +58,6 @@ if (typeof jxlate === "undefined") {
                 this.textarea.value = "";//clearing old form input
                 this.textarea.focus();
             }
-            document.getElementById('header').innerHTML = "JXlate " + fov("jxlate.html");//set the version text header
 
 
 
@@ -83,6 +82,8 @@ if (typeof jxlate === "undefined") {
             
             setInterval(this.events.pollRadioBox, 100);//poll the radio selector for changes, using an event for this has some issues between browsers.
             
+            var heading=document.getElementById("header");
+            heading.innerHTML=heading.innerHTML+" "+jxlate.version;
         },
 
         getCheckedRadioValue: function (sname) {//get the current value of a radio selector
