@@ -27,7 +27,7 @@ if (typeof jxlate.ui === "undefined") {
         init: function (textarea) {
             this.tbox = document.getElementById('tbox');
             this.textarea = textarea;
-            this.hide();
+            this.events.hide();
 
             this.toolsets[0] = [2];
             this.toolsets[2] = [0, 2, 3, 5, 6, 7];//TODO: add word-reversal.
