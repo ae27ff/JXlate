@@ -1,180 +1,190 @@
 <!doctype html>
 <html>
-	<head>
+    <head>
 
-		<title>Byte shift and constant-xor report</title>
-		<style>
-			#txt{ width:300px; }
-			#dec{ width:300px; }
-			table{ display: inline-block; }
-		</style>
-		<script>
-		if (!String.prototype.trim) {
-			 String.prototype.trim = function() {
-				return this.replace(/^\s+|\s+$/g,'');
-			 }
-		}
-			 var entityMap = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': '&quot;',
-    "'": '&#39;',
-    "/": '&#x2F;'
-  };
+        <title>Byte shift and constant-xor report</title>
+        <style>
+            #txt{ width:300px; }
+            #dec{ width:300px; }
+            table{ display: inline-block; }
+        </style>
+        <script>
+            if (!String.prototype.trim) {
+                String.prototype.trim = function () {
+                    return this.replace(/^\s+|\s+$/g, '');
+                };
+            }
+            var entityMap = {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': '&quot;',
+                "'": '&#39;',
+                "/": '&#x2F;'
+            };
 
-  function escapeHtml(string) {
-    return String(string).replace(/[&<>"'\/]/g, function (s) {
-      return entityMap[s];
-    });
-  }
-		function dectostr(sd){
-			var ad=sd.trim().split(" ");
-			var o="";
-			for(var i=0;i<ad.length;i++) o+=String.fromCharCode(  parseInt(ad[i])  );
-			return o;
-		}
-
-
-		function charshift(a,n){
-			return (a+n)%256;
-		}
-		function charxor(a,n){
-			return a^n;
-		}
-
-		function strfunc(s,func,n){
-			var o="";
-			for(var i=0;i<s.length;i++){
-				var a=s.charCodeAt(i);
-				a=func(a,n);
-				o+=String.fromCharCode(a);
-			}
-			return o;
-		}
+            function escapeHtml(string) {
+                return String(string).replace(/[&<>"'\/]/g, function (s) {
+                    return entityMap[s];
+                });
+            }
+            function dectostr(sd) {
+                var ad = sd.trim().split(" ");
+                var o = "";
+                for (var i = 0; i < ad.length; i++)
+                    o += String.fromCharCode(parseInt(ad[i]));
+                return o;
+            }
 
 
-		function strasc(s){
-			var o="";
-			for(var i=0;i<s.length;i++){
-				var a=s.charCodeAt(i);
-				o+=a+" ";
-			}
-			return o.trim();
-		}
-		function strshift(s,n){
-			return strfunc(s,charshift,n);
-		}
-		function strxor(s,n){
-			return strfunc(s,charxor,n);
-		}
+            function charshift(a, n) {
+                return (a + n) % 256;
+            }
+            function charxor(a, n) {
+                return a ^ n;
+            }
 
-		function strclean(s){
-			return s.replace(/[^\x20-\x7E\xA0-\xFF]/g, ".");
-		}
-		function charfilter(a){
-			return !((a<0x20 || a>0x7E) && (a!=0x0A && a!=0x0D));
-		}
-		function strfilter(s){
-			for(var i=0;i<s.length;i++){
-				var a=s.charCodeAt(i);
-				if(!charfilter(a)) return false;
-			}
-			return true;
-		}
-
-		function all(s,func,t){
-			//var t = document.getElementById("tbl");
-			var flt=document.getElementById("flt").checked;
-			for(var n=0;n<256;n++){
-				var o=func(s,n);
-				var f=strclean(o);
-				var d=strasc(o);
-
-				if(flt) if(!strfilter(o)) continue;
-
-				//n - f - d
-				var r=t.insertRow();
-				var cn = r.insertCell(0);
-				var cf = r.insertCell(1);
-				var cd = r.insertCell(2);
+            function strfunc(s, func, n) {
+                var o = "";
+                for (var i = 0; i < s.length; i++) {
+                    var a = s.charCodeAt(i);
+                    a = func(a, n);
+                    o += String.fromCharCode(a);
+                }
+                return o;
+            }
 
 
-				var sn=String.fromCharCode(n);
-				if(strfilter(sn)){
-					if(n==0x0a) sn="\\n";
-					if(n==0x0d) sn="\\r";
-					sn=n+"("+escapeHtml(sn)+")";
-				}
-				else sn=n;
+            function strasc(s) {
+                var o = "";
+                for (var i = 0; i < s.length; i++) {
+                    var a = s.charCodeAt(i);
+                    o += a + " ";
+                }
+                return o.trim();
+            }
+            function strshift(s, n) {
+                return strfunc(s, charshift, n);
+            }
+            function strxor(s, n) {
+                return strfunc(s, charxor, n);
+            }
 
-				cn.innerHTML=sn;
-				cf.innerHTML=escapeHtml(f);
-				cd.innerHTML=d;
-			}
-		}
-		function clearreport(Parent){
-			//var Parent = document.getElementById('tbl');
-			while(Parent.hasChildNodes()) Parent.removeChild(Parent.firstChild);
-		}
+            function strclean(s) {
+                return s.replace(/[^\x20-\x7E\xA0-\xFF]/g, ".");
+            }
+            function charfilter(a) {
+                return !((a < 0x20 || a > 0x7E) && (a !== 0x0A && a !== 0x0D));
+            }
+            function strfilter(s) {
+                for (var i = 0; i < s.length; i++) {
+                    var a = s.charCodeAt(i);
+                    if (!charfilter(a))
+                        return false;
+                }
+                return true;
+            }
 
+            function all(s, func, t) {
+                //var t = document.getElementById("tbl");
+                var flt = document.getElementById("flt").checked;
+                for (var n = 0; n < 256; n++) {
+                    var o = func(s, n);
+                    var f = strclean(o);
+                    var d = strasc(o);
 
-		function report(s){
-			var r,c;
-			var t = document.getElementById("tbls");
-			clearreport(t);
-			r=t.insertRow();
-			c = r.insertCell(0);
-			c.colSpan=3;
-			c.innerHTML="<b>All Byte Shifts</b>";
-			all(s,strshift,t);
+                    if (flt)
+                        if (!strfilter(o))
+                            continue;
 
-
-			t = document.getElementById("tblx");
-			clearreport(t);
-			r=t.insertRow();
-			c = r.insertCell(0);
-			c.colSpan=3;
-			c.innerHTML="<b>All Constant XORs</b>";
-			all(s,strxor,t);
-		}
-
-		function report_txt(){
-			var inpt = document.getElementById("txt");
-			var inpd = document.getElementById("dec");
-			inpd.value=strasc(inpt.value);
-			report(inpt.value);
-
-		}
-		function report_dec(){
-			var inpt = document.getElementById("txt");
-			var inpd = document.getElementById("dec");
-			inpt.value=dectostr(inpd.value);
-			report(dectostr(inpd.value));
-		}
-		function report_unk(){
-			var inpt = document.getElementById("txt");
-			var inpd = document.getElementById("dec");
-			if(inpd.value!=="") return report_dec();
-			report_txt();
-		}
+                    //n - f - d
+                    var r = t.insertRow();
+                    var cn = r.insertCell(0);
+                    var cf = r.insertCell(1);
+                    var cd = r.insertCell(2);
 
 
+                    var sn = String.fromCharCode(n);
+                    if (strfilter(sn)) {
+                        if (n === 0x0a)
+                            sn = "\\n";
+                        if (n === 0x0d)
+                            sn = "\\r";
+                        sn = n + "(" + escapeHtml(sn) + ")";
+                    } else
+                        sn = n;
+
+                    cn.innerHTML = sn;
+                    cf.innerHTML = escapeHtml(f);
+                    cd.innerHTML = d;
+                }
+            }
+            function clearreport(Parent) {
+                //var Parent = document.getElementById('tbl');
+                while (Parent.hasChildNodes())
+                    Parent.removeChild(Parent.firstChild);
+            }
 
 
-		</script>
-	</head>
-	<body>
-<input type="text" id="txt" placeholder="Text"><input type="submit" value="Generate Report" onclick="report_txt()"><br>
-<input type="text" id="dec" placeholder="Decimal"><input type="submit" value="Generate Report" onclick="report_dec()"><br>
-<input type="checkbox" id="flt" onclick="report_unk()"> Filter strings with unprintable chars.
-<hr>
-
-<table border="1" id="tbls">
-</table><table border="1" id="tblx">
-</table>
+            function report(s) {
+                var r, c;
+                var t = document.getElementById("tbls");
+                clearreport(t);
+                r = t.insertRow();
+                c = r.insertCell(0);
+                c.colSpan = 3;
+                c.innerHTML = "<b>All Byte Shifts</b>";
+                all(s, strshift, t);
 
 
-	</body>
+                t = document.getElementById("tblx");
+                clearreport(t);
+                r = t.insertRow();
+                c = r.insertCell(0);
+                c.colSpan = 3;
+                c.innerHTML = "<b>All Constant XORs</b>";
+                all(s, strxor, t);
+            }
+
+            function report_txt() {
+                var inpt = document.getElementById("txt");
+                var inpd = document.getElementById("dec");
+                inpd.value = strasc(inpt.value);
+                report(inpt.value);
+
+            }
+            function report_dec() {
+                var inpt = document.getElementById("txt");
+                var inpd = document.getElementById("dec");
+                inpt.value = dectostr(inpd.value);
+                report(dectostr(inpd.value));
+            }
+            function report_unk() {
+                var inpt = document.getElementById("txt");
+                var inpd = document.getElementById("dec");
+                if (inpd.value !== "")
+                    return report_dec();
+                report_txt();
+            }
+
+
+
+
+        </script>
+    </head>
+    <body>
+        <h2>Byte Shifts/Xor Report v1.1</h2>
+        <hr>
+        <input type="text" id="txt" placeholder="Text"><input type="submit" value="Generate Report" onclick="report_txt()"> <i>OR</i><br>
+        <input type="text" id="dec" placeholder="Decimal values"><input type="submit" value="Generate Report" onclick="report_dec()"><br>
+        <input type="checkbox" id="flt" onclick="report_unk()"> Filter strings with unprintable chars.
+        <hr>
+
+        <table border="1" id="tbls">
+        </table><table border="1" id="tblx">
+        </table>
+
+
+    </body>
 </html>
 
