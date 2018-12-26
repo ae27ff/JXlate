@@ -1,4 +1,4 @@
-if(typeof addcredits  == 'function') addcredits("base32.js","2013-04-24","Thomas Peri","`Nibbler` - A Multi-Base Encoder http://www.tumuski.com/ (only used for Base32 at this time)")
+if(typeof addcredits  === 'function') addcredits("base32.js","2013-04-24","Thomas Peri","`Nibbler` - A Multi-Base Encoder http://www.tumuski.com/ (only used for Base32 at this time)");
 
 /*
 Copyright (c) 2010-2013 Thomas Peri
