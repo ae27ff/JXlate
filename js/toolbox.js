@@ -155,27 +155,27 @@ if (typeof jxlate.ui === "undefined") {
         },
         action_stripspaces: function () {
             //TODO: operate on existing value instead of re-reading
-            this.textarea.value = replaceAll(" ", "", this.textarea.value);
-            this.textarea.value = replaceAll("\t", "", this.textarea.value);
-            this.textarea.value = replaceAll("\r", "", this.textarea.value);
-            this.textarea.value = replaceAll("\n", "", this.textarea.value);
+            this.textarea.value = jxlate.formatter.replaceAll(" ", "", this.textarea.value);
+            this.textarea.value = jxlate.formatter.replaceAll("\t", "", this.textarea.value);
+            this.textarea.value = jxlate.formatter.replaceAll("\r", "", this.textarea.value);
+            this.textarea.value = jxlate.formatter.replaceAll("\n", "", this.textarea.value);
         },
 //==============================================
 
 
         strippedlen: function (str) {
-            str = replaceAll(" ", "", str);
-            str = replaceAll("\t", "", str);
-            str = replaceAll("\r", "", str);
-            str = replaceAll("\n", "", str);
+            str = jxlate.formatter.replaceAll(" ", "", str);
+            str = jxlate.formatter.replaceAll("\t", "", str);
+            str = jxlate.formatter.replaceAll("\r", "", str);
+            str = jxlate.formatter.replaceAll("\n", "", str);
             return str.length;
         },
 
         invertbits: function (str) {
-            str = replaceAll("0", "X", str);
-            str = replaceAll("1", "Y", str);
-            str = replaceAll("X", "1", str);
-            str = replaceAll("Y", "0", str);
+            str = jxlate.formatter.replaceAll("0", "X", str);
+            str = jxlate.formatter.replaceAll("1", "Y", str);
+            str = jxlate.formatter.replaceAll("X", "1", str);
+            str = jxlate.formatter.replaceAll("Y", "0", str);
             return str;
         }
 
