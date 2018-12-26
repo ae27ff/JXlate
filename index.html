@@ -26,16 +26,20 @@
 
 <script>
 if(typeof addcredits  === 'function') addcredits("jxlate.html",2.4,"crashdemons","JavaScript Binary Translator UI.");
+
+document.addEventListener("DOMContentLoaded", function(event) { 
+  jxlate.init();
+});
 </script>
 </head>
-<body class="monospace bw" onload="jxlate.init()">
+<body class="monospace bw">
 
 <form action="#" id="frmInput">
 <div id="sidebar">
 <ul class="options" id="options">
 				<li class="header" id="header">JXlate</li>
 				<li><input type="radio" name="mode" value="0" id="rad0" checked><label for="rad0">
-					Text <span class="info">(<a href="#" class="infolink" onclick="jxlate.ui.iso8859info()">L1</a>)</span>
+					Text <span class="info">(<a href="#" class="infolink" onclick="jxlate.ui.events.iso8859info()">L1</a>)</span>
 					</label></li>
 				<li><input type="radio" name="mode" value="12" id="rad12"><label for="rad12">Text (UCS2)</label></li>
 				<li><input type="radio" name="mode" value="13" id="rad13"><label for="rad13">Text (UTF8)</label></li>
@@ -53,7 +57,7 @@ if(typeof addcredits  === 'function') addcredits("jxlate.html",2.4,"crashdemons"
 				<li><input type="radio" name="mode" value="14" id="rad14"><label for="rad14">Radix-N</label></li>
 			</ul>
 			<div id="border"></div>
-			<div class="toolopen"><img src="img/tools.png" onclick="jxlate.ui.toolbox.toggle()" alt="tools" title="text tools"></div>
+			<div class="toolopen"><img src="img/tools.png" onclick="jxlate.ui.toolbox.events.toggle()" alt="tools" title="text tools"></div>
 </div>
 <textarea name="text" spellcheck="false" wrap="hard" placeholder="Enter your data here" class="grey" id="text" cols="32"></textarea>
 </form>
