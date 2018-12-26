@@ -45,7 +45,7 @@ if (typeof jxlate === "undefined") {
                 else if (baseFrom === 85)
                     s = ascii85.decode(a[0]);
                 else if (baseFrom === "mc")
-                    s = morse_decode(a);
+                    s = morse.decode(a);
                 else if (baseFrom === "ucs2")
                     s = convert_encoding(a[0], 'ucs2', 'iso88591');
                 else if (baseFrom === "utf8")
@@ -70,7 +70,7 @@ if (typeof jxlate === "undefined") {
                 else if (baseTo === 85)
                     a = [ascii85.encode(s)];
                 else if (baseTo === "mc")
-                    a = [morse_encode(s)];
+                    a = [morse.encode(s)];
                 else if (baseTo === "ucs2")
                     a = [convert_encoding(s, 'iso88591', 'ucs2')];
                 else if (baseTo === "utf8")

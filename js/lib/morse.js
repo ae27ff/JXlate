@@ -1,8 +1,8 @@
 //poor coding by crashdemons
 
-var morse_cs = " ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";//morse code charset
-//array of mose-code versions of the above.
-var morse_cd = [
+var morse={
+    character_set: " ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+    codes:[
     "/",
     ".-",
     "-...",
@@ -42,24 +42,23 @@ var morse_cd = [
     "---..",
     "----.",
     "-----"
-];
-
-
-function morse_decode(arr) {
-    var str = "";
-    for (var i = 0, len = arr.length; i < len; i++) {//foreach array item (1 char, encoded in morse)
-        idx = morse_cd.indexOf(arr[i]);//find the index in our array
-        if (arr[i] === "")
-            continue;
-        str += (idx === -1) ? "?" : morse_cs[idx];//append the cleartext version (aligned to the same index) if any, if not "?"
+],
+    decode:function(arr){
+        var str = "";
+        for (var i = 0, len = arr.length; i < len; i++) {//foreach array item (1 char, encoded in morse)
+            var idx = morse.codes.indexOf(arr[i]);//find the index in our array
+            if (arr[i] === "")
+                continue;
+            str += (idx === -1) ? "?" : morse.character_set[idx];//append the cleartext version (aligned to the same index) if any, if not "?"
+        }
+        return str;
+    },
+    encode:function(arr){
+        var str = "";
+        for (var i = 0, len = arr.length; i < len; i++) {//foreach array item (1 char)
+            idx = morse.character_set.indexOf(arr[i].toUpperCase());//find the index in our charset string
+            str += (idx === -1) ? " " : morse.codes[idx] + " ";//append the morse translation if any, if not " "
+        }
+        return str;
     }
-    return str;
-}
-function morse_encode(arr) {
-    var morse = "";
-    for (var i = 0, len = arr.length; i < len; i++) {//foreach array item (1 char)
-        idx = morse_cs.indexOf(arr[i].toUpperCase());//find the index in our charset string
-        morse += (idx === -1) ? " " : morse_cd[idx] + " ";//append the morse translation if any, if not " "
-    }
-    return morse;
-}
+};
