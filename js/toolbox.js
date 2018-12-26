@@ -23,7 +23,9 @@ jxlate.ui.toolbox = {
         ['shift', 'Apply Caesar shift'],
         ['invert', 'Invert bit values'],
         ['greverse', 'Reverse groupings only'],
-        ['stripspaces', 'Remove spaces']
+        ['stripspaces', 'Remove spaces'],
+        ['xor', 'XOR each byte against a number'],
+        ['byteshift','Shift each byte value by some amount']
     ],
 
     /**
@@ -71,10 +73,10 @@ jxlate.ui.toolbox = {
         this.events.hide();
 
         this.toolsets[0] = [2];
-        this.toolsets[2] = [0, 2, 3, 5, 6, 7];//TODO: add word-reversal.
-        this.toolsets[8] = [0, 2, 3, 5, 6];
-        this.toolsets[10] = [0, 2, 3, 5, 6];
-        this.toolsets[16] = [0, 1, 2, 3, 5, 6, 7];
+        this.toolsets[2] = [0, 2, 3, 5, 6, 7, 8, 9];//TODO: add word-reversal.
+        this.toolsets[8] = [0, 2, 3, 5, 6, 8, 9];
+        this.toolsets[10] = [0, 2, 3, 5, 6, 8, 9];
+        this.toolsets[16] = [0, 1, 2, 3, 5, 6, 7, 8, 9];
         this.toolsets[32] = [2, 7];
         this.toolsets[64] = [2, 7];
         this.toolsets[85] = [2];
@@ -194,6 +196,26 @@ jxlate.ui.toolbox = {
         action_debug: function () {
             alert("wat");
         },
+        
+        action_xor: function(){
+            var xor_value = prompt("Enter a number 1-255 to xor against");
+            if(xor_value===null) return;
+            xor_value=parseInt(xor_value);
+            if(xor_value===0) return;
+            jxlate.ui.toolbox.performDecimalOperation(function(input_value){
+                return input_value ^ xor_value;
+            });
+        },
+        action_byteshift: function(){
+            var shift_value = prompt("Enter a number 1-255 to shift all the bytes with");
+            if(shift_value===null) return;
+            shift_value=parseInt(shift_value);
+            if(shift_value===0) return;
+            jxlate.ui.toolbox.performDecimalOperation(function(input_value){
+                console.log(input_value + " + " + shift_value + " = "+jxlate.util.modp(input_value + shift_value, 256));
+                return jxlate.util.modp(input_value + shift_value, 256);
+            });
+        },
 
         action_replace: function () {
             var search = prompt("Enter the string to replace", "");
@@ -255,6 +277,17 @@ jxlate.ui.toolbox = {
         }
     },
 //==============================================
+
+
+    performDecimalOperation:function(func){
+        var base = jxlate.ui.getSelectedBase();
+        var decimal_array = jxlate.ui.getInputAsDecimalArray();
+        console.log(decimal_array);
+        for(var i=0;i<decimal_array.length;i++){
+            decimal_array[i] = func(parseInt(decimal_array[i]),i);
+        }
+        jxlate.ui.setInputFromDecimalArray(decimal_array, base);
+    },
 
     /**
      * Determines the length of a string without whitespace

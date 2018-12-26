@@ -9,7 +9,7 @@ var jxlate = {//we're not really going to polymorphism here, so we can do with a
      * This is not guaranteed to be a number, so you should convert to string first before parsing.
      * @type {Number}
      */
-    version: 3.0,
+    version: 3.1,
     
     /**
      * Property containing JXlate Translator module object, when available.

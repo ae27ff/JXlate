@@ -11,8 +11,10 @@ if (typeof jxlate === "undefined") {
 jxlate.util = {
     init: function () {},
     modp: function (n, d) {//modulo that causes smaller negatives (|n|<d) to count from the righthand side (max value) instead of the stock behavior.
+        //console.log(n,d);
         while (n < 0)
             n += d;
+        //console.log(n%d);
         return (n % d);
     }
 };
