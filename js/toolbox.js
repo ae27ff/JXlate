@@ -1,191 +1,280 @@
-if (typeof addcredits === 'function')
-    addcredits("toolbox.js", 1.0, "crashdemons", "Text formatting tools");
 
-
-var tools = [
-    ['replace', 'Replace one phrase with another'],
-    ['case', 'Toggle letter case'],
-    ['length', 'Find the total length'],
-    ['reverse', 'Reverse all characters'],
-    ['shift', 'Apply Caesar shift'],
-    ['invert', 'Invert bit values'],
-    ['greverse', 'Reverse groupings only'],
-    ['stripspaces', 'Remove spaces']
-];
-
-var toolsets = [];
-
-var tbox;
-var tbox_textarea;
-var tbox_shown = false;
-var tbox_case = true;
-
-function tbox_init(textarea) {
-    tbox = document.getElementById('tbox');
-    tbox_textarea = textarea;
-    tbox_hide();
-
-    toolsets[0] = [2];
-    toolsets[2] = [0, 2, 3, 5, 6, 7];//TODO: add word-reversal.
-    toolsets[8] = [0, 2, 3, 5, 6];
-    toolsets[10] = [0, 2, 3, 5, 6];
-    toolsets[16] = [0, 1, 2, 3, 5, 6, 7];
-    toolsets[32] = [2, 7];
-    toolsets[64] = [2, 7];
-    toolsets[85] = [2];
-    toolsets[256] = [0, 1, 2, 3, 4];
-}
-function tbox_switch(modestr) {
-    tbox_clear();
-    var m = parseInt(modestr);
-    if (isNaN(m))
-        m = 0;
-    if (modestr === "ucs2" || modestr === "utf8")
-        m = 256;//allow text tools for unicode text modes.
-    var ts = toolsets[m];
-    for (var i = 0; i < ts.length; i++)
-        tbox_addtooln(ts[i]);
+if (typeof jxlate.ui === "undefined") {
+    var jxlate = {};//suppress warnings
+    console.error("JXlate UI module loaded before core.");
 }
 
-function tbox_show() {
-    tbox.style.display = 'block';
-}
-function tbox_hide() {
-    tbox.style.display = 'none';
-}
-function tbox_toggle() {
-    if (tbox_shown)
-        tbox_hide();
-    else
-        tbox_show();
-    tbox_shown = !tbox_shown;
-}
+/**
+ * JXLate UI toolbox object
+ * @type {Object}
+ */
+jxlate.ui.toolbox = {
+    /**
+     * Array of supported toolbox actions together with their description.
+     * 
+     * Each action is indexed by its ID number, the second index specifies the action name or description (0 or 1).
+     * @type {Array}
+     */
+    tools: [
+        ['replace', 'Replace one phrase with another'],
+        ['case', 'Toggle letter case'],
+        ['length', 'Find the total length'],
+        ['reverse', 'Reverse all characters'],
+        ['shift', 'Apply Caesar shift'],
+        ['invert', 'Invert bit values'],
+        ['greverse', 'Reverse groupings only'],
+        ['stripspaces', 'Remove spaces']
+    ],
 
-function tbox_setpos(x, y) {
-    var t = tbox;
-    t.style.left = x + "px";
-    t.style.top = y + "px";
-}
-function tbox_clear() {
-    var t = tbox;
-    while (t.lastChild) {
-        t.removeChild(t.lastChild);
-    }
-}
+    /**
+     * Array containing lists of tools that are available to each data mode (numeral system base).
+     * 
+     * Each entry is indexed by the numeral system base value and contains an array of tool ID numbers that are applicable to it.
+     * @type {Array}
+     * @see jxlate.ui.toolbox.tools
+     */
+    toolsets: [],
 
-function tbox_addtooln(i) {
-    tbox_addtool(tools[i][0], tools[i][1]);
-}
-function tbox_addtool(sname, sdesc) {
-    var sfunc = "tbox_action_" + sname;
+    /**
+     * The Toolbox DOM element object, when available.
+     * @type {Object}
+     */
+    tbox: null,
+    
+    /**
+     * The UI textarea DOM element object, when available.
+     * @type {Object}
+     */
+    textarea: null,
+    
+    /**
+     * State flag indicating whether the toolbox element is currently visible.
+     * @type {Boolean}
+     */
+    
+    shown: false,
+    
+    /**
+     * State flag indicating the current letter-case used for the 'case' tool action.
+     * @type {Boolean}
+     */
+    lettercase: true,
 
-    var t = tbox;
+    /**
+     * Initializes the toolbox element and all tool action information.
+     * @param {Object} textarea The DOM element object of the UI textarea input.
+     * @return {undefined}
+     */
+    init: function (textarea) {
+        this.tbox = document.getElementById('tbox');
+        this.textarea = textarea;
+        this.events.hide();
 
-    var tool = document.createElement("div");
-    tool.className = "tool";
+        this.toolsets[0] = [2];
+        this.toolsets[2] = [0, 2, 3, 5, 6, 7];//TODO: add word-reversal.
+        this.toolsets[8] = [0, 2, 3, 5, 6];
+        this.toolsets[10] = [0, 2, 3, 5, 6];
+        this.toolsets[16] = [0, 1, 2, 3, 5, 6, 7];
+        this.toolsets[32] = [2, 7];
+        this.toolsets[64] = [2, 7];
+        this.toolsets[85] = [2];
+        this.toolsets[256] = [0, 1, 2, 3, 4];
+    },
+    
+    /**
+     * Indicates to the toolbox to [visually] provide tool options for a different data mode / numeral system base.
+     * @param {String|number} modestr the data mode/numeral system base value being switched to.
+     * @return {undefined}
+     */
+    switch : function (modestr) {
+        this.clear();
+        var m = parseInt(modestr);
+        if (isNaN(m))
+            m = 0;
+        if (modestr === "ucs2" || modestr === "utf8")
+            m = 256;//allow text tools for unicode text modes.
+        var ts = this.toolsets[m];
+        for (var i = 0; i < ts.length; i++)
+            this.addtooln(ts[i]);
+    },
 
+    /**
+     * Set the positioning of the toolbox element
+     * @param {number} x the left position in pixels
+     * @param {type} y the top position in pixels
+     * @return {undefined}
+     */
+    setpos: function (x, y) {
+        this.tbox.style.left = x + "px";
+        this.tbox.style.top = y + "px";
+    },
+    
+    /**
+     * Removes all [visual] tool options currently displayed.
+     * @return {undefined}
+     */
+    clear: function () {
+        while (this.tbox.lastChild) {
+            this.tbox.removeChild(this.tbox.lastChild);
+        }
+    },
 
-    var img = document.createElement("img");
-    img.title = sdesc;
-    img.alt = sname;
-    img.src = "img/" + sname + ".png";
-    img.style.borderStyle = "none";
-    img.onclick = eval(sfunc);
+    /**
+     * Adds a tool option [visually] to the toolbox element, by tool id.
+     * @param {type} i The tool ID number
+     * @return {undefined}
+     */
+    addtooln: function (i) {
+        this.addtool(this.tools[i][0], this.tools[i][1]);
+    },
+    
+    /** Adds a tool option [visually] to the toolbox element.
+     * 
+     * This creates an element inside the toolbox which has a click event, alt-text, and image corresponding to the action string (tool name),
+     * and hover text showing the description.
+     * 
+     * @param {type} sname the name of the tool / action string
+     * @param {type} sdesc the description of the tool
+     * @return {undefined}
+     */
+    addtool: function (sname, sdesc) {
+        var sfunc = "jxlate.ui.toolbox.events.action_" + sname;
 
-    t.appendChild(tool);
-    tool.appendChild(img);
+        var tool = document.createElement("div");
+        tool.className = "tool";
 
-}
+        var img = document.createElement("img");
+        img.title = sdesc;
+        img.alt = sname;
+        img.src = "img/" + sname + ".png";
+        img.style.borderStyle = "none";
+        img.onclick = eval(sfunc);
 
-function tbox_action_debug() {
-    alert("wat");
-}
+        this.tbox.appendChild(tool);
+        tool.appendChild(img);
+    },
 
-function tbox_action_replace() {
-    var search = prompt("Enter the string to replace", "");
-    if (search === null)
-        return;
-    var replace = prompt("Enter the string to replace with", "");
-    if (replace === null)
-        return;
-    tbox_textarea.value = replaceAll(search, replace, tbox_textarea.value);
-}
-function tbox_action_case() {
-    if (tbox_case)
-        tbox_textarea.value = tbox_textarea.value.toUpperCase();
-    else
-        tbox_textarea.value = tbox_textarea.value.toLowerCase();
-    tbox_case = !tbox_case;
-}
-function tbox_action_length() {
-    var l = tbox_textarea.value.length;
-    var sl = strippedlen(tbox_textarea.value);
-    var out = "Total length: " + l;
-    var base = mode_bases[mode];
-    if (base === 2) {
-        out += "\nBit length: " + sl;
-        out += "\nBytes: " + (sl / 8);
-    } else if (base === 16) {
-        out += "\nDigits: " + sl + " (nibbles)";
-        out += "\nBytes: " + (sl / 2);
-    }
-    alert(out);
-}
-function tbox_action_reverse() {
-    tbox_textarea.value = reverse(tbox_textarea.value);
-}
-function tbox_action_shift() {
-    var shift = prompt("Please enter the caesar shift value", "13");
-    if (shift === null)
-        return;
-    shift = parseInt(shift);
-    if (shift === 0)
-        return;
-    tbox_textarea.value = Caesar(1, tbox_textarea.value, shift);
-}
+    /**
+     * Object containing event functions supported by the toolbox
+     */
+    events: {
 
-function tbox_action_invert() {//NOTE: uses 'mode' and 'mode_bases' global from ui.js
-    var base = mode_bases[mode];
-    var tmp = xlate_text(tbox_textarea.value, base, 2);
-    tmp = invertbits(tmp);
-    tbox_textarea.value = xlate_text(tmp, 2, base);
-}
-function tbox_action_greverse() {
-    tbox_textarea.value = tbox_textarea.value.split("").reverse().join("").split(" ").reverse().join(" ");
-}
-function tbox_action_stripspaces() {
-    tbox_textarea.value = replaceAll(" ", "", tbox_textarea.value);
-    tbox_textarea.value = replaceAll("\t", "", tbox_textarea.value);
-    tbox_textarea.value = replaceAll("\r", "", tbox_textarea.value);
-    tbox_textarea.value = replaceAll("\n", "", tbox_textarea.value);
-}
+        /**
+         * Show the toolbox element, visually.
+         * @return {undefined}
+         */
+        show: function () {
+            jxlate.ui.toolbox.tbox.style.display = 'block';
+        },
+        
+        /**
+         * Hide the toolbox element, visually
+         * @return {undefined}
+         */
+        hide: function () {
+            jxlate.ui.toolbox.tbox.style.display = 'none';
+        },
+        
+        /**
+         * Toggle whether the toolbox element is hidden or shown, visually.
+         * @return {undefined}
+         */
+        toggle: function () {
+            if (jxlate.ui.toolbox.shown)
+                jxlate.ui.toolbox.events.hide();
+            else
+                jxlate.ui.toolbox.events.show();
+            jxlate.ui.toolbox.shown = !jxlate.ui.toolbox.shown;
+        },
+
+        /**
+         * Unused tool action for debugging new options
+         * @return {undefined}
+         */
+        action_debug: function () {
+            alert("wat");
+        },
+
+        action_replace: function () {
+            var search = prompt("Enter the string to replace", "");
+            if (search === null)
+                return;
+            var replace = prompt("Enter the string to replace with", "");
+            if (replace === null)
+                return;
+            jxlate.ui.toolbox.textarea.value = jxlate.ui.toolbox.textarea.value.replaceAll(search, replace);
+        },
+        action_case: function () {
+            var textarea = jxlate.ui.toolbox.textarea;
+            if (jxlate.ui.toolbox.lettercase)
+                textarea.value = textarea.value.toUpperCase();
+            else
+                textarea.value = textarea.value.toLowerCase();
+            jxlate.ui.toolbox.lettercase = !jxlate.ui.toolbox.lettercase;
+        },
+        action_length: function () {
+            var l = jxlate.ui.toolbox.textarea.value.length;
+            var sl = jxlate.ui.toolbox.strippedlen(jxlate.ui.toolbox.textarea.value);
+            var out = "Total length: " + l;
+            var base = jxlate.ui.mode_bases[jxlate.ui.mode];
+            if (base === 2) {
+                out += "\nBit length: " + sl;
+                out += "\nBytes: " + (sl / 8);
+            } else if (base === 16) {
+                out += "\nDigits: " + sl + " (nibbles)";
+                out += "\nBytes: " + (sl / 2);
+            }
+            alert(out);
+        },
+        action_reverse: function () {
+            jxlate.ui.toolbox.textarea.value = jxlate.ui.toolbox.textarea.value.reverse();
+        },
+        action_shift: function () {
+            var shift = prompt("Please enter the caesar shift value", "13");
+            if (shift === null)
+                return;
+            shift = parseInt(shift);
+            if (shift === 0)
+                return;
+            jxlate.ui.toolbox.textarea.value = Caesar(1, jxlate.ui.toolbox.textarea.value, shift);
+        },
+
+        action_invert: function () {//NOTE: uses 'mode' and 'mode_bases' global from ui.js
+            var textarea = jxlate.ui.toolbox.textarea;
+            var base = jxlate.ui.mode_bases[jxlate.ui.mode];
+            var tmp = jxlate.ui.convertText(textarea.value, base, 2);
+            tmp = jxlate.ui.toolbox.invertbits(tmp);
+            textarea.value = jxlate.ui.convertText(tmp, 2, base);
+        },
+        action_greverse: function () {
+            jxlate.ui.toolbox.textarea.value = jxlate.ui.toolbox.textarea.value.split("").reverse().join("").split(" ").reverse().join(" ");
+        },
+        action_stripspaces: function () {
+            //TODO: operate on existing value instead of re-reading
+            jxlate.ui.toolbox.textarea.value = jxlate.ui.toolbox.textarea.value.stripWhitespace();
+        }
+    },
 //==============================================
 
+    /**
+     * Determines the length of a string without whitespace
+     * @param {String} str the string
+     * @return {number} the number of non-whitespace characters in the string
+     */
+    strippedlen: function (str) {
+        return str.stripWhitespace().length;
+    },
 
-function strippedlen(str) {
-    str = replaceAll(" ", "", str);
-    str = replaceAll("\t", "", str);
-    str = replaceAll("\r", "", str);
-    str = replaceAll("\n", "", str);
-    return str.length;
-}
+    /**
+     * Inverts a string containing binary digits.
+     * @param {String} str A string of binary digits / spaces.
+     * @return {String} The input string, but with each binary digit inverted.
+     */
+    invertbits: function (str) {
+        return str
+                .replaceAll("0", "X")
+                .replaceAll("1", "0")
+                .replaceAll("X", "1");
+    }
 
-function invertbits(str) {
-    str = replaceAll("0", "X", str);
-    str = replaceAll("1", "Y", str);
-    str = replaceAll("X", "1", str);
-    str = replaceAll("Y", "0", str);
-    return str;
-}
-
-
-
-function reverse(s) {
-    return s.split("").reverse().join("");
-}
-function replaceAll(find, replace, str) {
-    return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
-}
-function escapeRegExp(string) {
-    return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
-}
+};
