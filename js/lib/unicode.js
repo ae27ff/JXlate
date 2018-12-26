@@ -26,17 +26,17 @@ function ucs2_to_iso88591(s) {
         var c = s.charAt(i);
         var u = s.charCodeAt(i);
         if (u >= 0x100) {//unicode characters
-            hex += xlate_text(c, 256, 16);//char to hex value - euro->20AC
+            hex += jxlate.ui.convertText(c, 256, 16);//char to hex value - euro->20AC
         } else {//characters under ISO-8859-1 already
-            hex += "00" + xlate_text(c, 256, 16);//char to null+hex 'z'->005A
+            hex += "00" + jxlate.ui.convertText(c, 256, 16);//char to null+hex 'z'->005A
         }
     }
 
-    return xlate_bytesNF(hex, 16);
+    return jxlate.ui.convertToBytesNF(hex, 16);
 }
 function iso88591_to_ucs2(s) {
-    var hex = xlate_text(s, 256, 16);
-    hex = replaceAll(" ", "", hex);
+    var hex = jxlate.ui.convertText(s, 256, 16);
+    hex = jxlate.formatter.replaceAll(" ", "", hex);
     var esc = "";
     for (var i = 0; i < hex.length; i += 4) {
         var uh = hex.substr(i, 4);

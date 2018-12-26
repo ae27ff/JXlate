@@ -7,23 +7,28 @@
 <meta name="keywords" content="JXlate,Xlate,translate,binary,decimal,octal,hexadecimal,base64,base32,ascii85,morse code,caesar shift">
 <meta name="author" content="crashdemons">
 <link rel="stylesheet" type="text/css" href="jxlate.css">
-<script src="js/foo.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/ascii85.js"></script>
-<script src="js/base32.js"></script>
-<script src="js/caesar.js"></script>
-<script src="js/morse.js"></script>
-<script src="js/toolbox.js"></script>
-<script src="js/unicode.js"></script>
-<script src="js/util.js"></script>
-<script src="js/xlate.format.js"></script>
-<script src="js/xlate.js"></script>
+
+<script src="js/lib/util.js"></script>
+<script src="js/lib/ascii85.js"></script>
+<script src="js/lib/base32.js"></script>
+<script src="js/lib/caesar.js"></script>
+<script src="js/lib/morse.js"></script>
+<script src="js/lib/unicode.js"></script>
+
+<script src="js/core.js"></script>
+    <script src="js/formatter.js"></script>
+    <script src="js/translator.js"></script>
+    <script src="js/ui.js"></script>
+        <script src="js/toolbox.js"></script>
+        <script src="js/egg.js"></script>
+
 <script src="/ga.js"></script>
+
 <script>
 if(typeof addcredits  === 'function') addcredits("jxlate.html",2.4,"crashdemons","JavaScript Binary Translator UI.");
 </script>
 </head>
-<body class="monospace bw" onload="xlate_init()">
+<body class="monospace bw" onload="jxlate.init()">
 
 <form action="#" id="frmInput">
 <div id="sidebar">
