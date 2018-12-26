@@ -41,8 +41,8 @@ if (typeof jxlate === "undefined") {
                 for (var i = 0; i < a.length; i++)
                     a[i] = this.padZeroes(a[i], 8);//make sure the binary output is in groups of 8 bits all displayed.
             } else if (base == 16) {
-                for (var i = 0; i < a.length; i++)
-                    a[i] = this.padZeroes(a[i], 2);//make sure hex shows both 2 digits for each byte
+                for (var j = 0; j < a.length; j++)
+                    a[j] = this.padZeroes(a[j], 2);//make sure hex shows both 2 digits for each byte
             } else if (base === "32r" || base === "32h" || base === "32c" || base == 64 || base == 85 || base === "mc" || base === "ue") {
                 return a[0];//various encodings return a single item result.
             }
