@@ -3,33 +3,61 @@ if (typeof jxlate === "undefined") {
     console.error("JXlate module loaded before core.");
 } else
     jxlate.translator = {
-        b32hex: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", //Triacontakaidecimal+4
+        
+        /**
+         * Character set used for generating most other numeral system character sets.
+         * 
+         * Triacontakaidecimal (base32hex) string with extensions to contain the alphabet.
+         * @type {String}
+         */
+        b32hex: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        
+        /**
+         * An array that contains the character set strings for each indexed numeral system, when available.
+         * @type {Array}
+         */
         base_charsets: [],
+        
+        /**
+         * Initializes the translator object.
+         * @return {undefined}
+         */
         init: function () {
             this.fill_bases();
         },
+        
+        /**
+         * Generates internal charset strings for each supported numeral system base.
+         * @return {undefined}
+         */
         fill_bases: function () {
             for (var b = 36; b >= 0; b--)
                 this.base_charsets[b] = this.b32hex.substr(0, b).split("");
             this.base_charsets[26] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
         }, //set some charset options for use in conversion functions.
 
-//check if the base ID is a numeral conversion or an encoding (external function)
+        /**
+         * check if the base ID is implemented as a numeral conversion or a special encoding (external function)
+         * @param {String|number} base the numeral system base value
+         * @return {Boolean} whether the base is a special encoding
+         */
         isEncodedBase: function (base) {
             return (base === "32r" || base === "32h" || base === "32c" || base === 64 || base === 85 || base === "mc" || base === "ue" || base === "ucs2" || base === "utf8");
         },
 
-//resolves any encodings before regular numeral conversions.
+        /**
+         * Resolves any special encodings before and after performing base conversions, as a wrapper to normal conversions.
+         * @param {Array} a The array of data to be converted as represented in the initial base/numeral system.
+         * @param {String|number} baseFrom the base or numeral system to convert from
+         * @param {String|number} baseTo the base or numeral system to convert to
+         * @return {Array} An array containing the output parameters of the conversion: The array of data as represented in the final base/numeral system, the initial base, the final base.
+         */
         array_prepareEncodings: function (a, baseFrom, baseTo) {
             var fromEncoded = this.isEncodedBase(baseFrom);
             var toEncoded = this.isEncodedBase(baseTo);
             if ((!fromEncoded) && (!toEncoded))
                 return [a, baseFrom, baseTo];//if the input unit array is neither encoded nor being encoded, just return it to array_base2base for numeral conversion.
             var s = "";
-
-
-
-
 
             if (fromEncoded) {//catch all of the encoded strings coming in that need to be decoded before translation.
                 if (baseFrom === 64)
@@ -81,6 +109,12 @@ if (typeof jxlate === "undefined") {
 
             return [a, baseFrom, baseTo];//output modified parameters.
         },
+        
+        /**
+         * Prompt for a base number to perform arbitrary conversions with.
+         * @throws {String} "no entry" if no entry was made, "invalid radix" if an unsupported base value was entered.
+         * @return {number} the base value entered by the user.
+         */
         radix_prompt: function () {
             var n = prompt("Please enter the radix (base) to convert with. (only 2-36 supported)", "");
             if (n === null)
@@ -90,6 +124,14 @@ if (typeof jxlate === "undefined") {
                 throw "invalid radix";
             return n;
         },
+        
+        /**
+         * Converts an array of data between two bases / numeral systems
+         * @param {Array} a An array of data in to convert from the initial base
+         * @param {String|number} baseFrom The base or numeral system to convert from, or "n" to prompt for an arbitrary radix
+         * @param {String|number} baseTo The base or numeral system to convert to, or "n" to prompt for an arbitrary radix
+         * @return {Array} The array of data as converted to the final base.
+         */
         array_base2base: function (a, baseFrom, baseTo) {//convert arrays of numerals from one base to another - implements support for Base64
             if (baseFrom === "n")
                 baseFrom = this.radix_prompt();
@@ -109,6 +151,15 @@ if (typeof jxlate === "undefined") {
             return a;
         },
 
+        /**
+         * Converts a number-string in a given numeral system to another numeral system.
+         * 
+         * Only individual numbers (like "12302") are converted by this function, it does not handle a list or multiple numbers.
+         * @param {String} snum The numeral string in the initial base
+         * @param {String|number} baseFrom the numeral system to convert from
+         * @param {String|number} baseTo the numeral system to convert to
+         * @return {String} The equivalent numeral string in the final base
+         */
         base2base: function (snum, baseFrom, baseTo) {//convert a numeral of one base system into another base system numeral
             if (baseFrom === baseTo)
                 return snum;//same base - output the input
@@ -116,6 +167,12 @@ if (typeof jxlate === "undefined") {
             return this.dec2numeral(d, baseTo);//convert decimal to numeral system B
         },
 
+        /**
+         * Converts a number-string in a given numeral system to decimal
+         * @param {String|number} snum The numeral string in the given base
+         * @param {String|number} sbase The base to convert from
+         * @return {Number} The equivalent decimal value of the input
+         */
         numeral2dec: function (snum, sbase) {
             var base = parseInt(String(sbase).replace(/\D/g, ''));
 
@@ -147,6 +204,12 @@ if (typeof jxlate === "undefined") {
             return d;
         },
 
+        /**
+         * Converts a decimal value to a given numeral system number-string.
+         * @param {number} d the decimal value to convert
+         * @param {String|number} sbase the base to convert to
+         * @return {String} the equivalent number-string in the given base
+         */
         dec2numeral: function (d, sbase) {
             var base = parseInt(String(sbase).replace(/\D/g, ''));//replace any non-digit chars and cast/interpret to an Integer.
 
@@ -167,6 +230,14 @@ if (typeof jxlate === "undefined") {
             return (snum === '') ? this.base_charsets[base][0] : snum;
         },
 
+        /**
+         * Converts a single digit string from a given numeral system to decimal.
+         * 
+         * Note: this method returns 0 for input digits that are invalid in the provided numeral system base (not present in the charset).
+         * @param {String} sdig a string containing a single digit in the given numeral system
+         * @param {String|number} base the base to convert from
+         * @return {Number} the equivalent decimal value of the input digit.
+         */
         numeraldigit2dec: function (sdig, base) {//retrieve the decimal value of a single digit in a numeral system
             var idx = this.base_charsets[base].indexOf(sdig);
             // there will be a problem here when your indexOf is the first character, since
@@ -183,7 +254,14 @@ if (typeof jxlate === "undefined") {
 //encodeURI is the sucessor to this, but it encodes LESS chars, some of which urlencode() does
 //of particular interest, & and /  don't get encoded, which can lead to urlencoded inputs breaking URLs.
 //escape() is deprecated (why?) but it catches more of these cases
-        urlencode: function (s) {
+        /**
+         * Percent-encodes symbols in a string similarly to the PHP method of the same name.
+         * 
+         * Currently decoded using unescape().
+         * @param {type} s The string to encode
+         * @return {String} the encoded string
+         */
+        urlencode: function (s) {//TODO: urldecode does not decode plus signs as spaces and this method does not exactly match urlencode() output (spaces->%20)
             return escape(s).replace(/\+/g, "%2B");//inputs with + should be encoded as well... (escape converts spaces to %20)
         }
 

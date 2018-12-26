@@ -1,16 +1,22 @@
 
 if (typeof jxlate === "undefined") {
+    var jxlate={};//suppress warnings
     console.error("JXlate module loaded before core.");
-}else{
-    jxlate.util={
-        init:function(){},
-        modp:function(n, d) {//modulo that causes smaller negatives (|n|<d) to count from the righthand side (max value) instead of the stock behavior.
-            while (n < 0)
-                n += d;
-            return (n % d);
-        }
-    };
 }
+
+/**
+ * Object containing utility methods for JXlate
+ * @type {Object}
+ */
+jxlate.util = {
+    init: function () {},
+    modp: function (n, d) {//modulo that causes smaller negatives (|n|<d) to count from the righthand side (max value) instead of the stock behavior.
+        while (n < 0)
+            n += d;
+        return (n % d);
+    }
+};
+
 
 
 String.prototype.replaceAll = function (target, replacement) {
