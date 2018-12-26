@@ -110,18 +110,19 @@ if (typeof jxlate.ui === "undefined") {
                 var replace = prompt("Enter the string to replace with", "");
                 if (replace === null)
                     return;
-                this.textarea.value = jxlate.formatter.replaceAll(search, replace, this.textarea.value);
+                jxlate.ui.toolbox.textarea.value = jxlate.formatter.replaceAll(search, replace, jxlate.ui.toolbox.textarea.value);
             },
             action_case: function () {
-                if (this.lettercase)
-                    this.textarea.value = this.textarea.value.toUpperCase();
+                var textarea = jxlate.ui.toolbox.textarea;
+                if (jxlate.ui.toolbox.lettercase)
+                    textarea.value = textarea.value.toUpperCase();
                 else
-                    this.textarea.value = this.textarea.value.toLowerCase();
-                this.lettercase = !this.lettercase;
+                    textarea.value = textarea.value.toLowerCase();
+                jxlate.ui.toolbox.lettercase = !jxlate.ui.toolbox.lettercase;
             },
             action_length: function () {
-                var l = this.textarea.value.length;
-                var sl = this.strippedlen(this.textarea.value);
+                var l = jxlate.ui.toolbox.textarea.value.length;
+                var sl = jxlate.ui.toolbox.strippedlen(jxlate.ui.toolbox.textarea.value);
                 var out = "Total length: " + l;
                 var base = jxlate.translator.mode_bases[jxlate.ui.mode];
                 if (base === 2) {
@@ -134,7 +135,7 @@ if (typeof jxlate.ui === "undefined") {
                 alert(out);
             },
             action_reverse: function () {
-                this.textarea.value = this.textarea.value.reverse();
+                jxlate.ui.toolbox.textarea.value = jxlate.ui.toolbox.textarea.value.reverse();
             },
             action_shift: function () {
                 var shift = prompt("Please enter the caesar shift value", "13");
@@ -143,31 +144,34 @@ if (typeof jxlate.ui === "undefined") {
                 shift = parseInt(shift);
                 if (shift === 0)
                     return;
-                this.textarea.value = Caesar(1, this.textarea.value, shift);
+                jxlate.ui.toolbox.textarea.value = Caesar(1, jxlate.ui.toolbox.textarea.value, shift);
             },
 
             action_invert: function () {//NOTE: uses 'mode' and 'mode_bases' global from ui.js
+                var textarea = jxlate.ui.toolbox.textarea;
                 var base = jxlate.ui.mode_bases[jxlate.ui.mode];
-                var tmp = jxlate.ui.convertText(this.textarea.value, base, 2);
-                tmp = this.invertbits(tmp);
-                this.textarea.value = jxlate.ui.convertText(tmp, 2, base);
+                var tmp = jxlate.ui.convertText(textarea.value, base, 2);
+                tmp = jxlate.ui.toolbox.invertbits(tmp);
+                textarea.value = jxlate.ui.convertText(tmp, 2, base);
             },
             action_greverse: function () {
-                this.textarea.value = this.textarea.value.split("").reverse().join("").split(" ").reverse().join(" ");
+                jxlate.ui.toolbox.textarea.value = jxlate.ui.toolbox.textarea.value.split("").reverse().join("").split(" ").reverse().join(" ");
             },
             action_stripspaces: function () {
                 //TODO: operate on existing value instead of re-reading
-                this.textarea.value = jxlate.formatter.replaceAll(" ", "", this.textarea.value);
-                this.textarea.value = jxlate.formatter.replaceAll("\t", "", this.textarea.value);
-                this.textarea.value = jxlate.formatter.replaceAll("\r", "", this.textarea.value);
-                this.textarea.value = jxlate.formatter.replaceAll("\n", "", this.textarea.value);
+                var textarea = jxlate.ui.toolbox.textarea;
+                var text = textarea.value;
+                text = jxlate.formatter.replaceAll(" ", "", text);//TODO: prefer chaining
+                text = jxlate.formatter.replaceAll("\t", "", text);
+                text = jxlate.formatter.replaceAll("\r", "", text);
+                text = jxlate.formatter.replaceAll("\n", "", text);
             }
         },
 //==============================================
 
 
         strippedlen: function (str) {
-            str = jxlate.formatter.replaceAll(" ", "", str);
+            str = jxlate.formatter.replaceAll(" ", "", str);//TODO: prefer chaining
             str = jxlate.formatter.replaceAll("\t", "", str);
             str = jxlate.formatter.replaceAll("\r", "", str);
             str = jxlate.formatter.replaceAll("\n", "", str);
@@ -175,7 +179,7 @@ if (typeof jxlate.ui === "undefined") {
         },
 
         invertbits: function (str) {
-            str = jxlate.formatter.replaceAll("0", "X", str);
+            str = jxlate.formatter.replaceAll("0", "X", str);//TODO: prefer chaining
             str = jxlate.formatter.replaceAll("1", "Y", str);
             str = jxlate.formatter.replaceAll("X", "1", str);
             str = jxlate.formatter.replaceAll("Y", "0", str);
