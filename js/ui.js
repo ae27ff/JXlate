@@ -35,6 +35,57 @@ jxlate.ui = {
 //var mode_names=['Text','Morse','Binary','Octal','Decimal','Hexadecimal','Base32Rfc','Base32Hex','Base32Ckr','Base64','Ascii85','UrlEncode'];//unused array
 
     /**
+     * Gets the input text of the UI form (textarea content)
+     * @return {String}
+     */
+    getInputText:function(){
+        return this.textarea.value;
+    },
+    
+    /**
+     * Gets the input text of the UI form (textarea content)
+     * @param {String} text
+     * @return {undefined}
+     */
+    setInputText:function(text){
+        this.textarea.value=text;
+    },
+    
+    /**
+     * Gets the currently selected data mode as a base/numeral system value.
+     * @return {String|number} the base currently selected
+     */
+    getSelectedBase:function(){
+        return this.mode_bases[this.mode];
+    },
+    
+    /**
+     * Get the input data of the UI form (textarea content) as converted to an array of decimal values.
+     * @return {Array} the array of decimal values
+     */
+    getInputAsDecimalArray:function(){
+        var text = this.getInputText();
+        var baseFrom = this.getSelectedBase();
+        var a = jxlate.formatter.input2buffer(text, baseFrom);
+        return jxlate.translator.array_base2base(a, baseFrom, 10);
+    },
+    
+    /**
+     * Set the input from an array of decimal values converted back into the given base
+     * @param {type} arr the array of decimal values
+     * @param {type} baseTo the base to display the data in
+     * @return {undefined}
+     */
+    setInputFromDecimalArray:function(arr,baseTo){
+        var a = jxlate.translator.array_base2base(arr, 10, baseTo);
+        var text = jxlate.formatter.buffer2output(a, baseTo);
+        this.setInputText(text);
+    },
+    
+    
+    
+
+    /**
      * Converts human-readable input data from a given base to a character (byte) string without further formatting.
      * @param {String} s The input data
      * @param {String|number} baseFrom the base value / numeral system to convert to
