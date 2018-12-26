@@ -131,7 +131,7 @@ if (typeof jxlate === "undefined") {
                 for (var i = 0, length = radios.length; i < length; i++)//find the current selected radio input
                     if (radios[i].checked) {
                         //console.log("i="+i);
-                        target = jxlate.ui.modp(i - delta, jxlate.ui.mode_bases.length);
+                        target = jxlate.util.modp(i - delta, jxlate.ui.mode_bases.length);
                         radios[i].checked = false;//target the (current-scrollclicks) radio, in visual order.
                     }
                 //console.log(target);
