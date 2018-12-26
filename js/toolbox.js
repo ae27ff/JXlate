@@ -62,7 +62,7 @@ if (typeof jxlate.ui === "undefined") {
                 this.hide();
             else
                 this.show();
-            this.shown = !shown;
+            this.shown = !this.shown;
         },
 
         setpos: function (x, y) {
@@ -108,18 +108,18 @@ if (typeof jxlate.ui === "undefined") {
             var replace = prompt("Enter the string to replace with", "");
             if (replace === null)
                 return;
-            this.textarea.value = replaceAll(search, replace, this.textarea.value);
+            this.textarea.value = jxlate.formatter.replaceAll(search, replace, this.textarea.value);
         },
         action_case: function () {
             if (this.lettercase)
                 this.textarea.value = this.textarea.value.toUpperCase();
             else
                 this.textarea.value = this.textarea.value.toLowerCase();
-            lettercase = !lettercase;
+            this.lettercase = !this.lettercase;
         },
         action_length: function () {
             var l = this.textarea.value.length;
-            var sl = strippedlen(this.textarea.value);
+            var sl = this.strippedlen(this.textarea.value);
             var out = "Total length: " + l;
             var base = jxlate.translator.mode_bases[jxlate.ui.mode];
             if (base === 2) {
@@ -132,7 +132,7 @@ if (typeof jxlate.ui === "undefined") {
             alert(out);
         },
         action_reverse: function () {
-            this.textarea.value = reverse(this.textarea.value);
+            this.textarea.value = this.textarea.value.reverse();
         },
         action_shift: function () {
             var shift = prompt("Please enter the caesar shift value", "13");
@@ -145,10 +145,10 @@ if (typeof jxlate.ui === "undefined") {
         },
 
         action_invert: function () {//NOTE: uses 'mode' and 'mode_bases' global from ui.js
-            var base = this.mode_bases[mode];
-            var tmp = xlate_text(this.textarea.value, base, 2);
+            var base = jxlate.ui.mode_bases[jxlate.ui.mode];
+            var tmp = jxlate.ui.convertText(this.textarea.value, base, 2);
             tmp = this.invertbits(tmp);
-            this.textarea.value = xlate_text(tmp, 2, base);
+            this.textarea.value = jxlate.ui.convertText(tmp, 2, base);
         },
         action_greverse: function () {
             this.textarea.value = this.textarea.value.split("").reverse().join("").split(" ").reverse().join(" ");
