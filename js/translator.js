@@ -58,7 +58,7 @@ if (typeof jxlate === "undefined") {
             }
             if (toEncoded) {//if the input is due to be translated to another base, let's do it here.
                 a = this.array_base2base(a, baseFrom, 256);//translate the array into char values if it isn't already.
-                s = a.join("")
+                s = a.join("");
                 if (baseTo === 64)
                     a = [btoa(s)];
                 else if (baseTo === "ue")
