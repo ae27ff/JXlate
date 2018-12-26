@@ -124,7 +124,7 @@ if (typeof jxlate === "undefined") {
 
         MouseWheelHandler: function (e) {//handle scrollwheel events
             // cross-browser wheel delta
-            var e = window.event || e; // old IE support
+            var e = window.event || e; // old IE support - this looks like an error though...
             var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));//calculate the number of steps the wheel has moved. (signed for direction)
 
             var target = -1;
@@ -137,9 +137,9 @@ if (typeof jxlate === "undefined") {
                 }
             //console.log(target);
 
-            for (var i = 0, length = radios.length; i < length; i++)//find the targetted radio input and check it (will force a mode change and translation)
-                if (i === target)
-                    radios[i].checked = true;
+            for (var j = 0, length = radios.length; j < length; j++)//find the targetted radio input and check it (will force a mode change and translation)
+                if (j === target)
+                    radios[j].checked = true;
 
 
 
