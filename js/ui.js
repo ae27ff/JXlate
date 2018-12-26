@@ -68,12 +68,11 @@ if (typeof jxlate === "undefined") {
 
             var options = document.getElementById("options");
             if (options.addEventListener) {// add a listener for scrolling over the mode selector - allowing easier conversion
-                options.addEventListener("mousewheel", this.MouseWheelHandler, false);// IE9, Chrome, Safari, Opera
-                options.addEventListener("DOMMouseScroll", this.MouseWheelHandler, false);// Firefox
+                options.addEventListener("mousewheel", this.events.MouseWheelHandler, false);// IE9, Chrome, Safari, Opera
+                options.addEventListener("DOMMouseScroll", this.events.MouseWheelHandler, false);// Firefox
             } else
-                options.attachEvent("onmousewheel", MouseWheelHandler);// IE 6/7/8
+                options.attachEvent("onmousewheel", this.events.MouseWheelHandler);// IE 6/7/8
 
-            //TODO: Check if toolbox ready
             if(typeof this.toolbox === null){
                 console.error("UI Toolbox module was not ready - the toolbox will not function properly.");
                 
@@ -85,8 +84,8 @@ if (typeof jxlate === "undefined") {
                 this.toolbox.addtooln(3);
                 this.toolbox.addtooln(4);
             }
-
-            setInterval(this.pollRadioBox, 100);//poll the radio selector for changes, using an event for this has some issues between browsers.
+            
+            setInterval(this.events.pollRadioBox, 100);//poll the radio selector for changes, using an event for this has some issues between browsers.
             
         },
 
@@ -97,66 +96,67 @@ if (typeof jxlate === "undefined") {
                     return radios[i].value;
             return undefined;
         },
-        pollRadioBox: function () {//poll the UI for mode radio-box changes.
-            //called by event - restrict everything to static references.
-            var newmode = jxlate.ui.getCheckedRadioValue("mode");
-            if (newmode !== jxlate.ui.mode) {//check if the selected radio button has been changed
-                console.log("changed! " + jxlate.ui.mode + "->" + newmode);
-                var oldmode = jxlate.ui.mode;
-                jxlate.ui.mode = newmode;//change the current mode value.
-                if (jxlate.ui.isTextMode(oldmode) && jxlate.ui.isTextMode(newmode)) {
-                    console.log('text to text conversion has been deprecated. performing no action');
-                    return;
+        
+        events:{
+            pollRadioBox: function () {//poll the UI for mode radio-box changes.
+                //called by event - restrict everything to static references.
+                var newmode = jxlate.ui.getCheckedRadioValue("mode");
+                if (newmode !== jxlate.ui.mode) {//check if the selected radio button has been changed
+                    console.log("changed! " + jxlate.ui.mode + "->" + newmode);
+                    var oldmode = jxlate.ui.mode;
+                    jxlate.ui.mode = newmode;//change the current mode value.
+                    if (jxlate.ui.isTextMode(oldmode) && jxlate.ui.isTextMode(newmode)) {
+                        console.log('text to text conversion has been deprecated. performing no action');
+                        return;
+                    }
+                    try {
+                        jxlate.ui.switchMode(oldmode, newmode);//trigger a translation
+                    } catch (e) {
+                        jxlate.ui.setModeState(oldmode);
+                        console.log(e);
+                        if (e !== "no entry")
+                            alert("This value could not be converted as specified.\nPlease make sure it is valid.\n\n"
+                                    + "Technical Reason: \n" + "   " + e
+                                    );
+                    }
+                    console.log("conversion complete");
                 }
-                try {
-                    jxlate.ui.switchMode(oldmode, newmode);//trigger a translation
-                } catch (e) {
-                    jxlate.ui.setModeState(oldmode);
-                    console.log(e);
-                    if (e !== "no entry")
-                        alert("This value could not be converted as specified.\nPlease make sure it is valid.\n\n"
-                                + "Technical Reason: \n" + "   " + e
-                                );
-                }
-                console.log("conversion complete");
+            },
+            MouseWheelHandler: function (e) {//handle scrollwheel events
+                // cross-browser wheel delta
+                var e = window.event || e; // old IE support - this looks like an error though...
+                var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));//calculate the number of steps the wheel has moved. (signed for direction)
+
+                var target = -1;
+                var radios = document.getElementsByName("mode");
+                for (var i = 0, length = radios.length; i < length; i++)//find the current selected radio input
+                    if (radios[i].checked) {
+                        //console.log("i="+i);
+                        target = jxlate.ui.modp(i - delta, jxlate.ui.mode_bases.length);
+                        radios[i].checked = false;//target the (current-scrollclicks) radio, in visual order.
+                    }
+                //console.log(target);
+
+                for (var j = 0, lengthj = radios.length; j < lengthj; j++)//find the targetted radio input and check it (will force a mode change and translation)
+                    if (j === target)
+                        radios[j].checked = true;
+
+
+
+                return false;
+
+            },
+            iso8859info: function () {
+                alert("This mode displays ISO-8859-1 (Latin-1) text - single bytes 00-FF (256)\n" +
+                        "If you input unicode into this mode, it will be interpreted as two bytes.\n" +
+                        "Use UCS-2 (Unicode code point values) or UTF-8 modes instead for unicode."
+                        );
             }
-        },
-
-        MouseWheelHandler: function (e) {//handle scrollwheel events
-            // cross-browser wheel delta
-            var e = window.event || e; // old IE support - this looks like an error though...
-            var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));//calculate the number of steps the wheel has moved. (signed for direction)
-
-            var target = -1;
-            var radios = document.getElementsByName("mode");
-            for (var i = 0, length = radios.length; i < length; i++)//find the current selected radio input
-                if (radios[i].checked) {
-                    //console.log("i="+i);
-                    target = jxlate.ui.modp(i - delta, jxlate.ui.mode_bases.length);
-                    radios[i].checked = false;//target the (current-scrollclicks) radio, in visual order.
-                }
-            //console.log(target);
-
-            for (var j = 0, lengthj = radios.length; j < lengthj; j++)//find the targetted radio input and check it (will force a mode change and translation)
-                if (j === target)
-                    radios[j].checked = true;
-
-
-
-            return false;
-
         },
         modp: function (n, d) {//modulo that causes smaller negatives (|n|<d) to count from the righthand side (max value) instead of the stock behavior.
             while (n < 0)
                 n += d;
             return (n % d);
-        },
-
-        iso8859info: function () {
-            alert("This mode displays ISO-8859-1 (Latin-1) text - single bytes 00-FF (256)\n" +
-                    "If you input unicode into this mode, it will be interpreted as two bytes.\n" +
-                    "Use UCS-2 (Unicode code point values) or UTF-8 modes instead for unicode."
-                    );
         },
         setModeState: function (i) {
             //called by event - only use static references.
