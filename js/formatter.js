@@ -76,7 +76,7 @@ if (typeof jxlate === "undefined") {
         strstripnongraph:function(s) {//remove non-graphing chars.
             var out = "";
             for (var i = 0; i < s.length; i++) {
-                a = s.charCodeAt(i);
+                var a = s.charCodeAt(i);
                 if (this.isGraphable(a))
                     out += s.substr(i, 1);
                 else
