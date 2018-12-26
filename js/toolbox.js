@@ -1,5 +1,3 @@
-if (typeof addcredits === 'function')
-    addcredits("toolbox.js", 1.0, "crashdemons", "Text formatting tools");
 
 if (typeof jxlate.ui === "undefined") {
     var jxlate={};//suppress warnings

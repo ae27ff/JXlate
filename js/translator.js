@@ -1,5 +1,3 @@
-if (typeof addcredits === 'function')
-    addcredits("xlate.js", 11, "crashdemons", "Binary Translation library for numeral systems (extensions added for encoding libraries)");
 
 if (typeof jxlate === "undefined") {
     console.error("JXlate module loaded before core.");

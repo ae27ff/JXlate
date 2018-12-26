@@ -3,7 +3,6 @@
 // Code was written by Tyler Akins and is placed in the public domain
 // It would be nice if you left this header.  http://rumkin.com
 
-if(typeof addcredits  === 'function') addcredits("util.js",2014,"Tyler Akins","Utility functions");
 
 // Remove whitespace from beginning and end of text
 function Trim(s)

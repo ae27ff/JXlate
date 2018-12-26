@@ -1,7 +1,5 @@
-if (typeof addcredits === 'function')
-    addcredits("unicode.js", 1, "crashdemons", "Character encoding conversion functions");
-
-//NOTE - Javascript escape() internally uses UCS-2 (unicode code points 0000-FFFF)
+//poor coding by crashdemons
+////NOTE - Javascript escape() internally uses UCS-2 (unicode code points 0000-FFFF)
 //UTF-16 handles values over FFFF as does UTF-8
 
 //ISO88591  256

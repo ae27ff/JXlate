@@ -1,5 +1,3 @@
-if (typeof addcredits === 'function')
-    addcredits("xlate.format.js", 12, "crashdemons", "Numeral System formatting functions");
 
 if (typeof jxlate === "undefined") {
     console.error("JXlate module loaded before core.");

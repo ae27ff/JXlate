@@ -1,5 +1,4 @@
-if (typeof addcredits === 'function')
-    addcredits("morse.js", 2, "crashdemons", "Morse code translator functions");
+//poor coding by crashdemons
 
 var morse_cs = " ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";//morse code charset
 //array of mose-code versions of the above.

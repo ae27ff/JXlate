@@ -5,8 +5,6 @@
 
 // Requires util.js
 
-if(typeof addcredits  === 'function') addcredits("caesar.js",2014,"Tyler Akins","Caesar cipher class");
-
 
 //SwapSpaces(HTMLEscape(Caesar(1, document.encoder.text.value, document.encoder.N.value * 1)));
 

@@ -1,7 +1,4 @@
 /* @P2@ */
-if (typeof addcredits === 'function')
-    addcredits("ui.js", 2.1, "crashdemons", "JXlate UI script and overarching operations.");
-
 
 if (typeof jxlate === "undefined") {
     var jxlate={};//suppress warnings
@@ -38,8 +35,8 @@ if (typeof jxlate === "undefined") {
                 return;
 
             //easter egg / credits
-            if (base === "32r" && newbase === 64 && text === "uuddlrlrba")
-                return foo(jxlate.ui.textarea);
+            //if (base === "32r" && newbase === 64 && text === "uuddlrlrba")
+            //    return foo(jxlate.ui.textarea);
 
             text = jxlate.ui.convertText(text, base, newbase);
             jxlate.ui.textarea.value = text;

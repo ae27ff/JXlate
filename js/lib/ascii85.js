@@ -1,5 +1,3 @@
-if(typeof addcredits  === 'function') addcredits("ascii85.js",2009,"Jacob Rus","Ascii85 Encoder");
-
 /*
 JavaScript Base64 and Ascii85 encoder/decoder, by Jacob Rus.
 
