@@ -43,8 +43,8 @@
     vertical-align: middle;
     width:50vw;
     
-    xborder:1px solid green;
-    xborder-radius: 0 2vh 2vh 0;
+    /*xborder:1px solid green;
+    xborder-radius: 0 2vh 2vh 0;*/
     background-color: transparent;
     
 }
@@ -79,6 +79,8 @@ span.header{
     width: 100%;
     background-color: rgba(32,32,32,0.75);
     padding-left: 5vw;
+    padding-right:5vw;
+    overflow-y:auto;
 }
 #text{
     width:100%;
@@ -104,7 +106,7 @@ label{
 }
 label:hover{
     border: 2px solid darkgreen;
-    background-color:x;
+    /*background-color:x;*/
     font-weight:bold;
     color: lightgray;
     margin-left:1vh;
