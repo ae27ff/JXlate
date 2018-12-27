@@ -1,0 +1,89 @@
+/* 
+    Created on : Dec 27, 2018, 8:06:51 AM
+    Author     : crashdemons (crashenator at gmail.com)
+*/
+
+.bw{
+    background-color:green;
+}
+
+
+* {
+    box-sizing: border-box;
+    border:0;
+    margin:0;
+    padding:0;
+}
+
+.lite-menu{
+    position: fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:10vh;
+    display:inline-block;
+    line-height:0;
+    overflow:hidden;
+    
+    background-color: #1F1F1F;
+}
+.lite-menu-left{
+    top:0;
+    left:0;
+    height:10vh;
+    width:10vh;
+    vertical-align: middle;
+    
+    background-color: #3F3F3F;
+    border:1px solid black;
+    border-radius: 1vh;
+}
+.lite-menu-right{
+    display: inline-block;
+    vertical-align: middle;
+    width:50vw;
+    
+    xborder:1px solid green;
+    xborder-radius: 0 2vh 2vh 0;
+    background-color: transparent;
+    
+}
+span.header{
+    font-size:3vh;
+}
+#old-header-title{
+    display:none;
+}
+
+
+#sidebar,#tbox,#text{
+    position:fixed;
+    top:10vh;
+    left:0;
+    padding:0;
+}
+#sidebar{
+    z-index:10;
+    display:none;
+    width: 100%;
+    background-color: rgba(32,32,32,0.75);
+    padding-left: 5vw;
+}
+#tbox{
+    z-index:20;
+    display:none;
+    width: 100%;
+    background-color: rgba(32,32,32,0.75);
+    padding-left: 5vw;
+}
+#text{
+    width:100%;
+    height:100%;
+    resize: none;
+}
+
+#text{
+    right:0px;
+    bottom:0px;
+    width:100%;
+}

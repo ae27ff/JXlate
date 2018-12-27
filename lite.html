@@ -6,8 +6,9 @@
         <meta name="description" content="JXlate - multibase data translator page">
         <meta name="keywords" content="JXlate,Xlate,translate,binary,decimal,octal,hexadecimal,base64,base32,ascii85,morse code,caesar shift">
         <meta name="author" content="crashdemons">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" type="text/css" href="css/jxlate.css">
-        <link rel="stylesheet" type="text/css" href="css/desktop.css">
+        <link rel="stylesheet" type="text/css" href="css/lite.css">
 
         <script src="js/lib/rumkin-util.js"></script>
         <script src="js/lib/ascii85.js"></script>
@@ -22,22 +23,27 @@
         <script src="js/translator.js"></script>
         <script src="js/ui.js"></script>
         <script src="js/toolbox.js"></script>
+        <script src="js/litemenu.js"></script>
 
         <script src="/ga.js"></script>
 
         <script>
             document.addEventListener("DOMContentLoaded", function (event) {
-                jxlate.ui.display='desktop';
+                jxlate.ui.display='lite';
+                jxlate.ui.litemenu.init();
                 jxlate.init();
             });
         </script>
     </head>
     <body class="monospace bw">
-
+        <div class="lite-menu"><!-- 
+            --><img class="lite-menu-left" src="img/menu.png" alt="Menu" onclick="jxlate.ui.litemenu.events.toggle()" /><!-- 
+            --><span class="lite-menu-right header" id="header-title">JXLate</span><!-- 
+        --></div>
         <form action="#" id="frmInput">
             <div id="sidebar">
                 <ul class="options" id="options">
-                    <li class="header" id="header-title">JXlate</li>
+                    <li class="header" id="old-header-title">OldHead</li>
                     <li><input type="radio" name="mode" value="0" id="rad0" checked><label for="rad0">
                             Text <span class="info">(<a href="#" class="infolink" onclick="jxlate.ui.events.iso8859info()">L1</a>)</span>
                         </label></li>
@@ -57,7 +63,7 @@
                     <li><input type="radio" name="mode" value="14" id="rad14"><label for="rad14">Radix-N</label></li>
                 </ul>
                 <div id="border"></div>
-                <div class="toolopen"><img src="img/tools.png" onclick="jxlate.ui.toolbox.events.toggle()" alt="tools" title="text tools"></div>
+                <div class="toolopen"><img src="img/tools.png" onclick="jxlate.ui.litemenu.events.toggleToolbox()" alt="tools" title="text tools"></div>
             </div>
             <textarea name="text" spellcheck="false" wrap="hard" placeholder="Enter your data here" class="grey" id="text" cols="32"></textarea>
         </form>

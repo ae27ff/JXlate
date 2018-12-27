@@ -1,0 +1,24 @@
+html,body { margin: 0;}
+.monospace{
+    font-family: "Courier New", "Lucida Console", Courier, monospace, Monaco;
+}
+.bw{
+    background-color: black; color:#FFFFFF;
+}
+.grey{
+    background-color:#0F0F0F; color:#00FF00;
+}
+.infolink{
+    /* text-decoration: underline; */
+    /* border-bottom: 1px dotted white; */
+    color: gray;
+
+}
+.info{
+    font-weight: normal;
+    text-decoration:none;
+}
+
+ul.options{list-style-type: none; padding:0px; margin:0px;}
+
+.header{ font-family:Candara; background-color: #3F3F3F; font-weight:bold; text-align:center; }

@@ -20,6 +20,14 @@ jxlate.ui = {
      * @type {undefined}
      */
     textarea: null,
+    
+    /**
+     * Defines the type of layout displayed by the UI.
+     * 
+     * Currently this can be "desktop" or "lite", or null if not correctly set.
+     * @type {String|null}
+     */
+    display:null,
 
     /**
      * Property indicating the current mode value, respresenting the numeral system/base of the data being entered or converted to.
@@ -184,7 +192,7 @@ jxlate.ui = {
 
         setInterval(this.events.pollRadioBox, 100);//poll the radio selector for changes, using an event for this has some issues between browsers.
 
-        var heading = document.getElementById("header");
+        var heading = document.getElementById("header-title");
         heading.innerHTML = heading.innerHTML + " " + jxlate.version;
     },
 
