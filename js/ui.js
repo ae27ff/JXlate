@@ -195,9 +195,14 @@ jxlate.ui = {
         setInterval(this.events.pollRadioBox, 100);//poll the radio selector for changes, using an event for this has some issues between browsers.
 
         var heading = null;
-        if(this.display==="lite") heading = document.getElementById("header-title");
-        else heading = document.getElementById("old-header-title");
-        heading.innerHTML = heading.innerHTML + " " + jxlate.version;
+        if(this.display==="lite"){ 
+            heading = document.getElementById("header-title");
+            heading.innerHTML="JXlite "+ jxlate.version;;
+        }
+        else{
+            heading = document.getElementById("old-header-title");
+            heading.innerHTML="JXlate "+ jxlate.version;;
+        }
     },
 
     /**
