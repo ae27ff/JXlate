@@ -34,7 +34,7 @@ function ucs2_to_iso88591(s) {
 }
 function iso88591_to_ucs2(s) {
     var hex = jxlate.ui.convertText(s, 256, 16);
-    hex = jxlate.formatter.replaceAll(" ", "", hex);
+    hex = hex.replaceAll(" ", "");
     var esc = "";
     for (var i = 0; i < hex.length; i += 4) {
         var uh = hex.substr(i, 4);
