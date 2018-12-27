@@ -172,11 +172,13 @@ jxlate.ui = {
         }
 
         var options = document.getElementById("options");
-        if (options.addEventListener) {// add a listener for scrolling over the mode selector - allowing easier conversion
-            options.addEventListener("mousewheel", this.events.MouseWheelHandler, false);// IE9, Chrome, Safari, Opera
-            options.addEventListener("DOMMouseScroll", this.events.MouseWheelHandler, false);// Firefox
-        } else
-            options.attachEvent("onmousewheel", this.events.MouseWheelHandler);// IE 6/7/8
+        if(this.display!=="lite"){
+            if (options.addEventListener) {// add a listener for scrolling over the mode selector - allowing easier conversion
+                options.addEventListener("mousewheel", this.events.MouseWheelHandler, false);// IE9, Chrome, Safari, Opera
+                options.addEventListener("DOMMouseScroll", this.events.MouseWheelHandler, false);// Firefox
+            } else
+                options.attachEvent("onmousewheel", this.events.MouseWheelHandler);// IE 6/7/8
+        }
 
         if (typeof this.toolbox === null) {
             console.error("UI Toolbox module was not ready - the toolbox will not function properly.");
