@@ -9,6 +9,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" type="text/css" href="css/jxlate.css">
         <link rel="stylesheet" type="text/css" href="css/desktop.css">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
 
         <script src="js/lib/rumkin-util.js"></script>
         <script src="js/lib/ascii85.js"></script>
@@ -61,7 +62,7 @@
                     <li><input type="radio" name="mode" value="14" id="rad14"><label for="rad14">Radix-N</label></li>
                 </ul>
                 <div id="border"></div>
-                <div class="toolopen"><img src="img/tools.png" onclick="jxlate.ui.toolbox.events.toggle()" alt="tools" title="text tools"></div>
+                <div class="toolopen" onclick="jxlate.ui.toolbox.events.toggle()"><i class="fas fa-tools"></i></div>
             </div>
             <textarea name="text" spellcheck="false" wrap="hard" placeholder="Enter your data here" class="grey" id="text" cols="32"></textarea>
         </form>

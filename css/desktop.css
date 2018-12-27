@@ -26,7 +26,19 @@ html,body {height: 100%;width: 100%;  overflow: hidden; }
     color: #00FF00;
 }
 
-
+.fa,.far,.fas,.tltx{
+    font-size:42px;
+}
+div.tool{
+    min-height:48px;
+    min-width:48px;
+    text-align:center;
+    color:black;
+}
+div.toolopen{
+    text-align:center;
+    color:black;
+}
 
 #border {
     border-top:0;

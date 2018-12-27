@@ -16,16 +16,16 @@ jxlate.ui.toolbox = {
      * @type {Array}
      */
     tools: [
-        ['replace', 'Replace one phrase with another'],
-        ['case', 'Toggle letter case'],
-        ['length', 'Find the total length'],
-        ['reverse', 'Reverse all characters'],
-        ['shift', 'Apply Caesar shift'],
-        ['invert', 'Invert bit values'],
-        ['greverse', 'Reverse groupings only'],
-        ['stripspaces', 'Remove spaces'],
-        ['xor', 'XOR each byte against a number'],
-        ['byteshift','Shift each byte value by some amount']
+        ['replace', 'Replace one phrase with another','<i class="fas fa-sync"></i>'],
+        ['case', 'Toggle letter case','<span class="tltx">aA</span>'],
+        ['length', 'Find the total length','<i class="fas fa-ruler"></i>'],
+        ['reverse', 'Reverse all characters','<i class="fas fa-arrow-left"></i>'],
+        ['shift', 'Apply Caesar shift','<i class="fas fa-sort-alpha-up"></i>'],
+        ['invert', 'Invert bit values','<span class="tltx">10</span>'],
+        ['greverse', 'Reverse groupings only','<span class="tltx">GR</span>'],
+        ['stripspaces', 'Remove spaces','<span class="tltx">_</span>'],
+        ['xor', 'XOR each byte against a number','<i class="fas fa-plus-circle"></i>'],
+        ['byteshift','Shift each byte value by some amount','<i class="fas fa-sort-numeric-up"></i>']
     ],
 
     /**
@@ -127,7 +127,7 @@ jxlate.ui.toolbox = {
      * @return {undefined}
      */
     addtooln: function (i) {
-        this.addtool(this.tools[i][0], this.tools[i][1]);
+        this.addtool(this.tools[i][0], this.tools[i][1], this.tools[i][2]);
     },
     
     /** Adds a tool option [visually] to the toolbox element.
@@ -139,17 +139,18 @@ jxlate.ui.toolbox = {
      * @param {type} sdesc the description of the tool
      * @return {undefined}
      */
-    addtool: function (sname, sdesc) {
+    addtool: function (sname, sdesc, sdisp) {
         var sfunc = "jxlate.ui.toolbox.events.action_" + sname;
 
         var tool = document.createElement("div");
         tool.className = "tool";
 
-        var img = document.createElement("img");
-        img.title = sdesc;
-        img.alt = sname;
-        img.src = "img/" + sname + ".png";
-        img.style.borderStyle = "none";
+        var img = document.createElement("div");
+        //img.title = sdesc;
+        //img.alt = sname;
+        //img.src = "img/" + sname + ".png";
+        //img.style.borderStyle = "none";
+        img.innerHTML = sdisp;
         tool.onclick = (function(sfunc){
             return function(){
                 eval(sfunc)();
