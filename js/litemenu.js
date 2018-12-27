@@ -27,6 +27,7 @@ jxlate.ui.litemenu={
     close:function(){
         jxlate.ui.toolbox.events.hide();
         this.sidebar.style.display = 'none';
+        jxlate.ui.textarea.focus();
         this.opened=false;
     },
     closeParent:function(){

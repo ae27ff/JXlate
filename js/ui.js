@@ -142,7 +142,7 @@ jxlate.ui = {
 
         text = jxlate.ui.convertText(text, base, newbase);
         jxlate.ui.textarea.value = text;
-        jxlate.ui.textarea.focus();
+        if(jxlate.ui.display!=="lite") jxlate.ui.textarea.focus();
 
     },
 
