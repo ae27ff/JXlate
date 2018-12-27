@@ -127,6 +127,8 @@ div.toolopen{
 }
 div.tool img, div.toolopen img{
     vertical-align:middle;
+    max-width:48px;
+    max-height:48px;
 }
 .lite-tool-description{
     color: #0f0f0f;
