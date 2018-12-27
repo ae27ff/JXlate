@@ -8,10 +8,12 @@ if (typeof jxlate.ui === "undefined") {
 jxlate.ui.litemenu={
     sidebar:null,
     options:null,
+    button:null,
     opened:false,
     init:function(){
         this.sidebar=document.getElementById("sidebar");
         this.options=document.getElementById("options");
+        this.button=document.getElementById("lite-menu-button");
         this.createToolboxLabel(document.getElementsByClassName("toolopen")[0]);
     },
     createToolboxLabel:function(tool_div){
@@ -33,11 +35,13 @@ jxlate.ui.litemenu={
     },
     open:function(){
         this.showOptions();
+        this.button.style.backgroundColor="#002710";//#3F3F3F
         this.sidebar.style.display = 'block';
         this.opened=true;
     },
     close:function(){
         jxlate.ui.toolbox.events.hide();
+        this.button.style.backgroundColor="#3F3F3F";//#3F3F3F
         this.sidebar.style.display = 'none';
         jxlate.ui.textarea.focus();
         this.opened=false;
