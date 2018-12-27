@@ -71,6 +71,7 @@ span.header{
     background-color: rgba(32,32,32,0.5);
     padding-left: 5vw;
     padding-right:5vw;
+    overflow-y:auto;
 }
 #tbox{
     z-index:20;
