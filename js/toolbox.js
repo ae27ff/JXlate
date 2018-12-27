@@ -150,8 +150,13 @@ jxlate.ui.toolbox = {
         img.alt = sname;
         img.src = "img/" + sname + ".png";
         img.style.borderStyle = "none";
-        img.onclick = eval(sfunc);
-
+        tool.onclick = (function(sfunc){
+            return function(){
+                eval(sfunc)();
+                if(jxlate.ui.display==="lite") jxlate.ui.litemenu.close();//close menu after clicking action.
+            };
+        })(sfunc);
+              
         this.tbox.appendChild(tool);
         tool.appendChild(img);
     },

@@ -50,6 +50,7 @@
 }
 span.header{
     font-size:3vh;
+    line-height:3vh;
 }
 #old-header-title{
     display:none;
@@ -61,13 +62,15 @@ span.header{
     top:10vh;
     left:0;
     padding:0;
+    bottom:0;
 }
 #sidebar{
     z-index:10;
     display:none;
     width: 100%;
-    background-color: rgba(32,32,32,0.75);
+    background-color: rgba(32,32,32,0.5);
     padding-left: 5vw;
+    padding-right:5vw;
 }
 #tbox{
     z-index:20;
@@ -86,4 +89,44 @@ span.header{
     right:0px;
     bottom:0px;
     width:100%;
+}
+
+label{
+    display:block;
+    background-color: #0f0f0f;
+    border: 2px solid black;
+    margin-bottom:3px;
+    color: #3f3f3f;
+    transition: margin-left 0.25s;
+    transition: background-color 0.25s;
+    opacity: 0.75;
+}
+label:hover{
+    border: 2px solid darkgreen;
+    background-color:x;
+    font-weight:bold;
+    color: lightgray;
+    margin-left:1vh;
+}
+input[type=radio]:checked + label{
+    background-color: #000f00;
+    color:red;
+    font-weight:bold;
+    margin-left:-1vh;
+}
+
+
+input[type=radio]{ opacity: 0.0; position:absolute; left:-9999px; top:-9999px; } /* hide the default radio button checkbox */
+
+
+div.toolopen{
+    right:1vh;
+}
+div.tool img, div.toolopen img{
+    vertical-align:middle;
+}
+.lite-tool-description{
+    color: #0f0f0f;
+    font-weight: bold;
+    text-transform: capitalize;
 }

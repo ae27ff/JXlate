@@ -12,6 +12,18 @@ jxlate.ui.litemenu={
     init:function(){
         this.sidebar=document.getElementById("sidebar");
         this.options=document.getElementById("options");
+        this.createToolboxLabel(document.getElementsByClassName("toolopen")[0]);
+    },
+    createToolboxLabel:function(tool_div){
+        var tool_img=tool_div.firstChild;
+        if(tool_div.children.length > 1) return;
+        tool_div.innerHTML=tool_div.innerHTML+'<span class="lite-tool-description">'+tool_img.title+'</span>';
+        tool_img.title="";
+    },
+    createToolboxLabels:function(){
+        var tool_items=document.getElementsByClassName("tool");
+        for(var i=0;i<tool_items.length;i++)
+            this.createToolboxLabel(tool_items[i]);
     },
     showOptions:function(){
         this.options.style.display = 'block';
@@ -40,7 +52,8 @@ jxlate.ui.litemenu={
     events:{
         toggle:function(){ jxlate.ui.litemenu.toggle(); },
         toggleToolbox:function(){
-            jxlate.ui.toolbox.events.toggle();
+            jxlate.ui.toolbox.events.show();
+            jxlate.ui.litemenu.createToolboxLabels();
             jxlate.ui.litemenu.closeParent();
         }
     }

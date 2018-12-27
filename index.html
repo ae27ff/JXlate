@@ -6,6 +6,7 @@
         <meta name="description" content="JXlate - multibase data translator page">
         <meta name="keywords" content="JXlate,Xlate,translate,binary,decimal,octal,hexadecimal,base64,base32,ascii85,morse code,caesar shift">
         <meta name="author" content="crashdemons">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" type="text/css" href="css/jxlate.css">
         <link rel="stylesheet" type="text/css" href="css/desktop.css">
 
@@ -33,13 +34,16 @@
         </script>
     </head>
     <body class="monospace bw">
-
+        <div class="lite-menu"><!-- 
+            --><img class="lite-menu-left" src="img/menu.png" alt="Menu" onclick="jxlate.ui.litemenu.events.toggle()" /><!-- 
+            --><span class="lite-menu-right header" id="header-title">JXLate</span><!-- 
+        --></div>
         <form action="#" id="frmInput">
             <div id="sidebar">
                 <ul class="options" id="options">
-                    <li class="header" id="header-title">JXlate</li>
-                    <li><input type="radio" name="mode" value="0" id="rad0" checked><label for="rad0">
-                            Text <span class="info">(<a href="#" class="infolink" onclick="jxlate.ui.events.iso8859info()">L1</a>)</span>
+                    <li class="header" id="old-header-title">JXlate</li>
+                    <li><input type="radio" name="mode" value="0" id="rad0" checked><label for="rad0"><!--
+                            -->Text <span class="info">(<a href="#" class="infolink" onclick="jxlate.ui.events.iso8859info()">L1</a>)</span>
                         </label></li>
                     <li><input type="radio" name="mode" value="12" id="rad12"><label for="rad12">Text (UCS2)</label></li>
                     <li><input type="radio" name="mode" value="13" id="rad13"><label for="rad13">Text (UTF8)</label></li>
