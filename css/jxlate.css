@@ -42,3 +42,8 @@ div.toolopen{
     border: 2px solid gray;
     margin: 5px 5px 5px 5px;
 }
+
+#branding-side{
+    margin: 5px 5px 5px 5px;
+    max-height:50px;
+}

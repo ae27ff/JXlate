@@ -203,6 +203,7 @@ jxlate.ui = {
             heading = document.getElementById("old-header-title");
             heading.innerHTML="JXlate "+ jxlate.version;;
         }
+        jxlate.branding.load("branding-side");
     },
 
     /**

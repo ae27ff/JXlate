@@ -34,6 +34,14 @@ var jxlate = {//we're not really going to polymorphism here, so we can do with a
      * @type {Object}
      */
     util: null,
+    
+    /**
+     * Property containing JXlate Branding module object, when available.
+     * By default, branding does not appear.
+     * @type {Object}
+     */
+    branding: null,
+    
     /**
      * Sets whether the UI module should be initialized during init - for use in projects without the main UI.
      * 
@@ -54,6 +62,7 @@ var jxlate = {//we're not really going to polymorphism here, so we can do with a
         this.util.init();
         this.formatter.init();
         this.translator.init();
+        this.branding.init();
         if(this.initializeUI) this.ui.init();
     }
 };
