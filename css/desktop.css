@@ -16,7 +16,7 @@ html,body {height: 100%;width: 100%;  overflow: hidden; }
 }
 
 #text {
-    width: calc(100% - 111px);
+    width: calc(100% - 112px);
     height: 100%;
     border: none;
     margin: 0;
