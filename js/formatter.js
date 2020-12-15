@@ -58,7 +58,6 @@ jxlate.formatter = {
      */
     buffer2output: function (a, base, formatHint) {
         if(typeof formatHint === "undefined") formatHint="";
-        console.log(base,formatHint);
         if (base == 256 || base === "ucs2" || base === "utf8") {
             return this.strstripnongraph(a.join(""));//do not display any special/control characters etc.
         } else if (base == 2) {
@@ -68,9 +67,7 @@ jxlate.formatter = {
             for (var j = 0; j < a.length; j++)
                 a[j] = this.padZeroes(a[j], 2);//make sure hex shows both 2 digits for each byte
             if(formatHint==="ucs2"){
-               s = a.join("").toUpperCase().replace(/\s/g, '').match(/.{1,4}/g).join(" ");
-               console.log(s)
-               return s;
+               return a.join("").toUpperCase().replace(/\s/g, '').match(/.{1,4}/g).join(" ");
             }
         } else if (base === "32r" || base === "32h" || base === "32c" || base == 64 || base == 85 || base === "mc" || base === "ue") {
             return a[0];//various encodings return a single item result.
