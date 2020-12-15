@@ -67,7 +67,7 @@ jxlate.formatter = {
             for (var j = 0; j < a.length; j++)
                 a[j] = this.padZeroes(a[j], 2);//make sure hex shows both 2 digits for each byte
             if(formatHint==="ucs2"){
-               return a.join("").toUpperCase().replace(/\s/g, '').match(/.{1,4}/g);
+               return a.join("").toUpperCase().replace(/\s/g, '').match(/.{1,4}/g).join(" ");
             }
         } else if (base === "32r" || base === "32h" || base === "32c" || base == 64 || base == 85 || base === "mc" || base === "ue") {
             return a[0];//various encodings return a single item result.
