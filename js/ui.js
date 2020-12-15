@@ -115,7 +115,7 @@ jxlate.ui = {
     convertText: function (s, baseFrom, baseTo) {//translate a string from one base to another
         var a = jxlate.formatter.input2buffer(s, baseFrom);//preformat the input into an array of units in that base
         a = jxlate.translator.array_base2base(a, baseFrom, baseTo);//process the array for conversion
-        return jxlate.formatter.buffer2output(a, baseTo);//postformat the output back into readable form.
+        return jxlate.formatter.buffer2output(a, baseTo, baseFrom);//postformat the output back into readable form.
     },
     
     /**
