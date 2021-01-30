@@ -126,8 +126,14 @@
                 },
                 charMap: {
                     0x00: "NUL",
-                    0x0d: "\\r",
-                    0x0a: "\\n"
+                    0x07: "BEL",
+                    0x08: "BS",
+                    0x09: "Tab",
+                    0x1B: "Esc",
+                    0xa0: "NBSP",
+                    0x0d: "CR",
+                    0x0a: "LF",
+                    0x7F: "Del"
                 },
                 cleanUnprintableChars: function (s) {
                     return s.replace(/[^\x20-\x7E\xA0-\xFF]/g, ".");
