@@ -7,15 +7,15 @@
             #txt{ width:300px; }
             #dec{ width:300px; }
             table{ display: inline-block; }
-            
+
             table, th, td {
                 border: 1px solid black;
-              }
-            
+            }
+
             td{ font-family: "Lucida Console", Monaco, monospace; }
         </style>
         <script>
-            
+
             //Polyfills for outdated browsers
             if (!String.prototype.trim) {
                 String.prototype.trim = function () {
@@ -25,18 +25,19 @@
             if (!Array.prototype.join) {
                 Array.prototype.join = function (delim) {
                     var out = "";
-                    for(var i=0;i<this.length;i++){
-                        if(out.length>0) out += delim;
+                    for (var i = 0; i < this.length; i++) {
+                        if (out.length > 0)
+                            out += delim;
                         out += this[i];
                     }
                     return out;
                 };
             }
-            
+
 
 
             var Operations = {
-                create:function(id,displayName,apply){
+                create: function (id, displayName, apply) {
                     return {
                         id: id,
                         displayName: displayName,
@@ -44,9 +45,9 @@
                     };
                 }
             }
-            
+
             var StringUtils = {
-                entityMap : {
+                entityMap: {
                     "&": "&amp;",
                     "<": "&lt;",
                     ">": "&gt;",
@@ -54,13 +55,15 @@
                     "'": '&#39;',
                     "/": '&#x2F;'
                 },
-                charMap : {
-                    0x00 : "NUL",
-                    0x0d : "\\r",
-                    0x0a : "\\n"
+                charMap: {
+                    0x00: "NUL",
+                    0x0d: "\\r",
+                    0x0a: "\\n"
                 },
-                cleanUnprintableChars : function(s){ return s.replace(/[^\x20-\x7E\xA0-\xFF]/g, "."); },
-                filterPrintable: function(s){
+                cleanUnprintableChars: function (s) {
+                    return s.replace(/[^\x20-\x7E\xA0-\xFF]/g, ".");
+                },
+                filterPrintable: function (s) {
                     for (var i = 0; i < s.length; i++) {
                         var a = s.charCodeAt(i);
                         if (!charfilter(a))
@@ -68,26 +71,27 @@
                     }
                     return true;
                 },
-                toCharCodes : function(s){
-                    var o=[];
+                toCharCodes: function (s) {
+                    var o = [];
                     for (var i = 0; i < s.length; i++) {
                         var a = s.charCodeAt(i);
                         o.push(a);
                     }
                     return o;
                 },
-                fromCharCodes : function(arrCodes){
-                    for(var i=0;i<arrCodes.length;i++) arrCodes[i]=+arrCodes[i];//convert to number
-                    if(Object.apply){
+                fromCharCodes: function (arrCodes) {
+                    for (var i = 0; i < arrCodes.length; i++)
+                        arrCodes[i] = +arrCodes[i];//convert to number
+                    if (Object.apply) {
                         return String.fromCharCode.apply(null, arrCodes);
-                    }else{
+                    } else {
                         var o = "";
                         for (var i = 0; i < arrCodes.length; i++)
                             o += String.fromCharCode(parseInt(arrCodes[i]));
                         return o;
                     }
                 },
-                applyCharFunction : function(s, charBiFunction, n){
+                applyCharFunction: function (s, charBiFunction, n) {
                     var o = "";
                     for (var i = 0; i < s.length; i++) {
                         var a = s.charCodeAt(i);
@@ -96,7 +100,7 @@
                     }
                     return o;
                 },
-                allCharsMatchFilter : function(s, charFilter){
+                allCharsMatchFilter: function (s, charFilter) {
                     for (var i = 0; i < s.length; i++) {
                         var a = s.charCodeAt(i);
                         if (!charFilter(a))
@@ -104,34 +108,35 @@
                     }
                     return true;
                 },
-                isCharPrintable : function(c){
+                isCharPrintable: function (c) {
                     return !((c < 0x20 || c > 0x7E) && (c !== 0x0A && c !== 0x0D));
                 },
-                
-                createPrintableCharString : function(c){
+
+                createPrintableCharString: function (c) {
                     var sc = String.fromCharCode(c);
                     var printable = StringUtils.isCharPrintable(c);
-                    
-                    if(typeof StringUtils.charMap[c] !== "undefined"){
+
+                    if (typeof StringUtils.charMap[c] !== "undefined") {
                         sc = StringUtils.charMap[c];
                         printable = true;
                     }
-                    
-                    if(!printable) return c;
+
+                    if (!printable)
+                        return c;
                     return c + "(" + StringUtils.escapeHTML(sc) + ")";
                 },
-                allCharsPrintable : function(s){
+                allCharsPrintable: function (s) {
                     return StringUtils.allCharsMatchFilter(s, StringUtils.isCharPrintable);
                 },
-                escapeHTML : function(string){
+                escapeHTML: function (string) {
                     return String(string).replace(/[&<>"'\/]/g, function (s) {
-                         return StringUtils.entityMap[s];
+                        return StringUtils.entityMap[s];
                     });
                 }
-                
+
             };
-            
-            
+
+
 
             function charshift(a, n) {
                 return (a + n) % 256;
@@ -142,7 +147,7 @@
 
 
             var ShiftsTool = {
-                tryAllBytes : function(s, charfunc, t) {
+                tryAllBytes: function (s, charfunc, t) {
                     //var t = document.getElementById("tbl");
                     var flt = document.getElementById("flt").checked;
                     for (var n = 0; n < 256; n++) {
@@ -168,54 +173,54 @@
                         cellOutDecimal.innerHTML = decimalOut;
                     }
                 },
-            clearreport:function (Parent) {
-                //var Parent = document.getElementById('tbl');
-                while (Parent.hasChildNodes())
-                    Parent.removeChild(Parent.firstChild);
-            },
-            report:function (s) {
-                var r, c;
-                var t = document.getElementById("tbls");
-                this.clearreport(t);
-                r = t.insertRow();
-                c = r.insertCell(0);
-                c.colSpan = 3;
-                c.innerHTML = "<b>All Byte Shifts</b>";
-                this.tryAllBytes(s, charshift, t);
+                clearreport: function (Parent) {
+                    //var Parent = document.getElementById('tbl');
+                    while (Parent.hasChildNodes())
+                        Parent.removeChild(Parent.firstChild);
+                },
+                report: function (s) {
+                    var r, c;
+                    var t = document.getElementById("tbls");
+                    this.clearreport(t);
+                    r = t.insertRow();
+                    c = r.insertCell(0);
+                    c.colSpan = 3;
+                    c.innerHTML = "<b>All Byte Shifts</b>";
+                    this.tryAllBytes(s, charshift, t);
 
 
-                t = document.getElementById("tblx");
-                this.clearreport(t);
-                r = t.insertRow();
-                c = r.insertCell(0);
-                c.colSpan = 3;
-                c.innerHTML = "<b>All Constant XORs</b>";
-                this.tryAllBytes(s, charxor, t);
-            },
+                    t = document.getElementById("tblx");
+                    this.clearreport(t);
+                    r = t.insertRow();
+                    c = r.insertCell(0);
+                    c.colSpan = 3;
+                    c.innerHTML = "<b>All Constant XORs</b>";
+                    this.tryAllBytes(s, charxor, t);
+                },
 
-            report_txt:function () {
-                var inpt = document.getElementById("txt");
-                var inpd = document.getElementById("dec");
-                inpd.value = StringUtils.toCharCodes(inpt.value).join(" ");
-                this.report(inpt.value);
-            },
-            report_dec:function () {
-                var inpt = document.getElementById("txt");
-                var inpd = document.getElementById("dec");
-                
-                var decArray = inpd.value.trim().split(" ");
-                var string = StringUtils.fromCharCodes(decArray);
-                
-                inpt.value = string;
-                this.report(string);
-            },
-            report_unk:function () {
-                var inpt = document.getElementById("txt");
-                var inpd = document.getElementById("dec");
-                if (inpd.value !== "")
-                    return this.report_dec();
-                this.report_txt();
-            }
+                report_txt: function () {
+                    var inpt = document.getElementById("txt");
+                    var inpd = document.getElementById("dec");
+                    inpd.value = StringUtils.toCharCodes(inpt.value).join(" ");
+                    this.report(inpt.value);
+                },
+                report_dec: function () {
+                    var inpt = document.getElementById("txt");
+                    var inpd = document.getElementById("dec");
+
+                    var decArray = inpd.value.trim().split(" ");
+                    var string = StringUtils.fromCharCodes(decArray);
+
+                    inpt.value = string;
+                    this.report(string);
+                },
+                report_unk: function () {
+                    var inpt = document.getElementById("txt");
+                    var inpd = document.getElementById("dec");
+                    if (inpd.value !== "")
+                        return this.report_dec();
+                    this.report_txt();
+                }
             };
 
 
