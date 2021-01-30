@@ -140,67 +140,65 @@
             }
 
 
+            var ShiftsTool = {
+                tryAllBytes : function(s, charfunc, t) {
+                    //var t = document.getElementById("tbl");
+                    var flt = document.getElementById("flt").checked;
+                    for (var n = 0; n < 256; n++) {
+                        var strOut = StringUtils.applyCharFunction(s, charfunc, n);
+                        var cleanedOut = StringUtils.cleanUnprintableChars(strOut);
+                        var decimalOut = StringUtils.toCharCodes(strOut).join(" ");
 
-            function all(s, charfunc, t) {
-                //var t = document.getElementById("tbl");
-                var flt = document.getElementById("flt").checked;
-                for (var n = 0; n < 256; n++) {
-                    var strOut = StringUtils.applyCharFunction(s, charfunc, n);
-                    var cleanedOut = StringUtils.cleanUnprintableChars(strOut);
-                    var decimalOut = StringUtils.toCharCodes(strOut).join(" ");
+                        if (flt)
+                            if (!StringUtils.allCharsPrintable(strOut))
+                                continue;
 
-                    if (flt)
-                        if (!StringUtils.allCharsPrintable(strOut))
-                            continue;
-
-                    //n - f - d
-                    var newRow = t.insertRow();
-                    var cellKey = newRow.insertCell(0);
-                    var cellOutString = newRow.insertCell(1);
-                    var cellOutDecimal = newRow.insertCell(2);
+                        //n - f - d
+                        var newRow = t.insertRow();
+                        var cellKey = newRow.insertCell(0);
+                        var cellOutString = newRow.insertCell(1);
+                        var cellOutDecimal = newRow.insertCell(2);
 
 
-                    var charString = StringUtils.createPrintableCharString(n);
+                        var charString = StringUtils.createPrintableCharString(n);
 
-                    cellKey.innerHTML = charString;
-                    cellOutString.innerHTML = StringUtils.escapeHTML(cleanedOut);
-                    cellOutDecimal.innerHTML = decimalOut;
-                }
-            }
-            function clearreport(Parent) {
+                        cellKey.innerHTML = charString;
+                        cellOutString.innerHTML = StringUtils.escapeHTML(cleanedOut);
+                        cellOutDecimal.innerHTML = decimalOut;
+                    }
+                },
+            clearreport:function (Parent) {
                 //var Parent = document.getElementById('tbl');
                 while (Parent.hasChildNodes())
                     Parent.removeChild(Parent.firstChild);
-            }
-
-
-            function report(s) {
+            },
+            report:function (s) {
                 var r, c;
                 var t = document.getElementById("tbls");
-                clearreport(t);
+                this.clearreport(t);
                 r = t.insertRow();
                 c = r.insertCell(0);
                 c.colSpan = 3;
                 c.innerHTML = "<b>All Byte Shifts</b>";
-                all(s, charshift, t);
+                this.tryAllBytes(s, charshift, t);
 
 
                 t = document.getElementById("tblx");
-                clearreport(t);
+                this.clearreport(t);
                 r = t.insertRow();
                 c = r.insertCell(0);
                 c.colSpan = 3;
                 c.innerHTML = "<b>All Constant XORs</b>";
-                all(s, charxor, t);
-            }
+                this.tryAllBytes(s, charxor, t);
+            },
 
-            function report_txt() {
+            report_txt:function () {
                 var inpt = document.getElementById("txt");
                 var inpd = document.getElementById("dec");
                 inpd.value = StringUtils.toCharCodes(inpt.value).join(" ");
-                report(inpt.value);
-            }
-            function report_dec() {
+                this.report(inpt.value);
+            },
+            report_dec:function () {
                 var inpt = document.getElementById("txt");
                 var inpd = document.getElementById("dec");
                 
@@ -208,15 +206,18 @@
                 var string = StringUtils.fromCharCodes(decArray);
                 
                 inpt.value = string;
-                report(string);
-            }
-            function report_unk() {
+                this.report(string);
+            },
+            report_unk:function () {
                 var inpt = document.getElementById("txt");
                 var inpd = document.getElementById("dec");
                 if (inpd.value !== "")
-                    return report_dec();
-                report_txt();
+                    return this.report_dec();
+                this.report_txt();
             }
+            };
+
+
 
 
 
@@ -226,9 +227,9 @@
     <body>
         <h2>Byte Shifts/Xor Report v1.2</h2>
         <hr>
-        <input type="text" id="txt" placeholder="Text"><input type="submit" value="Generate Report" onclick="report_txt()"> <i>OR</i><br>
-        <input type="text" id="dec" placeholder="Decimal values"><input type="submit" value="Generate Report" onclick="report_dec()"><br>
-        <input type="checkbox" id="flt" onclick="report_unk()"> Filter strings with unprintable chars.
+        <input type="text" id="txt" placeholder="Text"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_txt()"> <i>OR</i><br>
+        <input type="text" id="dec" placeholder="Decimal values"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_dec()"><br>
+        <input type="checkbox" id="flt" onclick="ShiftsTool.report_unk()"> Filter strings with unprintable chars.
         <hr>
 
         <table border="1" id="tbls">
