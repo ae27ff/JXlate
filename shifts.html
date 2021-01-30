@@ -34,11 +34,12 @@
             }
             
 
-            var operation = {
-                create:function(type,name,apply){
+
+            var Operations = {
+                create:function(id,displayName,apply){
                     return {
-                        type: type,
-                        name: name,
+                        id: id,
+                        displayName: displayName,
                         apply: apply
                     };
                 }
