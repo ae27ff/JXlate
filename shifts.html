@@ -4,15 +4,74 @@
 
         <title>Byte shift and constant-xor report</title>
         <style>
-            #txt{ width:300px; }
-            #dec{ width:300px; }
-            table{ display: inline-block; }
+            #txt,#dec,#hex{ width:300px; }
+            Xtable{ display: inline-block; }
 
             table, th, td {
-                border: 1px solid black;
+                xborder: 1px solid black;
+            }
+            table{
+                background-color: #DFDFDF;
+                border-radius: 0.5em;
+                padding:0.5em;
+                
+                border: 0; 
+                border-collapse: collapse; 
+                border-spacing: 0 5px;
             }
 
-            td{ font-family: "Lucida Console", Monaco, monospace; }
+            tbody{ font-family: "Lucida Console", Monaco, monospace; }
+            
+            /* fix header border */
+            thead{
+                font-weight: bold;
+                border-bottom: 1px solid black;
+                text-align: center;
+            }
+            
+            thead tr th {
+              border-bottom: 1px solid red; 
+              border-collapse: separate; 
+              border-spacing: 5px 5px;
+            } 
+            tbody tr#first td {
+              border-top: 3px solid #4d4d4d; 
+              border-collapse: separate;
+              border-spacing: 5px 5px;
+            }
+            
+            
+            /* fix column borders */
+            table { border: none; border-collapse: collapse; }
+            table td { border-left: 1px dashed #000; }
+            table td:first-child { border-left: none; }
+            
+            tbody tr td{ padding-left:0.5em; padding-right: 0.5em; }
+            
+            
+            /* column colors */
+            thead tr.result-column-header td:nth-child(1){ background-color: rgba(255, 223, 211,0.5); }
+            thead tr td:nth-child(2){ background-color: rgba(223, 255, 211,0.5); }
+            thead tr td:nth-child(3){ background-color: rgba(211, 223, 255,0.5); }
+            
+            
+            tbody tr td:nth-child(1){ background-color: #FFDFD3; }
+            tbody tr:nth-child(even) > td:nth-child(1) { background-color: #FFEFE3; }
+            tbody tr td:nth-child(2){ background-color: #DFFFD3; }
+            tbody tr:nth-child(even) > td:nth-child(2) { background-color: #EFFFE3; }
+            tbody tr td:nth-child(3){ background-color: #D3DFFF; }
+            tbody tr:nth-child(even) > td:nth-child(3) { background-color: #E3EFFF; }
+            
+            
+            
+            /* controls colors */
+            #controls{
+                background-color: skyblue;
+                width: max-content;
+                padding:10px;
+                border-radius: 0.5em;
+                line-height:1.5em;
+            }
         </style>
         <script>
 
@@ -34,17 +93,27 @@
                 };
             }
 
-
-
-            var Operations = {
-                create: function (id, displayName, apply) {
+            var OperationTypes = {
+                create: function (id, displayName, min, max) {
                     return {
                         id: id,
                         displayName: displayName,
+                        min: min,
+                        max: max
+                    };
+                }
+            };
+
+            var Operations = {
+                create: function (id, displayName, type, apply) {
+                    return {
+                        id: id,
+                        displayName: displayName,
+                        type: type,
                         apply: apply
                     };
                 }
-            }
+            };
 
             var StringUtils = {
                 entityMap: {
@@ -132,28 +201,54 @@
                     return String(string).replace(/[&<>"'\/]/g, function (s) {
                         return StringUtils.entityMap[s];
                     });
+                },
+                stripWS: function(str){
+                    return str.replace(/\s/g,'');
                 }
 
             };
 
 
 
-            function charshift(a, n) {
-                return (a + n) % 256;
-            }
-            function charxor(a, n) {
-                return a ^ n;
-            }
-
-
             var ShiftsTool = {
-                tryAllBytes: function (s, charfunc, t) {
+                operationTypes: {
+                    0 : OperationTypes.create("bytes","Bytes", 0, 255),
+                    1 : OperationTypes.create("bitshifts","Bit Shifts", 0, 7),
+                    get:function(i){ return this[i]; }
+                },
+                operations: [
+                    Operations.create("bshift","Constant Byte Shift",0,function(c,n){ return (c + n) % 256; } ),
+                    Operations.create("cxor","Constant Byte XOR",0,function(c,n){ return c ^ n; } ),
+                    
+                    
+                    Operations.create("brotate","Byte Bit-Rotation",1,function(c,n){ 
+                        var newchar = c;
+                        for(var i=0;i<n;i++){
+                            var bit = newchar&1;
+                            var shiftedchar = newchar>>1;
+                            var rotatedbit = bit<<7;
+                            var rotatedchar = rotatedbit | shiftedchar;
+                            newchar = rotatedchar;
+                        }
+                        return newchar;
+                    } ),
+                    
+                    
+                    Operations.create("cand","Constant Byte AND",0,function(c,n){ return c & n; } ),
+                    Operations.create("cor","Constant Byte OR",0,function(c,n){ return c | n; } ),
+                    Operations.create("cxnor","Constant Byte XNOR",0,function(c,n){ return (c ^ n) ^ 0xFF; } ),
+                    Operations.create("cnand","Constant Byte NAND",0,function(c,n){ return (c & n) ^ 0xFF; } )
+                ],
+                
+                tryAllRange: function (operationType, s, charfunc, t) {
                     //var t = document.getElementById("tbl");
                     var flt = document.getElementById("flt").checked;
-                    for (var n = 0; n < 256; n++) {
+                    
+                    console.log(operationType,operationType.min,operationType.max);
+                    for (var n = operationType.min; n <= operationType.max; n++) {
                         var strOut = StringUtils.applyCharFunction(s, charfunc, n);
                         var cleanedOut = StringUtils.cleanUnprintableChars(strOut);
-                        var decimalOut = StringUtils.toCharCodes(strOut).join(" ");
+                        var hexOut = this.decArrayToHexArray(StringUtils.toCharCodes(strOut)).join(" ");
 
                         if (flt)
                             if (!StringUtils.allCharsPrintable(strOut))
@@ -163,66 +258,194 @@
                         var newRow = t.insertRow();
                         var cellKey = newRow.insertCell(0);
                         var cellOutString = newRow.insertCell(1);
-                        var cellOutDecimal = newRow.insertCell(2);
+                        var cellOutHex = newRow.insertCell(2);
 
 
                         var charString = StringUtils.createPrintableCharString(n);
 
                         cellKey.innerHTML = charString;
                         cellOutString.innerHTML = StringUtils.escapeHTML(cleanedOut);
-                        cellOutDecimal.innerHTML = decimalOut;
+                        cellOutHex.innerHTML = hexOut;
                     }
                 },
-                clearreport: function (Parent) {
+                clearreport: function (parentElem) {
                     //var Parent = document.getElementById('tbl');
-                    while (Parent.hasChildNodes())
-                        Parent.removeChild(Parent.firstChild);
+                    console.log("clearreport", parentElem);
+                    while (parentElem.hasChildNodes())
+                        parentElem.removeChild(parentElem.firstChild);
                 },
-                report: function (s) {
-                    var r, c;
-                    var t = document.getElementById("tbls");
-                    this.clearreport(t);
-                    r = t.insertRow();
-                    c = r.insertCell(0);
-                    c.colSpan = 3;
-                    c.innerHTML = "<b>All Byte Shifts</b>";
-                    this.tryAllBytes(s, charshift, t);
-
-
-                    t = document.getElementById("tblx");
-                    this.clearreport(t);
-                    r = t.insertRow();
-                    c = r.insertCell(0);
-                    c.colSpan = 3;
-                    c.innerHTML = "<b>All Constant XORs</b>";
-                    this.tryAllBytes(s, charxor, t);
+                
+                report_op_elem: function(resultsElem,op,s){
+                    var row, cell;
+                    
+                    var tableElem = document.createElement("table");
+                    tableElem.id = "results_"+op.id;
+                    
+                    var thead = tableElem.createTHead();
+                    
+                    
+                    row = thead.insertRow();
+                    row.classList.add('result-type-header');
+                    cell = row.insertCell(0);
+                    cell.colSpan = 3;
+                    var operationType = this.operationTypes.get(op.type);
+                    //cell.innerHTML = "<b>"+StringUtils.escapeHTML(op.displayName)+" - All "+StringUtils.escapeHTML(operationType.displayName)+"</b>";
+                    cell.innerHTML = StringUtils.escapeHTML(op.displayName)+" - All "+StringUtils.escapeHTML(operationType.displayName);
+                    
+                    var row2 = thead.insertRow();
+                    row2.classList.add('result-column-header');
+                    cell = row2.insertCell(0);
+                    cell.innerHTML = "Key Value";
+                    cell = row2.insertCell(1);
+                    cell.innerHTML = "Decoded Text";
+                    cell = row2.insertCell(2);
+                    cell.innerHTML = "Decoded Hex Values";
+                    
+                    var tbody = tableElem.createTBody();
+                    
+                    this.tryAllRange(operationType, s, op.apply, tbody);
+                    
+                    resultsElem.appendChild(tableElem);
+                },
+                
+                report_op: function(op,s){
+                    var resultContainer = document.getElementById("results");
+                    this.clearreport(resultContainer);
+                    this.report_op_elem(resultContainer, op, s);
+                },
+                
+                report_all_ops: function (s) {
+                    var resultContainer = document.getElementById("results");
+                    this.clearreport(resultContainer);
+                    
+                    for(var i=0;i<this.operations.length;i++){
+                        this.report_op_elem(resultContainer, this.operations[i], s);
+                    }
                 },
 
-                report_txt: function () {
+                //-------------------------------------
+                
+                decArrayToHexArray:function(decArray){
+                    var hexArray = [];
+                    for(var i=0; i<decArray.length;i++){
+                        decArray[i] = +decArray[i];
+                        var hex = decArray[i].toString(16);
+                        for(var j=hex.length;j<2;j++) hex="0"+hex;//pad zeros
+                        hexArray.push(hex);
+                    }
+                    return hexArray;
+                },
+                hexArrayToDecArray:function(hexArray){
+                    var decArray = [];
+                    for(var i=0; i<hexArray.length;i++){
+                        var charCode = parseInt(hexArray[i],16);
+                        decArray.push(charCode);
+                    }
+                    return decArray;
+                },
+                
+                report_update_inputs_dec:function(decArray){
                     var inpt = document.getElementById("txt");
                     var inpd = document.getElementById("dec");
-                    inpd.value = StringUtils.toCharCodes(inpt.value).join(" ");
-                    this.report(inpt.value);
+                    var inph = document.getElementById("hex");
+                    
+                    var hexArray = this.decArrayToHexArray(decArray);
+                    
+                    var text = StringUtils.fromCharCodes(decArray);
+                    
+                    inpd.value=decArray.join(" ");
+                    inpt.value=text;
+                    inph.value=hexArray.join(" ");
+                    
+                    var result = {text: text, hex: hexArray, dec: decArray};
+                    console.log(result)
+                    return result;
+                },
+                
+                report_update_inputs_txt:function(s){
+                    var decArray = StringUtils.toCharCodes(s);
+                    return this.report_update_inputs_dec(decArray);
+                },
+                report_update_inputs_hex:function(hexArray){
+                    var decArray = this.hexArrayToDecArray(hexArray);
+                    return this.report_update_inputs_dec(decArray);
+                },
+                
+                
+
+                report_op_from_select:function(s){
+                    var op = this.getSelectedOperationType();
+                    console.log("report_op_from_select",op,s);
+                    this.report_op(op, s);
+                },
+
+                report_txt : function () {
+                    var input = document.getElementById("txt");
+                    var values = this.report_update_inputs_txt(input.value);
+                    this.report_op_from_select(values.text);
                 },
                 report_dec: function () {
-                    var inpt = document.getElementById("txt");
-                    var inpd = document.getElementById("dec");
-
-                    var decArray = inpd.value.trim().split(" ");
-                    var string = StringUtils.fromCharCodes(decArray);
-
-                    inpt.value = string;
-                    this.report(string);
+                    var input = document.getElementById("dec");
+                    var values = this.report_update_inputs_dec(input.value.split(" "));
+                    this.report_op_from_select(values.text);
                 },
+                report_hex: function () {
+                    var input = document.getElementById("hex");
+                    var hexArray = StringUtils.stripWS(input.value).match(/.{1,2}/g);
+                    var values = this.report_update_inputs_hex(hexArray);
+                    this.report_op_from_select(values.text);
+                },
+
                 report_unk: function () {
-                    var inpt = document.getElementById("txt");
+                    //var inpt = document.getElementById("txt");
                     var inpd = document.getElementById("dec");
+                    var inph = document.getElementById("hex");
+                    
+                    if (inph.value !== "")
+                        return this.report_hex();
                     if (inpd.value !== "")
                         return this.report_dec();
                     this.report_txt();
+                },
+                getSelectedOperationType : function(){
+                    var opSelect = document.getElementById('operation-type');
+                    var opId = opSelect.value;
+                    for(var i=0;i<this.operations.length;i++){
+                        var op = this.operations[i];
+                        if(op.id === opId) return op;
+                    }
+                    return null;
+                },
+                fillOperationOptions : function(){
+                    var opSelect = document.getElementById('operation-type');
+                    for(var i=0;i<this.operations.length;i++){
+                        var op = this.operations[i];
+                        var option = document.createElement('option');
+                        option.value = op.id;
+                        option.innerHTML = StringUtils.escapeHTML(op.displayName);
+                        opSelect.appendChild(option);
+                    }
+                },
+                init : function(){
+                    this.fillOperationOptions();
                 }
             };
 
+
+function docReady(fn) {
+    // see if DOM is already available
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+        // call on next available tick
+        setTimeout(fn, 1);
+    } else {
+        document.addEventListener("DOMContentLoaded", fn);
+    }
+}    
+
+
+docReady(function(){
+    ShiftsTool.init();
+})
 
 
 
@@ -231,16 +454,21 @@
         </script>
     </head>
     <body>
-        <h2>Byte Shifts/Xor Report v1.2</h2>
+        <h2>Byte Shifts/Xor Report v2.0</h2>
         <hr>
+        <div id="controls">
         <input type="text" id="txt" placeholder="Text"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_txt()"> <i>OR</i><br>
-        <input type="text" id="dec" placeholder="Decimal values"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_dec()"><br>
+        <input type="text" id="dec" placeholder="Decimal values"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_dec()"> <i>OR</i><br>
+        <input type="text" id="hex" placeholder="Hexadecimal values"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_hex()"> <br>
+        <select id="operation-type"  onchange="ShiftsTool.report_unk()">
+            
+        </select><br>
         <input type="checkbox" id="flt" onclick="ShiftsTool.report_unk()"> Filter strings with unprintable chars.
+        </div>
         <hr>
 
-        <table border="1" id="tbls">
-        </table><table border="1" id="tblx">
-        </table>
+        <div id="results">
+        </div>
 
 
     </body>
