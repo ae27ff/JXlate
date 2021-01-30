@@ -139,30 +139,13 @@
                 return a ^ n;
             }
 
-            function strfunc(s, func, n) {
-                var o = "";
-                for (var i = 0; i < s.length; i++) {
-                    var a = s.charCodeAt(i);
-                    a = func(a, n);
-                    o += String.fromCharCode(a);
-                }
-                return o;
-            }
-
-            function strshift(s, n) {
-                return strfunc(s, charshift, n);
-            }
-            function strxor(s, n) {
-                return strfunc(s, charxor, n);
-            }
 
 
-
-            function all(s, func, t) {
+            function all(s, charfunc, t) {
                 //var t = document.getElementById("tbl");
                 var flt = document.getElementById("flt").checked;
                 for (var n = 0; n < 256; n++) {
-                    var strOut = func(s, n);
+                    var strOut = StringUtils.applyCharFunction(s, charfunc, n);
                     var cleanedOut = StringUtils.cleanUnprintableChars(strOut);
                     var decimalOut = StringUtils.toCharCodes(strOut).join(" ");
 
@@ -199,7 +182,7 @@
                 c = r.insertCell(0);
                 c.colSpan = 3;
                 c.innerHTML = "<b>All Byte Shifts</b>";
-                all(s, strshift, t);
+                all(s, charshift, t);
 
 
                 t = document.getElementById("tblx");
@@ -208,7 +191,7 @@
                 c = r.insertCell(0);
                 c.colSpan = 3;
                 c.innerHTML = "<b>All Constant XORs</b>";
-                all(s, strxor, t);
+                all(s, charxor, t);
             }
 
             function report_txt() {
