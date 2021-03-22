@@ -266,6 +266,12 @@
                         return c ^ n;
                     }),
 
+                    Operations.create("bbshift", "Byte Bit-Shift", OperationTypes.CHAR_FUNCTION, 2, function (c, n) {
+                        var newchar = c;
+                        if(n<0) newchar<<= (-n);
+                        else newchar>>=n;
+                        return newchar&0xff;
+                    }),
                     Operations.create("brotate", "Byte Bit-Rotation", OperationTypes.CHAR_FUNCTION, 1, function (c, n) {
                         var newchar = c;
                         for (var i = 0; i < n; i++) {
