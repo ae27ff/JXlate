@@ -92,6 +92,23 @@
                     return out;
                 };
             }
+            if (!String.prototype.padStart) {
+              String.prototype.padStart = function padStart(targetLength, padString) {
+                targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
+                padString = String(typeof padString !== 'undefined' ? padString : ' ');
+                if (this.length > targetLength) {
+                  return String(this);
+                } else {
+                  targetLength = targetLength - this.length;
+                  if (targetLength > padString.length) {
+                    padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
+                  }
+                  return padString.slice(0, targetLength) + String(this);
+                }
+              };
+            }
+            
+            
 
             var OperationTypes = {
                 create: function (id, displayName, min, max) {
@@ -166,11 +183,22 @@
                         return o;
                     }
                 },
-                applyCharFunction: function (s, charBiFunction, n) {
-                    var o = "";
-                    for (var i = 0; i < s.length; i++) {
-                        var a = s.charCodeAt(i);
-                        a = charBiFunction(a, n);
+                applyCharFunction: function (s, charFunction, n) {
+                    let o = "";
+                    let charCodes = [];
+                    let hex = [];
+                    let binary = [];
+                    
+                    for (let i = 0; i < s.length; i++) {
+                        let a = s.charCodeAt(i);
+                        charCodes.push(a);
+                    }
+                    hex = ShiftsTool.decArrayToHexArray(charCodes);
+                    binary = ShiftsTool.decArrayToBinArray(charCodes);
+                    
+                    
+                    for (let i = 0; i < s.length; i++) {
+                        let a = charFunction(charCodes[i], n, s, charCodes, hex, binary);
                         o += String.fromCharCode(a);
                     }
                     return o;
@@ -220,6 +248,7 @@
                 operationTypes: {
                     0: OperationTypes.create("bytes", "Bytes", 0, 255),
                     1: OperationTypes.create("bitshifts", "Bit Shifts", 0, 7),
+                    2: OperationTypes.create("lrbitshifts", "Bit Shifts", -7, 7),
                     get: function (i) {
                         return this[i];
                     }
@@ -243,7 +272,7 @@
                         }
                         return newchar;
                     }),
-
+                    
                     Operations.create("cand", "Constant Byte AND", 0, function (c, n) {
                         return c & n;
                     }),
@@ -342,25 +371,35 @@
                 },
 
                 //-------------------------------------
-
-                decArrayToHexArray: function (decArray) {
-                    var hexArray = [];
-                    for (var i = 0; i < decArray.length; i++) {
-                        decArray[i] = +decArray[i];
-                        var hex = decArray[i].toString(16);
-                        for (var j = hex.length; j < 2; j++)
-                            hex = "0" + hex;//pad zeros
-                        hexArray.push(hex);
-                    }
-                    return hexArray;
-                },
-                hexArrayToDecArray: function (hexArray) {
+                
+                radixArrayToDecArray: function (radixArray, radix) {
                     var decArray = [];
-                    for (var i = 0; i < hexArray.length; i++) {
-                        var charCode = parseInt(hexArray[i], 16);
+                    for (var i = 0; i < radixArray.length; i++) {
+                        var charCode = parseInt(radixArray[i], radix);
                         decArray.push(charCode);
                     }
                     return decArray;
+                },
+                decArrayToRadixArray: function (decArray, radix, minZeroPadLength) {
+                    let radixArray = [];
+                    for (var i = 0; i < decArray.length; i++) {
+                        let radixString = Number(+decArray[i]).toString(radix).padStart(minZeroPadLength,"0");
+                        radixArray.push(radixString);
+                    }
+                    return radixArray;
+                },
+                
+                decArrayToBinArray: function(decArray){
+                    return this.decArrayToRadixArray(decArray,2,8);
+                },
+                binArrayToDecArray: function(binArray){
+                    return this.radixArrayToDecArray(binArray,2);
+                },
+                decArrayToHexArray: function (decArray) {
+                    return this.decArrayToRadixArray(decArray,16,2);
+                },
+                hexArrayToDecArray: function (hexArray) {
+                    return this.radixArrayToDecArray(hexArray,16);
                 },
 
                 report_update_inputs_dec: function (decArray) {
