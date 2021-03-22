@@ -260,7 +260,7 @@
                     }
                 },
                 operations: [
-                    Operations.create("bshift", "Constant Byte Shift", OperationTypes.CHAR_FUNCTION, 0, function (c, n) {
+                    Operations.create("bshift", "Constant Byte Shift (modular addition)", OperationTypes.CHAR_FUNCTION, 0, function (c, n) {
                         return (c + n) % 256;
                     }),
                     Operations.create("cxor", "Constant Byte XOR", OperationTypes.CHAR_FUNCTION, 0, function (c, n) {
