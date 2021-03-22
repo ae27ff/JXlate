@@ -108,9 +108,12 @@
               };
             }
             
-            
-
             var OperationTypes = {
+                CHAR_FUNCTION: 0,
+                STR_FUNCTION: 1
+            };
+
+            var OperationRangeTypes = {
                 create: function (id, displayName, min, max) {
                     return {
                         id: id,
@@ -122,11 +125,12 @@
             };
 
             var Operations = {
-                create: function (id, displayName, type, apply) {
+                create: function (id, displayName, funcType, rangeType, apply) {
                     return {
                         id: id,
                         displayName: displayName,
-                        type: type,
+                        funcType: funcType,
+                        rangeType: rangeType,
                         apply: apply
                     };
                 }
@@ -185,6 +189,13 @@
                 },
                 applyCharFunction: function (s, charFunction, n) {
                     let o = "";
+                    for (let i = 0; i < s.length; i++) {
+                        let a = charFunction(s.charCodeAt(i), n);
+                        o += String.fromCharCode(a);
+                    }
+                    return o;
+                },
+                applyStrFunction: function (s, strFunction, n) {
                     let charCodes = [];
                     let hex = [];
                     let binary = [];
@@ -195,13 +206,7 @@
                     }
                     hex = ShiftsTool.decArrayToHexArray(charCodes);
                     binary = ShiftsTool.decArrayToBinArray(charCodes);
-                    
-                    
-                    for (let i = 0; i < s.length; i++) {
-                        let a = charFunction(charCodes[i], n, s, charCodes, hex, binary);
-                        o += String.fromCharCode(a);
-                    }
-                    return o;
+                    return strFunction(s, n, charCodes, hex, binary);
                 },
                 allCharsMatchFilter: function (s, charFilter) {
                     for (var i = 0; i < s.length; i++) {
@@ -245,23 +250,23 @@
 
 
             var ShiftsTool = {
-                operationTypes: {
-                    0: OperationTypes.create("bytes", "Bytes", 0, 255),
-                    1: OperationTypes.create("bitshifts", "Bit Shifts", 0, 7),
-                    2: OperationTypes.create("lrbitshifts", "Bit Shifts", -7, 7),
+                operationRanges: {
+                    0: OperationRangeTypes.create("bytes", "Bytes", 0, 255),
+                    1: OperationRangeTypes.create("bitshifts", "Bit Shifts", 0, 7),
+                    2: OperationRangeTypes.create("lrbitshifts", "Bit Shifts", -8, 8),
                     get: function (i) {
                         return this[i];
                     }
                 },
                 operations: [
-                    Operations.create("bshift", "Constant Byte Shift", 0, function (c, n) {
+                    Operations.create("bshift", "Constant Byte Shift", OperationTypes.CHAR_FUNCTION, 0, function (c, n) {
                         return (c + n) % 256;
                     }),
-                    Operations.create("cxor", "Constant Byte XOR", 0, function (c, n) {
+                    Operations.create("cxor", "Constant Byte XOR", OperationTypes.CHAR_FUNCTION, 0, function (c, n) {
                         return c ^ n;
                     }),
 
-                    Operations.create("brotate", "Byte Bit-Rotation", 1, function (c, n) {
+                    Operations.create("brotate", "Byte Bit-Rotation", OperationTypes.CHAR_FUNCTION, 1, function (c, n) {
                         var newchar = c;
                         for (var i = 0; i < n; i++) {
                             var bit = newchar & 1;
@@ -272,28 +277,56 @@
                         }
                         return newchar;
                     }),
+                    Operations.create("sbrotate", "Full String Bit-Rotation", OperationTypes.STR_FUNCTION, 2, function (s, n, charCodes, hex, binary) {
+                        
+                        let binaryString = binary.join("");
+                        if(n<0){
+                            n=-n;
+                            for(let i=0; i<n; i++){
+                                let bit = binaryString.substr(0,1);
+                                binaryString = binaryString.substr(1) + bit;
+                            }
+                        }else{
+                            for(let i=0; i<n; i++){
+                                let bit = binaryString.substr(-1,1);
+                                binaryString = bit + binaryString.substr(0,binaryString.length-1);
+                            }
+                        }
+                        binary = binaryString.match(/.{1,8}/g);
+                        charCodes = ShiftsTool.binArrayToDecArray(binary);
+                        return StringUtils.fromCharCodes(charCodes);
+                    }),
                     
-                    Operations.create("cand", "Constant Byte AND", 0, function (c, n) {
+                    
+                    Operations.create("cand", "Constant Byte AND", OperationTypes.CHAR_FUNCTION, 0, function (c, n) {
                         return c & n;
                     }),
-                    Operations.create("cor", "Constant Byte OR", 0, function (c, n) {
+                    Operations.create("cor", "Constant Byte OR", OperationTypes.CHAR_FUNCTION, 0, function (c, n) {
                         return c | n;
                     }),
-                    Operations.create("cxnor", "Constant Byte XNOR", 0, function (c, n) {
+                    Operations.create("cxnor", "Constant Byte XNOR", OperationTypes.CHAR_FUNCTION, 0, function (c, n) {
                         return (c ^ n) ^ 0xFF;
                     }),
-                    Operations.create("cnand", "Constant Byte NAND", 0, function (c, n) {
+                    Operations.create("cnand", "Constant Byte NAND", OperationTypes.CHAR_FUNCTION, 0, function (c, n) {
                         return (c & n) ^ 0xFF;
                     })
                 ],
 
-                tryAllRange: function (operationType, s, charfunc, t) {
+                tryAllRange: function (operationFuncType, operationRangeType, s, operFunc, t) {
                     //var t = document.getElementById("tbl");
                     var flt = document.getElementById("flt").checked;
 
-                    console.log(operationType, operationType.min, operationType.max);
-                    for (var n = operationType.min; n <= operationType.max; n++) {
-                        var strOut = StringUtils.applyCharFunction(s, charfunc, n);
+                    console.log(operationRangeType, operationRangeType.min, operationRangeType.max);
+                    for (var n = operationRangeType.min; n <= operationRangeType.max; n++) {
+                        
+                        var strOut = "";
+                        if(operationFuncType===OperationTypes.CHAR_FUNCTION){
+                            strOut = StringUtils.applyCharFunction(s, operFunc, n);;
+                        }
+                        if(operationFuncType===OperationTypes.STR_FUNCTION){
+                            strOut = StringUtils.applyStrFunction(s, operFunc, n);;
+                        }
+                        
                         var cleanedOut = StringUtils.cleanUnprintableChars(strOut);
                         var hexOut = this.decArrayToHexArray(StringUtils.toCharCodes(strOut)).join(" ");
 
@@ -335,9 +368,9 @@
                     row.classList.add('result-type-header');
                     cell = row.insertCell(0);
                     cell.colSpan = 3;
-                    var operationType = this.operationTypes.get(op.type);
+                    var operationRangeType = this.operationRanges.get(op.rangeType);
                     //cell.innerHTML = "<b>"+StringUtils.escapeHTML(op.displayName)+" - All "+StringUtils.escapeHTML(operationType.displayName)+"</b>";
-                    cell.innerHTML = StringUtils.escapeHTML(op.displayName) + " - All " + StringUtils.escapeHTML(operationType.displayName);
+                    cell.innerHTML = StringUtils.escapeHTML(op.displayName) + " - All " + StringUtils.escapeHTML(operationRangeType.displayName);
 
                     var row2 = thead.insertRow();
                     row2.classList.add('result-column-header');
@@ -350,7 +383,7 @@
 
                     var tbody = tableElem.createTBody();
 
-                    this.tryAllRange(operationType, s, op.apply, tbody);
+                    this.tryAllRange(op.funcType,operationRangeType, s, op.apply, tbody);
 
                     resultsElem.appendChild(tableElem);
                 },
@@ -511,7 +544,7 @@
         </script>
     </head>
     <body>
-        <h2>Byte Shifts/Xor Report v2.0</h2>
+        <h2>Byte Shifts/Xor Report v2.1</h2>
         <hr>
         <div id="controls">
             <input type="text" id="txt" placeholder="Text"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_txt()"> <i>OR</i><br>
