@@ -13,6 +13,7 @@ html,body {height: 100%;width: 100%;  overflow: hidden; }
     font-size:10pt;
     border-right: 1px solid red;
     background-color:#0f0f0f;
+    overflow-y: auto;
 }
 
 #text {
