@@ -16,16 +16,18 @@ jxlate.ui.toolbox = {
      * @type {Array}
      */
     tools: [
-        ['replace', 'Replace one phrase with another'],
+        ['replace', 'Replace one phrase with another'],//0
         ['case', 'Toggle letter case'],
         ['length', 'Find the total length'],
         ['reverse', 'Reverse all characters'],
         ['shift', 'Apply Caesar shift'],
-        ['invert', 'Invert bit values'],
+        ['invert', 'Invert bit values'],//5
         ['greverse', 'Reverse groupings only'],
         ['stripspaces', 'Remove spaces'],
         ['xor', 'XOR each byte against a number'],
-        ['byteshift','Shift each byte value by some amount']
+        ['byteshift','Shift each byte value by some amount'],
+        ['filein', 'Import file...'],//10
+        ['fileout', 'Export file...']//11
     ],
 
     /**
@@ -72,15 +74,15 @@ jxlate.ui.toolbox = {
         this.textarea = textarea;
         this.events.hide();
 
-        this.toolsets[0] = [2];
-        this.toolsets[2] = [0, 2, 3, 5, 6, 7, 8, 9];//TODO: add word-reversal.
-        this.toolsets[8] = [0, 2, 3, 5, 6, 8, 9];
-        this.toolsets[10] = [0, 2, 3, 5, 6, 8, 9];
-        this.toolsets[16] = [0, 1, 2, 3, 5, 6, 7, 8, 9];
-        this.toolsets[32] = [2, 7];
-        this.toolsets[64] = [2, 7];
-        this.toolsets[85] = [2];
-        this.toolsets[256] = [0, 1, 2, 3, 4];
+        this.toolsets[0] = [10,11,2];
+        this.toolsets[2] = [10,11,0, 2, 3, 5, 6, 7, 8, 9];//TODO: add word-reversal.
+        this.toolsets[8] = [10,11,0, 2, 3, 5, 6, 8, 9];
+        this.toolsets[10] = [10,11,0, 2, 3, 5, 6, 8, 9];
+        this.toolsets[16] = [10,11,0, 1, 2, 3, 5, 6, 7, 8, 9];
+        this.toolsets[32] = [10,11,2, 7];
+        this.toolsets[64] = [10,11,2, 7];
+        this.toolsets[85] = [10,11,2];
+        this.toolsets[256] = [10,11,0, 1, 2, 3, 4];
     },
     
     /**
@@ -192,6 +194,13 @@ jxlate.ui.toolbox = {
             else
                 jxlate.ui.toolbox.events.show();
             jxlate.ui.toolbox.shown = !jxlate.ui.toolbox.shown;
+        },
+
+        action_filein: function(){
+          jxlate.ui.addFile();  
+        },
+        action_fileout: function(){
+          jxlate.ui.getAsFile();  
         },
 
         /**

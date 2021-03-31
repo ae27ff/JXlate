@@ -16,6 +16,17 @@ jxlate.util = {
             n += d;
         //console.log(n%d);
         return (n % d);
+    },
+    stobuf: function(str) {
+        var buf = new ArrayBuffer(str.length);
+        var bufView = new Uint8Array(buf);
+        for (var i=0, strLen=str.length; i < strLen; i++) {
+          bufView[i] = str.charCodeAt(i);
+          if(str.charCodeAt(i)<0 || str.charCodeAt(i)>255){
+              console.log("!!! "+str.charCodeAt(i));
+          }
+        }
+        return buf;
     }
 };
 

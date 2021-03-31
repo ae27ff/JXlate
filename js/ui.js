@@ -22,6 +22,18 @@ jxlate.ui = {
     textarea: null,
     
     /**
+     * UI element used for local file importing
+     * @type HTMLElement
+     */
+    fileUpTrigger:null,
+    
+    /**
+     * UI element used for local file exporting
+     * @type HTMLElement
+     */
+    fileDownTrigger:null,
+    
+    /**
      * Defines the type of layout displayed by the UI.
      * 
      * Currently this can be "desktop" or "lite", or null if not correctly set.
@@ -77,6 +89,10 @@ jxlate.ui = {
         var a = jxlate.formatter.input2buffer(text, baseFrom);
         return jxlate.translator.array_base2base(a, baseFrom, 10);
     },
+    getInputAsDatastring:function(){
+        var decarr = this.getInputAsDecimalArray();
+        return String.fromCharCode.apply(null, decarr);
+    },
     
     /**
      * Set the input from an array of decimal values converted back into the given base
@@ -85,9 +101,16 @@ jxlate.ui = {
      * @return {undefined}
      */
     setInputFromDecimalArray:function(arr,baseTo){
+        if(typeof baseTo==="undefined" || baseTo===-1) baseTo = this.getSelectedBase();
         var a = jxlate.translator.array_base2base(arr, 10, baseTo);
         var text = jxlate.formatter.buffer2output(a, baseTo);
         this.setInputText(text);
+    },
+    
+    setInputFromDatastring:function(str,baseTo){
+        var arr = [];
+        for(var i=0;i<str.length;i++) arr.push(str.charCodeAt(i));
+        this.setInputFromDecimalArray(arr,baseTo);
     },
     
     
@@ -171,6 +194,9 @@ jxlate.ui = {
             this.textarea.focus();
         }
 
+        this.fileUpTrigger = document.getElementById('ui-addfile-trigger');
+        this.fileDownTrigger = document.getElementById('ui-downloadfile-trigger');
+        
         var options = document.getElementById("options");
         if(this.display!=="lite"){
             if (options.addEventListener) {// add a listener for scrolling over the mode selector - allowing easier conversion
@@ -190,6 +216,7 @@ jxlate.ui = {
             this.toolbox.addtooln(2);
             this.toolbox.addtooln(3);
             this.toolbox.addtooln(4);
+            this.toolbox.switch(this.getSelectedBase());//fix for toolbox not loading options at init
         }
 
         setInterval(this.events.pollRadioBox, 100);//poll the radio selector for changes, using an event for this has some issues between browsers.
@@ -218,6 +245,109 @@ jxlate.ui = {
                 return radios[i].value;
         return undefined;
     },
+    
+    
+    getDataBlob:function(data){
+        var buf = jxlate.util.stobuf(data);
+        //console.log(buf)
+        //data=decodeURIComponent(escape(data));
+        //data=unescape(encodeURIComponent(data));
+        return new Blob([buf], {type: 'application/octet-stream;charset=utf-8;'});//TODO: IE is messing up file encoding!
+    },
+    ieDownloadData:function(data,filename){
+        var dlData = this.getDataBlob(data);
+        navigator.msSaveBlob(dlData, filename);
+    },
+    setDlLink:function(data, filename){
+        var linkElem = this.fileDownTrigger;
+        if (navigator.msSaveBlob) {
+            linkElem.setAttribute('onclick', "jxlate.ui.ieDownloadData(atob('"+btoa(data)+"'),'"+filename+"')");
+        }else{
+            var dlData = this.getDataBlob(data);
+            var dlURL = window.URL.createObjectURL(dlData);
+            linkElem.href = dlURL;
+            linkElem.setAttribute('download', filename);
+        }
+    },
+    
+    getAsFile: function(){//NOTE: this method can only be triggered from a user interaction event
+        this.fileUpTrigger.style.display="block";
+        this.setDlLink(this.getInputAsDatastring(),"jxlate-export.data");
+        this.fileDownTrigger.click();
+        this.fileUpTrigger.style.display="none";
+    },
+    
+    
+    
+    addFile: function(){//NOTE: this method can only be triggered from a user interaction event
+        this.fileUpTrigger.style.display="block";
+        this.fileUpTrigger.value=null;//ensure the previous file is cleared.
+        this.fileUpTrigger.click();//open file select window
+        this.fileUpTrigger.style.display="none";
+    },
+    
+    
+    addFileObject: function(f){
+        console.log("addfileobj "+f);
+        var reader = new FileReader();
+        var this0 = this;
+        reader.onload = (function(theFile) {
+		return function(e) {
+                        console.log("reader onload");
+
+                        window.g_debug_event=e;
+                        window.g_debug_target=e.target;
+                        window.g_debug_result=e.target.result;
+                        
+                        var result=null;
+                        if(typeof e.target.result === "undefined" || e.target.result===null){
+                            result=e.target.content;//IE11
+                        }else{
+                            result=e.target.result;
+                        }
+                        
+                        if(result instanceof ArrayBuffer){
+                            var binaryData = "";
+                            var bytes = new Uint8Array(e.target.result);
+                            var length = bytes.byteLength;
+                            for (var i = 0; i < length; i++) binaryData += String.fromCharCode(bytes[i]);
+                            result = binaryData;
+                        }
+                        
+                        this0.setInputFromDatastring(result);
+                        
+			//console.log('x ',result);
+			//setTimeout(processData,250);
+		};
+	})(f);
+        
+        if (navigator.msSaveBlob) {
+            reader.readAsArrayBuffer(f);
+        }else{
+            reader.readAsBinaryString(f);
+        }
+        //readAsArrayBuffer
+        
+        
+        
+        //reader.readAsText(f);
+    },
+    
+    handleFileSelectEvent: function(evt){
+        console.log("file select evt "+evt);
+        this.handleFileSelect(evt.target);
+    },
+    handleFileSelect: function(target){
+        console.log("file select "+target);
+	var files = target.files; // FileList object
+
+	// use the 1st file from the list
+        for(var i=0;i<files.length;i++){
+            this.addFileObject(files[i]);
+            break;//well, we only actually accept one file. sorry.
+        }
+    },
+    
 
     /**
      * Sets the current UI data mode (base) selection without data conversion or further UI updates.
