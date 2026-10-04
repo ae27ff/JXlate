@@ -38,7 +38,20 @@ String.prototype.replaceAll = function (target, replacement) {
 };
 
 String.prototype.reverse = function () {
-    return this.split("").reverse().join("");
+    var characters = [];
+    for (var i = 0; i < this.length; i++) {
+        var codeUnit = this.charCodeAt(i);
+        if (codeUnit >= 0xD800 && codeUnit <= 0xDBFF && i + 1 < this.length) {
+            var nextCodeUnit = this.charCodeAt(i + 1);
+            if (nextCodeUnit >= 0xDC00 && nextCodeUnit <= 0xDFFF) {
+                characters.push(this.substr(i, 2));
+                i++;
+                continue;
+            }
+        }
+        characters.push(this.charAt(i));
+    }
+    return characters.reverse().join("");
 };
 
 String.prototype.stripWhitespace = function () {
