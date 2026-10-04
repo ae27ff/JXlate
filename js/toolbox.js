@@ -252,14 +252,15 @@ jxlate.ui.toolbox = {
             var replace = prompt("Enter the string to replace with", "");
             if (replace === null)
                 return;
-            jxlate.ui.toolbox.textarea.value = jxlate.ui.toolbox.textarea.value.replaceAll(search, replace);
+            jxlate.ui.setInputText(jxlate.ui.getInputText().replaceAll(search, replace));
         },
         action_case: function () {
-            var textarea = jxlate.ui.toolbox.textarea;
+            var text = jxlate.ui.getInputText();
             if (jxlate.ui.toolbox.lettercase)
-                textarea.value = textarea.value.toUpperCase();
+                text = text.toUpperCase();
             else
-                textarea.value = textarea.value.toLowerCase();
+                text = text.toLowerCase();
+            jxlate.ui.setInputText(text);
             jxlate.ui.toolbox.lettercase = !jxlate.ui.toolbox.lettercase;
         },
         action_length: function () {
@@ -277,7 +278,7 @@ jxlate.ui.toolbox = {
             alert(out);
         },
         action_reverse: function () {
-            jxlate.ui.toolbox.textarea.value = jxlate.ui.toolbox.textarea.value.reverse();
+            jxlate.ui.setInputText(jxlate.ui.getInputText().reverse());
         },
         action_shift: function () {
             var shift = prompt("Please enter the caesar shift value", "13");
@@ -294,22 +295,21 @@ jxlate.ui.toolbox = {
             }
             if (shift === 0)
                 return;
-            jxlate.ui.toolbox.textarea.value = Caesar(1, jxlate.ui.toolbox.textarea.value, shift);
+            jxlate.ui.setInputText(Caesar(1, jxlate.ui.getInputText(), shift));
         },
 
         action_invert: function () {//NOTE: uses 'mode' and 'mode_bases' global from ui.js
-            var textarea = jxlate.ui.toolbox.textarea;
             var base = jxlate.ui.mode_bases[jxlate.ui.mode];
-            var tmp = jxlate.ui.convertText(textarea.value, base, 2);
+            var tmp = jxlate.ui.convertText(jxlate.ui.getInputText(), base, 2);
             tmp = jxlate.ui.toolbox.invertbits(tmp);
-            textarea.value = jxlate.ui.convertText(tmp, 2, base);
+            jxlate.ui.setInputText(jxlate.ui.convertText(tmp, 2, base));
         },
         action_greverse: function () {
-            jxlate.ui.toolbox.textarea.value = jxlate.ui.toolbox.textarea.value.split("").reverse().join("").split(" ").reverse().join(" ");
+            jxlate.ui.setInputText(jxlate.ui.getInputText().split("").reverse().join("").split(" ").reverse().join(" "));
         },
         action_stripspaces: function () {
             //TODO: operate on existing value instead of re-reading
-            jxlate.ui.toolbox.textarea.value = jxlate.ui.toolbox.textarea.value.stripWhitespace();
+            jxlate.ui.setInputText(jxlate.ui.getInputText().stripWhitespace());
         }
     },
 //==============================================

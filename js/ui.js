@@ -20,6 +20,13 @@ jxlate.ui = {
      * @type {undefined}
      */
     textarea: null,
+
+    /**
+     * Preserves the exact text assigned to a text mode when textarea value
+     * normalization changes its line endings (for example CR to LF).
+     * @type {Object|null}
+     */
+    textRepresentation: null,
     
     /**
      * UI element used for local file importing
@@ -59,7 +66,7 @@ jxlate.ui = {
      * @return {String}
      */
     getInputText:function(){
-        return this.textarea.value;
+        return this._getTextRepresentation(this.getSelectedBase());
     },
     
     /**
@@ -68,7 +75,45 @@ jxlate.ui = {
      * @return {undefined}
      */
     setInputText:function(text){
-        this.textarea.value=text;
+        this._setTextRepresentation(text, this.getSelectedBase());
+    },
+
+    _isTextBase:function(base){
+        return base === 256 || base === "ucs2" || base === "utf8";
+    },
+
+    _getTextRepresentation:function(base){
+        var visibleText = this.textarea.value;
+        if (this.textRepresentation !== null &&
+            this.textRepresentation.base === base &&
+            this.textRepresentation.visibleText === visibleText)
+            return this.textRepresentation.rawText;
+        return visibleText;
+    },
+
+    _setTextRepresentation:function(text, base){
+        this.textarea.value = text;
+        if (this._isTextBase(base)) {
+            this.textRepresentation = {
+                base: base,
+                rawText: text,
+                visibleText: this.textarea.value
+            };
+        } else {
+            this.textRepresentation = null;
+        }
+    },
+
+    _relabelTextRepresentation:function(oldBase, newBase){
+        if (this.textRepresentation !== null &&
+            this.textRepresentation.base === oldBase &&
+            this.textRepresentation.visibleText === this.textarea.value &&
+            this._isTextBase(newBase))
+            this.textRepresentation.base = newBase;
+    },
+
+    _invalidateTextRepresentation:function(){
+        this.textRepresentation = null;
     },
     
     /**
@@ -108,7 +153,7 @@ jxlate.ui = {
         if(typeof baseTo==="undefined" || baseTo===-1) baseTo = this.getSelectedBase();
         var a = jxlate.translator.array_base2base(arr, 10, baseTo);
         var text = jxlate.formatter.buffer2output(a, baseTo);
-        this.setInputText(text);
+        this._setTextRepresentation(text, baseTo);
     },
     
     setInputFromDatastring:function(str,baseTo){
@@ -154,10 +199,9 @@ jxlate.ui = {
      * @return {undefined}
      */
     switchMode: function (mode, newmode) {//mode is changing - retrieve all of the parameters needed to start a translation and prepare the form.
-        var text = this.textarea.value;
-
         var base = jxlate.ui.mode_bases[mode];
         var newbase = jxlate.ui.mode_bases[newmode];
+        var text = jxlate.ui._getTextRepresentation(base);
 
         if (text === "") {
             jxlate.ui.toolbox.switch(newbase);
@@ -169,7 +213,7 @@ jxlate.ui = {
         //    return foo(jxlate.ui.textarea);
 
         text = jxlate.ui.convertText(text, base, newbase);
-        jxlate.ui.textarea.value = text;
+        jxlate.ui._setTextRepresentation(text, newbase);
         jxlate.ui.toolbox.switch(newbase);
         if(jxlate.ui.display!=="lite") jxlate.ui.textarea.focus();
 
@@ -195,6 +239,11 @@ jxlate.ui = {
         if (this.mainForm === null) {
             this.mainForm = document.getElementById('frmInput');
             this.textarea = this.mainForm.elements["text"];
+            this.textRepresentation = null;
+            if (this.textarea.addEventListener)
+                this.textarea.addEventListener("input", this.events.InvalidateTextRepresentation, false);
+            else if (this.textarea.attachEvent)
+                this.textarea.attachEvent("oninput", this.events.InvalidateTextRepresentation);
             this.setModeState(0);
             this.textarea.value = "";//clearing old form input
             this.textarea.focus();
@@ -393,6 +442,10 @@ jxlate.ui = {
                 var oldmode = jxlate.ui.mode;
                 jxlate.ui.mode = newmode;//change the current mode value.
                 if (jxlate.ui.isTextMode(oldmode) && jxlate.ui.isTextMode(newmode)) {
+                    jxlate.ui._relabelTextRepresentation(
+                        jxlate.ui.mode_bases[oldmode],
+                        jxlate.ui.mode_bases[newmode]
+                    );
                     console.log('text to text conversion has been deprecated. performing no action');
                     return;
                 }
@@ -408,6 +461,10 @@ jxlate.ui = {
                 }
                 console.log("conversion complete");
             }
+        },
+
+        InvalidateTextRepresentation: function(){
+            jxlate.ui._invalidateTextRepresentation();
         },
         
         /**
