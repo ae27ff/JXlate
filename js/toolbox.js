@@ -174,6 +174,7 @@ jxlate.ui.toolbox = {
          */
         show: function () {
             jxlate.ui.toolbox.tbox.style.display = 'block';
+            jxlate.ui.toolbox.shown = true;
         },
         
         /**
@@ -182,6 +183,7 @@ jxlate.ui.toolbox = {
          */
         hide: function () {
             jxlate.ui.toolbox.tbox.style.display = 'none';
+            jxlate.ui.toolbox.shown = false;
         },
         
         /**
@@ -193,7 +195,6 @@ jxlate.ui.toolbox = {
                 jxlate.ui.toolbox.events.hide();
             else
                 jxlate.ui.toolbox.events.show();
-            jxlate.ui.toolbox.shown = !jxlate.ui.toolbox.shown;
         },
 
         action_filein: function(){
@@ -240,7 +241,6 @@ jxlate.ui.toolbox = {
                 return;
             }
             jxlate.ui.toolbox.performDecimalOperation(function(input_value){
-                console.log(input_value + " + " + shift_value + " = "+jxlate.util.modp(input_value + shift_value, 256));
                 return jxlate.util.modp(input_value + shift_value, 256);
             });
         },
@@ -260,6 +260,10 @@ jxlate.ui.toolbox = {
                 text = text.toUpperCase();
             else
                 text = text.toLowerCase();
+            if (jxlate.ui.getSelectedBase() === 256 && /[^\x00-\xff]/.test(text)) {
+                alert("This letter case requires Unicode characters. Select UTF-8 or UCS-2 text mode first.");
+                return;
+            }
             jxlate.ui.setInputText(text);
             jxlate.ui.toolbox.lettercase = !jxlate.ui.toolbox.lettercase;
         },
@@ -300,10 +304,7 @@ jxlate.ui.toolbox = {
         },
 
         action_invert: function () {//NOTE: uses 'mode' and 'mode_bases' global from ui.js
-            var base = jxlate.ui.mode_bases[jxlate.ui.mode];
-            var tmp = jxlate.ui.convertText(jxlate.ui.getInputText(), base, 2);
-            tmp = jxlate.ui.toolbox.invertbits(tmp);
-            jxlate.ui.setInputText(jxlate.ui.convertText(tmp, 2, base));
+            jxlate.ui.toolbox.performDecimalOperation(function(byte){return byte ^ 255;});
         },
         action_greverse: function () {
             jxlate.ui.setInputText(jxlate.ui.getInputText().replace(/\S+/g, function(group){
