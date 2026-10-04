@@ -76,8 +76,17 @@ var ascii85 = this.ascii85 = (function () {
   };
   ascii85.decode = function (a85text) {
     assertOrBadInput ((a85text.slice(0,2) === '<~') && (a85text.slice(-2) === '~>'), 'Invalid initial/final ascii85 characters');
-    // kill whitespace, handle special 'z' case
-    a85text = a85text.slice(2,-2).replace(/\s/g, '').replace('z', '!!!!!');
+    // kill whitespace and handle each complete zero block
+    a85text = a85text.slice(2,-2).replace(/\s/g, '');
+    var groupPosition = 0;
+    for (var j = 0; j < a85text.length; j++) {
+      if (a85text.charAt(j) === 'z') {
+        assertOrBadInput(groupPosition === 0, 'The zero-block shorthand must start at a group boundary.');
+      } else {
+        groupPosition = (groupPosition + 1) % 5;
+      }
+    }
+    a85text = a85text.replace(/z/g, '!!!!!');
     assertOrBadInput(!(/[^\x21-\x75]/.test(a85text)), 'Input contains out-of-range characters.');
     var padding = '\x75\x75\x75\x75\x75'.slice((a85text.length % 5) || 5);
     a85text += padding; // pad with 'u'
