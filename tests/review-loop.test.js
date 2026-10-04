@@ -46,7 +46,7 @@ for (const name of ['missing', 'constructor', '__proto__'])
     assert.throws(() => context.convert_encoding('A', name, 'utf8'));
 const morseText = 'ABC XYZ 1234567890';
 assert.equal(ui.convertText(ui.convertText(morseText, 256, 'mc'), 'mc', 256), morseText);
-assert.throws(() => ui.convertText('A!', 256, 'mc'));
+assert.throws(() => ui.convertText('A#', 256, 'mc'));
 assert.throws(() => ui.convertText('\xdf', 256, 'mc'));
 assert.throws(() => ui.convertText('......', 'mc', 256));
 assert.equal(Object.hasOwn(context, 'idx'), false);

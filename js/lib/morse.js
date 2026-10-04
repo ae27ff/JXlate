@@ -10,7 +10,7 @@ var morse = {
      * All characters supported for morse encoding
      * @type {String}
      */
-    character_set: " ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+    character_set: " ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.,?'!/()&:;=+-_\"$@",
     
     /**
      * Array of all morse codes supported.
@@ -57,7 +57,27 @@ var morse = {
         "--...",
         "---..",
         "----.",
-        "-----"
+        "-----",
+
+        // Punctuation from ITU-R M.1677-1, plus the common ! & ; _ $ extensions.
+        ".-.-.-", // .
+        "--..--", // ,
+        "..--..", // ?
+        ".----.", // '
+        "-.-.--", // !
+        "-..-.",  // / (literal slash; the standalone / token represents a space)
+        "-.--.",  // (
+        "-.--.-", // )
+        ".-...",  // &
+        "---...", // :
+        "-.-.-.", // ;
+        "-...-",  // =
+        ".-.-.",  // +
+        "-....-", // -
+        "..--.-", // _
+        ".-..-.", // "
+        "...-..-", // $
+        ".--.-."  // @
     ],
     
     /**
