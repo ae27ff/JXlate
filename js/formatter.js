@@ -59,7 +59,7 @@ jxlate.formatter = {
     buffer2output: function (a, base, formatHint) {
         if(typeof formatHint === "undefined") formatHint="";
         if (base == 256 || base === "ucs2" || base === "utf8") {
-            return this.strstripnongraph(a.join(""));//do not display any special/control characters etc.
+            return a.join("");//preserve every code unit so display formatting cannot corrupt later conversions.
         } else if (base == 2) {
             for (var i = 0; i < a.length; i++)
                 a[i] = this.padZeroes(a[i], 8);//make sure the binary output is in groups of 8 bits all displayed.
