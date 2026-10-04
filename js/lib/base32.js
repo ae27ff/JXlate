@@ -36,6 +36,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *   codeBits: The number of bits in each character of encoded data.
  *   keyString: The characters that correspond to each value when encoded.
  *   pad (optional): The character to pad the end of encoded output.
+ *   omitPadding (optional): If true, omit pad characters when encoding only.
  *   arrayData (optional): If truthy, unencoded data is an array instead of a string.
  *
  * Example:
@@ -71,7 +72,7 @@ var Nibbler = function (options) {
 	var construct,
 
 		// options
-		pad, dataBits, codeBits, keyString, arrayData,
+		pad, omitPadding, dataBits, codeBits, keyString, arrayData,
 
 		// private instance variables
 		mask, group, max,
@@ -87,7 +88,8 @@ var Nibbler = function (options) {
 		var i, mag, prev;
 
 		// options
-		pad = options.pad || '';
+		pad = typeof options.pad === 'undefined' ? '' : options.pad;
+		omitPadding = typeof options.omitPadding === 'undefined' ? false : options.omitPadding;
 		dataBits = options.dataBits;
 		codeBits = options.codeBits;
 		keyString = options.keyString;
@@ -95,7 +97,8 @@ var Nibbler = function (options) {
 		if (typeof dataBits !== 'number' || dataBits % 1 !== 0 || dataBits < 1 || dataBits > 16 ||
 			typeof codeBits !== 'number' || codeBits % 1 !== 0 || codeBits < 1 || codeBits > dataBits ||
 			typeof keyString !== 'string' || keyString.length !== Math.pow(2, codeBits) ||
-			(pad !== '' && (typeof pad !== 'string' || pad.length !== 1 || keyString.indexOf(pad) >= 0))) {
+			(pad !== '' && (typeof pad !== 'string' || pad.length !== 1 || keyString.indexOf(pad) >= 0)) ||
+			typeof omitPadding !== 'boolean') {
 			throw 'invalid encoder options';
 		}
 		var seen = Object.create(null);
@@ -204,7 +207,7 @@ var Nibbler = function (options) {
 			write(buffer << (bitsOut - size));
 
 			// add padding string for the remainder of the group
-			while (output.length % group > 0) {
+			while (!omitPadding && output.length % group > 0) {
 				output.push(pad);
 			}
 		}
@@ -244,6 +247,8 @@ var Nibbler = function (options) {
 					throw 'the encoded padding is invalid';
 			}
 		}
+		// Unused trailing bits do not change the decoded data. Accept them,
+		// while the encoder always emits their canonical zero value.
 		return translate(input, codeBits, dataBits, true);
 	};
 
@@ -264,7 +269,8 @@ base32ckr = new Nibbler({
     dataBits: 8,
     codeBits: 5,
     keyString: '0123456789ABCDEFGHJKMNPQRSTVWXYZ',
-    pad: '='
+    pad: '=',
+    omitPadding: true
 });
 base32hex = new Nibbler({
     dataBits: 8,
@@ -272,5 +278,3 @@ base32hex = new Nibbler({
     keyString: '0123456789ABCDEFGHIJKLMNOPQRSTUV',
     pad: '='
 });
-
-
