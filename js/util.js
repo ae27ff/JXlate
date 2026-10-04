@@ -17,13 +17,15 @@ jxlate.util = {
         return remainder < 0 ? remainder + d : (remainder === 0 ? 0 : remainder);
     },
     stobuf: function(str) {
+        if (typeof str !== "string")
+            throw "buffer input must be a byte string";
         var buf = new ArrayBuffer(str.length);
         var bufView = new Uint8Array(buf);
         for (var i=0, strLen=str.length; i < strLen; i++) {
-          bufView[i] = str.charCodeAt(i);
-          if(str.charCodeAt(i)<0 || str.charCodeAt(i)>255){
-              console.log("!!! "+str.charCodeAt(i));
-          }
+          var byte = str.charCodeAt(i);
+          if (byte > 255)
+              throw "buffer input must contain byte values from 0 to 255";
+          bufView[i] = byte;
         }
         return buf;
     }
@@ -32,6 +34,11 @@ jxlate.util = {
 
 
 String.prototype.replaceAll = function (target, replacement) {
+    if (target === "") {
+        if (this.length === 0)
+            return String(replacement);
+        return replacement + this.split("").join(replacement) + replacement;
+    }
     return this.split(target).join(replacement);
     //return this.replace(new RegExp(this.escapeRegExp(target), 'g'), replacement);
 };
