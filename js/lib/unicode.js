@@ -22,12 +22,8 @@ function ucs2_to_iso88591(s) {
     console.log(uchars);
     for (var i = 0; i < s.length; i++) {
         var c = s.charAt(i);
-        var u = s.charCodeAt(i);
-        if (u >= 0x100) {//unicode characters
-            hex += jxlate.ui.convertText(c, 256, 16);//char to hex value - euro->20AC
-        } else {//characters under ISO-8859-1 already
-            hex += "00" + jxlate.ui.convertText(c, 256, 16);//char to null+hex 'z'->005A
-        }
+        var codeUnitHex = jxlate.ui.convertText(c, 256, 16);
+        hex += ("0000" + codeUnitHex).slice(-4);//UCS-2 is two bytes per UTF-16 code unit.
     }
 
     return jxlate.ui.convertToBytesNF(hex, 16);
