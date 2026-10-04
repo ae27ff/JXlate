@@ -264,8 +264,9 @@ jxlate.ui.toolbox = {
             jxlate.ui.toolbox.lettercase = !jxlate.ui.toolbox.lettercase;
         },
         action_length: function () {
-            var l = jxlate.ui.toolbox.textarea.value.length;
-            var sl = jxlate.ui.toolbox.strippedlen(jxlate.ui.toolbox.textarea.value);
+            var text = jxlate.ui.getInputText();
+            var l = text.length;
+            var sl = jxlate.ui.toolbox.strippedlen(text);
             var out = "Total length: " + l;
             var base = jxlate.ui.mode_bases[jxlate.ui.mode];
             if (base === 2) {
