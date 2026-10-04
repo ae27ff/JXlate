@@ -211,6 +211,19 @@ var Nibbler = function (options) {
 	 * Decode.  Input and output are strings.
 	 */
 	decode = function (input) {
+		if (pad !== '') {
+			var paddingIndex = input.indexOf(pad);
+			var dataLength = (paddingIndex < 0) ? input.length : paddingIndex;
+			var remainder = dataLength % 8;
+			var requiredPadding = {0: 0, 2: 6, 4: 4, 5: 3, 7: 1}[remainder];
+			if (typeof requiredPadding === 'undefined') {
+				throw 'the final base32 group has an invalid length';
+			}
+			if (paddingIndex >= 0 &&
+				(input.length % 8 !== 0 || requiredPadding === 0 || input.length - dataLength !== requiredPadding)) {
+				throw 'the base32 padding is invalid';
+			}
+		}
 		return translate(input, codeBits, dataBits, true);
 	};
 
