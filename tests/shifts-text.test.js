@@ -45,4 +45,24 @@ assert.equal(reports[1], '\xe2\x82\xac');
 fields.hex.value = 'e2 82 ac';
 tool.report_hex();
 assert.equal(reports[2], '\xe2\x82\xac');
+for (const length of [8191, 8192, 8193, 200000]) {
+    const codes = Array.from({ length }, (_, i) => String((i * 73) % 256));
+    const expected = Buffer.from(codes.map(Number)).toString('latin1');
+    assert.equal(context.StringUtils.fromCharCodes(codes), expected);
+    for (const value of codes) assert.equal(typeof value, 'number');
+}
+const largeBytes = Buffer.from(Array.from({ length: 200000 }, (_, i) => (i * 73) % 256));
+const largeText = largeBytes.toString('latin1');
+reports = [];
+fields.txt.value = largeText;
+tool.report_txt();
+assert.equal(reports[0], largeText);
+fields.dec.value = Array.from(largeBytes).join(' ');
+tool.report_dec();
+assert.equal(reports[1], largeText);
+fields.hex.value = largeBytes.toString('hex');
+tool.report_hex();
+assert.equal(reports[2], largeText);
+const rotation = tool.operations.find(op => op.id === 'sbrotate');
+assert.equal(context.StringUtils.applyStrFunction(largeText, rotation.apply, 0), largeText);
 console.log('Shifts text regression tests passed');

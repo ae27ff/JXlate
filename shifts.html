@@ -179,14 +179,11 @@
                 fromCharCodes: function (arrCodes) {
                     for (var i = 0; i < arrCodes.length; i++)
                         arrCodes[i] = +arrCodes[i];//convert to number
-                    if (Object.apply) {
-                        return String.fromCharCode.apply(null, arrCodes);
-                    } else {
-                        var o = "";
-                        for (var i = 0; i < arrCodes.length; i++)
-                            o += String.fromCharCode(parseInt(arrCodes[i]));
-                        return o;
-                    }
+                    var chunks = [];
+                    var chunkSize = 8192;
+                    for (var i = 0; i < arrCodes.length; i += chunkSize)
+                        chunks.push(String.fromCharCode.apply(null, arrCodes.slice(i, i + chunkSize)));
+                    return chunks.join("");
                 },
                 applyCharFunction: function (s, charFunction, n) {
                     let o = "";
