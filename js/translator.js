@@ -216,8 +216,11 @@ if (typeof jxlate === "undefined") {
 
             if (base === 10)
                 return d.toString();//decimal to decimal, nothing to do except to ensure a String
-            if (base === 256)
+            if (base === 256) {
+                if (d < 0 || d > 255)
+                    throw "byte value must be between 0 and 255";
                 return String.fromCharCode(d);//decimal to byte, enough said
+            }
 
             //decimal to an arbitrary-base numeral string
             var snum = "";
