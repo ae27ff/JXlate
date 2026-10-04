@@ -336,9 +336,15 @@ jxlate.ui = {
     
     getAsFile: function(){//NOTE: this method can only be triggered from a user interaction event
         this.fileUpTrigger.style.display="block";
-        this.setDlLink(this.getInputAsDatastring(),"jxlate-export.data");
-        this.fileDownTrigger.click();
-        this.fileUpTrigger.style.display="none";
+        try {
+            this.setDlLink(this.getInputAsDatastring(),"jxlate-export.data");
+            this.fileDownTrigger.click();
+        } catch (e) {
+            alert("This value could not be exported as a file. Please check that it contains valid byte values.\n\n"
+                    + "Technical Reason: " + e);
+        } finally {
+            this.fileUpTrigger.style.display="none";
+        }
     },
     
     
