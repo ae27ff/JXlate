@@ -17,9 +17,12 @@ jxlate.ui.litemenu={
         this.createToolboxLabel(document.getElementsByClassName("toolopen")[0]);
     },
     createToolboxLabel:function(tool_div){
-        var tool_img=tool_div.firstChild;
         if(tool_div.children.length > 1) return;
-        tool_div.innerHTML=tool_div.innerHTML+'<span class="lite-tool-description">'+tool_img.title+'</span>';
+        var tool_img=tool_div.children[0];
+        var label=document.createElement("span");
+        label.className="lite-tool-description";
+        label.textContent=tool_img.title;
+        tool_div.appendChild(label);
         tool_img.title="";
     },
     createToolboxLabels:function(){
