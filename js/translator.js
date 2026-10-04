@@ -119,6 +119,8 @@ if (typeof jxlate === "undefined") {
             var n = prompt("Please enter the radix (base) to convert with. (only 2-36 supported)", "");
             if (n === null)
                 throw "no entry";
+            if (!/^\d+$/.test(n))
+                throw "invalid radix";
             n = parseInt(n);
             if (n < 2 || n > 36)
                 throw "invalid radix";
@@ -178,6 +180,8 @@ if (typeof jxlate === "undefined") {
 
             var d;
             if (base === 10) {
+                if (!/^\d+$/.test(snum))
+                    throw "invalid decimal numeral";
                 d = parseInt(snum);//decimal to decimal, nothing to do except make sure the output is an integer.
                 if (!isFinite(d) || Math.floor(d) !== d || Math.abs(d) > 9007199254740991)
                     throw "number exceeds the safe integer range";
@@ -229,23 +233,16 @@ if (typeof jxlate === "undefined") {
 
         /**
          * Converts a single digit string from a given numeral system to decimal.
-         * 
-         * Note: this method returns 0 for input digits that are invalid in the provided numeral system base (not present in the charset).
+         * Throws when the digit is not present in the provided numeral system.
          * @param {String} sdig a string containing a single digit in the given numeral system
          * @param {String|number} base the base to convert from
          * @return {Number} the equivalent decimal value of the input digit.
          */
         numeraldigit2dec: function (sdig, base) {//retrieve the decimal value of a single digit in a numeral system
             var idx = this.base_charsets[base].indexOf(sdig);
-            // there will be a problem here when your indexOf is the first character, since
-            // you return 0 if it's not found, but indexOf will return 0 if the first char
-            // is the matched item -CZ
-
-            // No problem there, that's what I intended as far as Base2 through 16: Invalid digits become null in valid (0 value).
-            // If this becomes a problem later we can return -1 and add a check to numeral2dec() and maybe not append it at all
-            // -CD
-
-            return (idx === -1) ? 0 : idx;
+            if (idx === -1)
+                throw "invalid digit '" + sdig + "' for base " + base;
+            return idx;
         },
 
 //encodeURI is the sucessor to this, but it encodes LESS chars, some of which urlencode() does
