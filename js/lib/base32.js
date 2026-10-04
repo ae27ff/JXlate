@@ -55,8 +55,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *     keyString: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
  *     pad: '='
  * });
- * base64_7bit.encode("Hello, World!");  // returns "kZdmzesQV9/LZkQg=="
- * base64_7bit.decode("kZdmzesQV9/LZkQg==");  // returns "Hello, World!"
+ * base64_7bit.encode("Hello, World!");  // returns "kZdmzesQV9/LZkQg====="
+ * base64_7bit.decode("kZdmzesQV9/LZkQg=====");  // returns "Hello, World!"
  *
  */
 var Nibbler = function (options) {
@@ -214,19 +214,22 @@ var Nibbler = function (options) {
 		if (pad !== '') {
 			var paddingIndex = input.indexOf(pad);
 			var dataLength = (paddingIndex < 0) ? input.length : paddingIndex;
-			var remainder = dataLength % 8;
-			var requiredPadding = {0: 0, 2: 6, 4: 4, 5: 3, 7: 1}[remainder];
-			if (typeof requiredPadding === 'undefined') {
-				throw 'the final base32 group has an invalid length';
+			var remainder = dataLength % group;
+			var decodedLength = Math.floor(remainder * codeBits / dataBits);
+			// A partial group must be the encoding of a whole number of
+			// data units. Derive its shape from this instance's bit widths.
+			if (Math.ceil(decodedLength * dataBits / codeBits) !== remainder) {
+				throw 'the final encoded group has an invalid length';
 			}
+			var requiredPadding = (group - remainder) % group;
 			if (paddingIndex >= 0 &&
-				(input.length % 8 !== 0 || requiredPadding === 0 || input.length - dataLength !== requiredPadding)) {
-				throw 'the base32 padding is invalid';
+				(input.length % group !== 0 || requiredPadding === 0 || input.length - dataLength !== requiredPadding)) {
+				throw 'the encoded padding is invalid';
 			}
 			if (paddingIndex >= 0) {
 				for (var i = paddingIndex; i < input.length; i++) {
 					if (input.charAt(i) !== pad)
-						throw 'the base32 padding is invalid';
+						throw 'the encoded padding is invalid';
 				}
 			}
 		}
