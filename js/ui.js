@@ -159,9 +159,10 @@ jxlate.ui = {
         var base = jxlate.ui.mode_bases[mode];
         var newbase = jxlate.ui.mode_bases[newmode];
 
-        jxlate.ui.toolbox.switch(newbase);
-        if (text === "")
+        if (text === "") {
+            jxlate.ui.toolbox.switch(newbase);
             return;
+        }
 
         //easter egg / credits
         //if (base === "32r" && newbase === 64 && text === "uuddlrlrba")
@@ -169,6 +170,7 @@ jxlate.ui = {
 
         text = jxlate.ui.convertText(text, base, newbase);
         jxlate.ui.textarea.value = text;
+        jxlate.ui.toolbox.switch(newbase);
         if(jxlate.ui.display!=="lite") jxlate.ui.textarea.focus();
 
     },
