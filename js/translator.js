@@ -176,31 +176,25 @@ if (typeof jxlate === "undefined") {
         numeral2dec: function (snum, sbase) {
             var base = parseInt(String(sbase).replace(/\D/g, ''));
 
-            if (base === 10)
-                return parseInt(snum);//decimal to decimal, nothing to do except make sure the output is an integer.
+            var d;
+            if (base === 10) {
+                d = parseInt(snum);//decimal to decimal, nothing to do except make sure the output is an integer.
+                if (!isFinite(d) || Math.floor(d) !== d || Math.abs(d) > 9007199254740991)
+                    throw "number exceeds the safe integer range";
+                return d;
+            }
             if (base === 256)
                 return snum.charCodeAt(0);//single byte to decimal, easy enough.
 
-            //numeral string representation to decimal, for each digit, decimal+=digitvalue*(base^place)
-            var d = 0;
-            var imax = snum.length - 1;
-            for (var i = 0; i <= imax; i++) {
+            //Accumulate one digit at a time so every intermediate can be range-checked.
+            d = 0;
+            for (var i = 0; i < snum.length; i++) {
                 var sdig = snum.substr(i, 1);//current digit of numeral string
                 var n = this.numeraldigit2dec(sdig, sbase);//retrieve the decimal value of the single digit in the numeral system
-                var p = imax - i;//determine the 0-based 'place' in the numeral that the digit is at.  this is a reverse index in the range [imax,0]
-                var v = n * Math.pow(base, p);//digitvalue*(base^place) to calculate the decimal value of the digit at it's 'place' in the numeral. (eg: F in F00 -> 3840)
-                d += v;
-                //console.log("i:"+i+" dig:"+sdig+" form: "+v+"="+n+"*("+base+"^"+p+")")
+                d = d * base + n;
+                if (!isFinite(d) || Math.floor(d) !== d || d > 9007199254740991)
+                    throw "number exceeds the safe integer range";
             }
-            /*
-             a bit insane and unreadable, but for fun:
-             for (
-             var i=0,d=0,imax=snum.length-1,sdig=0,n=0,p=0,v=0 ;
-             i<=imax ;
-             i++, sdig=snum.substr(i,1), n=numeraldigit2dec(sdig,sbase), p=imax-i, v=n*Math.pow(base,p), d+= v
-             ) {}
-             return d;
-             */
             return d;
         },
 
@@ -212,6 +206,9 @@ if (typeof jxlate === "undefined") {
          */
         dec2numeral: function (d, sbase) {
             var base = parseInt(String(sbase).replace(/\D/g, ''));//replace any non-digit chars and cast/interpret to an Integer.
+
+            if (!isFinite(d) || Math.floor(d) !== d || Math.abs(d) > 9007199254740991)
+                throw "number exceeds the safe integer range";
 
             if (base === 10)
                 return d.toString();//decimal to decimal, nothing to do except to ensure a String
