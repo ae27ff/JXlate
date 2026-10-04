@@ -91,7 +91,11 @@ jxlate.ui = {
     },
     getInputAsDatastring:function(){
         var decarr = this.getInputAsDecimalArray();
-        return String.fromCharCode.apply(null, decarr);
+        var data = "";
+        var chunkSize = 8192;
+        for (var i = 0; i < decarr.length; i += chunkSize)
+            data += String.fromCharCode.apply(null, decarr.slice(i, i + chunkSize));
+        return data;
     },
     
     /**
