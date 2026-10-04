@@ -306,7 +306,9 @@ jxlate.ui.toolbox = {
             jxlate.ui.setInputText(jxlate.ui.convertText(tmp, 2, base));
         },
         action_greverse: function () {
-            jxlate.ui.setInputText(jxlate.ui.getInputText().split("").reverse().join("").split(" ").reverse().join(" "));
+            jxlate.ui.setInputText(jxlate.ui.getInputText().replace(/\S+/g, function(group){
+                return group.reverse();
+            }));
         },
         action_stripspaces: function () {
             //TODO: operate on existing value instead of re-reading
