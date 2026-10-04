@@ -53,6 +53,42 @@ jxlate.ui = {
      */
     display:null,
 
+    inputOptionsStorageKey: 'jxlate.inputOptions',
+
+    loadInputOptions: function () {
+        try {
+            var preferences = JSON.parse(window.localStorage.getItem(this.inputOptionsStorageKey));
+            if (preferences && typeof preferences === 'object') {
+                if (preferences.base64Alphabet === 'base64uri' || preferences.base64Alphabet === 'y64')
+                    jxlate.translator.base64Alphabet = preferences.base64Alphabet;
+                if (typeof preferences.urlForgiving === 'boolean')
+                    jxlate.translator.urlForgiving = preferences.urlForgiving;
+                if (typeof preferences.urlForm === 'boolean')
+                    jxlate.translator.urlForm = preferences.urlForm;
+            }
+        } catch (error) {
+            // Storage may be unavailable or contain malformed preferences.
+        }
+        this.syncInputOptions();
+    },
+
+    syncInputOptions: function () {
+        var alphabet = document.getElementById('base64-alphabet');
+        var forgiving = document.getElementById('url-forgiving');
+        var form = document.getElementById('url-form');
+        if (alphabet)
+            alphabet.value = jxlate.translator.base64Alphabet;
+        if (forgiving)
+            forgiving.checked = jxlate.translator.urlForgiving;
+        if (form)
+            form.checked = jxlate.translator.urlForm;
+    },
+
+    openInputOptions: function () {
+        this.syncInputOptions();
+        document.getElementById('input-options-dialog').showModal();
+    },
+
     /**
      * Property indicating the current mode value, respresenting the numeral system/base of the data being entered or converted to.
      * @type {Number|String}
@@ -243,7 +279,7 @@ jxlate.ui = {
 
         this.fileUpTrigger = document.getElementById('ui-addfile-trigger');
         this.fileDownTrigger = document.getElementById('ui-downloadfile-trigger');
-        this.events.UpdateInputOptions();
+        this.loadInputOptions();
         
         var options = document.getElementById("options");
         if(this.display!=="lite"){
@@ -439,6 +475,15 @@ jxlate.ui = {
                 jxlate.translator.urlForgiving = forgiving.checked;
             if (form)
                 jxlate.translator.urlForm = form.checked;
+            try {
+                window.localStorage.setItem(jxlate.ui.inputOptionsStorageKey, JSON.stringify({
+                    base64Alphabet: jxlate.translator.base64Alphabet,
+                    urlForgiving: jxlate.translator.urlForgiving,
+                    urlForm: jxlate.translator.urlForm
+                }));
+            } catch (error) {
+                // Keep the applied settings usable even when storage is blocked.
+            }
         },
         
         /**

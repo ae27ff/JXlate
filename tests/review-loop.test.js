@@ -377,10 +377,9 @@ for (const page of ['index.html', 'lite.html']) {
     nodes.get('base64-alphabet').value = 'y64';
     nodes.get('url-forgiving').checked = true;
     nodes.get('url-form').checked = true;
-    for (const id of ['base64-alphabet', 'url-forgiving', 'url-form']) {
-        const markup = pageHtml.match(new RegExp('<(?:select|input)[^>]*id="' + id + '"[^>]*>'))[0];
-        vm.runInContext(markup.match(/onchange="([^"]+)"/)[1], c);
-    }
+    assert.equal(c.jxlate.translator.base64Alphabet, 'base64uri', 'draft options wait for OK');
+    const optionsForm = pageHtml.match(/<form method="dialog"[^>]*>/)[0];
+    vm.runInContext(optionsForm.match(/onsubmit="([^"]+)"/)[1], c);
     assert.equal(c.jxlate.translator.base64Alphabet, 'y64');
     assert.equal(c.jxlate.translator.urlForgiving, true);
     assert.equal(c.jxlate.translator.urlForm, true);

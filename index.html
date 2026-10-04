@@ -7,7 +7,7 @@
         <meta name="keywords" content="JXlate,Xlate,translate,binary,decimal,octal,hexadecimal,base64,base32,ascii85,morse code,caesar shift">
         <meta name="author" content="crashdemons">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" type="text/css" href="css/jxlate.css?v=3.5.1">
+        <link rel="stylesheet" type="text/css" href="css/jxlate.css?v=3.5.2">
         <link rel="stylesheet" type="text/css" href="css/desktop.css?v=2">
 
         <script src="js/lib/rumkin-util.js"></script>
@@ -22,7 +22,7 @@
         <script src="js/util.js?v=3.4"></script>
         <script src="js/formatter.js?v=3.5"></script>
         <script src="js/translator.js?v=3.5"></script>
-        <script src="js/ui.js?v=3.5"></script>
+        <script src="js/ui.js?v=3.5.2"></script>
         <script src="js/toolbox.js?v=3.4"></script>
         <script src="js/branding.js"></script>
 
@@ -64,15 +64,9 @@
                 </ul>
                 <div id="border"></div>
                 <div class="toolopen"><img src="img/tools.png" onclick="jxlate.ui.toolbox.events.toggle()" alt="tools" title="text tools"></div>
-                <div class="input-options"><details><summary>Input options</summary>
-                    <label for="base64-alphabet">Base64 decode</label>
-                    <select id="base64-alphabet" onchange="jxlate.ui.events.UpdateInputOptions()" title="Choose Y64 for Yahoo's dot alphabet and dash padding.">
-                        <option value="base64uri">Base64 / URI</option>
-                        <option value="y64">Y64 (Yahoo)</option>
-                    </select>
-                    <label><input type="checkbox" id="url-forgiving" onchange="jxlate.ui.events.UpdateInputOptions()">Keep bad URL % escapes</label>
-                    <label><input type="checkbox" id="url-form" onchange="jxlate.ui.events.UpdateInputOptions()">URL + as space</label>
-                </details></div>
+                <div class="input-options">
+                    <button type="button" aria-haspopup="dialog" aria-controls="input-options-dialog" onclick="jxlate.ui.openInputOptions()">Input options</button>
+                </div>
                 <input type="file" id="ui-addfile-trigger" style="display:none;" onchange="jxlate.ui.handleFileSelect(this)">
                 <a href="#" id="ui-downloadfile-trigger" style="display:none"></a>
                 <div class="branding" id="branding-side"></div>
@@ -80,5 +74,27 @@
             <textarea name="text" spellcheck="false" wrap="hard" placeholder="Enter your data here" class="grey" id="text" cols="32"></textarea>
         </form>
         <div class="grey toolbox fixed" id="tbox"></div>
+        <dialog class="input-options-dialog" id="input-options-dialog" aria-labelledby="input-options-title">
+            <form method="dialog" onsubmit="jxlate.ui.events.UpdateInputOptions()">
+                <header><h2 id="input-options-title">Input options</h2></header>
+                <div class="input-options-content">
+                    <fieldset>
+                        <legend>Base64</legend>
+                        <label for="base64-alphabet">Decode alphabet</label>
+                        <select id="base64-alphabet" autofocus aria-describedby="base64-help">
+                            <option value="base64uri">Base64 / URI</option>
+                            <option value="y64">Y64 (Yahoo)</option>
+                        </select>
+                        <p id="base64-help">Y64 uses Yahoo's dot alphabet and dash padding.</p>
+                    </fieldset>
+                    <fieldset>
+                        <legend>URL decoding</legend>
+                        <label class="checkbox-option"><input type="checkbox" id="url-forgiving"> <span>Keep bad URL % escapes</span></label>
+                        <label class="checkbox-option"><input type="checkbox" id="url-form"> <span>URL + as space</span></label>
+                    </fieldset>
+                </div>
+                <footer><button type="submit" value="ok">OK</button></footer>
+            </form>
+        </dialog>
     </body>
 </html>

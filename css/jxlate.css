@@ -21,11 +21,87 @@ html,body { margin: 0;}
 
 ul.options{list-style-type: none; padding:0px; margin:0px;}
 
-.input-options { padding: 4px; font-size: 9pt; font-family: Verdana,Kartika; line-height: 150%; text-align: left; }
-.input-options summary { cursor: pointer; }
-.input-options label { color: #ccc; padding: 0; border: 0; margin: 4px 0; }
-.input-options select { width: 100%; background: #222; color: #fff; font-size: inherit; }
-.input-options input[type=checkbox] { appearance: auto; }
+.input-options { padding: 5px; }
+.input-options button,
+.input-options-dialog button {
+    font: inherit;
+    color: #fff;
+    background: #303030;
+    border: 1px solid #777;
+    border-radius: 4px;
+    padding: 8px;
+    min-height: 44px;
+    cursor: pointer;
+}
+.input-options button { width: 100%; font: 9pt Verdana, sans-serif; }
+.input-options button:hover,
+.input-options-dialog button:hover { background: #454545; }
+.input-options button:focus-visible,
+.input-options-dialog :focus-visible { outline: 2px solid #75d875; outline-offset: 3px; }
+.input-options-dialog {
+    box-sizing: border-box;
+    width: calc(100% - 32px);
+    max-width: 440px;
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #777;
+    border-radius: 8px;
+    background: #1c1c1c;
+    color: #eee;
+    font: 14px/1.5 Verdana, sans-serif;
+    box-shadow: 0 16px 64px #000;
+}
+.input-options-dialog::backdrop { background: rgba(0, 0, 0, 0.75); }
+.input-options-dialog header { padding: 16px 24px; border-bottom: 1px solid #444; }
+.input-options-dialog h2 { margin: 0; font-size: 18px; }
+.input-options-content { padding: 20px 24px; }
+.input-options-dialog fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.input-options-dialog fieldset + fieldset { margin-top: 24px; }
+.input-options-dialog legend { padding: 0; margin-bottom: 10px; font-weight: bold; color: #fff; }
+.input-options-dialog label {
+    display: block;
+    margin: 0 0 8px;
+    padding: 0;
+    border: 0;
+    color: #eee;
+    background: transparent;
+    opacity: 1;
+    font-weight: normal;
+    transition: none;
+}
+.input-options-dialog select {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px;
+    border: 1px solid #777;
+    border-radius: 4px;
+    font: inherit;
+    color: #fff;
+    background: #282828;
+}
+.input-options-dialog p { margin: 8px 0 0; color: #bbb; font-size: 12px; }
+.input-options-dialog .checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    margin: 0;
+    cursor: pointer;
+}
+.input-options-dialog input[type=checkbox] { appearance: auto; width: 18px; height: 18px; flex-shrink: 0; }
+.input-options-dialog footer { display: flex; justify-content: flex-end; padding: 12px 24px; border-top: 1px solid #444; }
+.input-options-dialog footer button { min-width: 88px; background: #264b2b; border-color: #75a875; }
+@media (max-width: 480px) {
+    .input-options-dialog header,
+    .input-options-content,
+    .input-options-dialog footer { padding-left: 16px; padding-right: 16px; }
+    .input-options-dialog select { font-size: 16px; }
+    .input-options-dialog footer button { width: 100%; }
+}
 
 .header{ font-family:Candara; background-color: #3F3F3F; font-weight:bold; text-align:center; }
 
