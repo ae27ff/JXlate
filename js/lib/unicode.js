@@ -11,8 +11,6 @@ function utf8_to_iso88591(s) {
     return unescape(encodeURIComponent(s));
 }
 function iso88591_to_utf8(s) {
-    console.log(s);
-    console.log(escape(s));
     return decodeURIComponent(escape(s));
 }
 function ucs2_to_iso88591(s) {
@@ -39,13 +37,14 @@ function iso88591_to_ucs2(s) {
     return unescape(esc);
 }
 function convert_encoding(content, a, b) {
-    console.log(content);
-    var func = a + "_to_" + b;
-    if ((typeof eval(func)) === "function")
-        return eval(func + "(content)");
-    //no direction conversion - do intermediate conversion to bytes then back.
-    var tmp = eval(a + "_to_iso88591(content)");
-    console.log("tmp=");
-    console.log(tmp);
-    return eval("iso88591_to_" + b + "(tmp)");
+    var encoders = {utf8: utf8_to_iso88591, ucs2: ucs2_to_iso88591};
+    var decoders = {utf8: iso88591_to_utf8, ucs2: iso88591_to_ucs2};
+    if (a !== "iso88591" && !Object.prototype.hasOwnProperty.call(encoders, a))
+        throw "unsupported source encoding";
+    if (b !== "iso88591" && !Object.prototype.hasOwnProperty.call(decoders, b))
+        throw "unsupported target encoding";
+    if (a === b)
+        return content;
+    var bytes = a === "iso88591" ? content : encoders[a](content);
+    return b === "iso88591" ? bytes : decoders[b](bytes);
 }
