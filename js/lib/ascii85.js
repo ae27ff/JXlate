@@ -109,8 +109,7 @@ var ascii85 = this.ascii85 = (function () {
         ((a85text.charCodeAt(i+2) - 0x21) * pow2) +
         ((a85text.charCodeAt(i+3) - 0x21) * pow1) +
         ((a85text.charCodeAt(i+4) - 0x21)));
-      if (i + 5 <= unpaddedLength)
-        assertOrBadInput(newchars <= 4294967295, 'The ascii85 group exceeds four bytes.');
+      assertOrBadInput(newchars <= 4294967295, 'The ascii85 group exceeds four bytes.');
       out_array.push(
         (newchars >> 030) & 0xFF,
         (newchars >> 020) & 0xFF,
