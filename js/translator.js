@@ -258,18 +258,18 @@ if (typeof jxlate === "undefined") {
             return idx;
         },
 
-//encodeURI is the sucessor to this, but it encodes LESS chars, some of which urlencode() does
-//of particular interest, & and /  don't get encoded, which can lead to urlencoded inputs breaking URLs.
-//escape() is deprecated (why?) but it catches more of these cases
         /**
-         * Percent-encodes symbols in a string similarly to the PHP method of the same name.
-         * 
-         * Currently decoded using unescape().
-         * @param {type} s The string to encode
+         * Percent-encodes byte data for a URI component, leaving only RFC 3986
+         * unreserved characters literal. Text modes serialize Unicode to
+         * their selected encoding before calling this method.
+         * @param {String} s The byte string to encode
          * @return {String} the encoded string
          */
-        urlencode: function (s) {//TODO: urldecode does not decode plus signs as spaces and this method does not exactly match urlencode() output (spaces->%20)
-            return escape(s).replace(/\+/g, "%2B");//inputs with + should be encoded as well... (escape converts spaces to %20)
+        urlencode: function (s) {
+            return s.replace(/[^A-Za-z0-9._~-]/g, function(character){
+                var byte = jxlate.translator.numeral2dec(character, 256);
+                return "%" + ("0" + byte.toString(16).toUpperCase()).slice(-2);
+            });
         }
 
     };
