@@ -28,6 +28,9 @@ jxlate.ui = {
      */
     textRepresentation: null,
     textEdit: null,
+    textHistory: [],
+    textHistoryIndex: -1,
+    fileReadSequence: 0,
     
     /**
      * UI element used for local file importing
@@ -80,131 +83,15 @@ jxlate.ui = {
         this._setTextRepresentation(text, this.getSelectedBase());
     },
 
-    _isTextBase:function(base){
-        return base === 256 || base === "ucs2" || base === "utf8";
-    },
+    _isTextBase: TextBuffer.prototype._isTextBase,
+    _getTextRepresentation: TextBuffer.prototype._getTextRepresentation,
+    _setTextRepresentation: TextBuffer.prototype._setTextRepresentation,
+    _saveTextHistory: TextBuffer.prototype._saveTextHistory,
+    _relabelTextRepresentation: TextBuffer.prototype._relabelTextRepresentation,
+    _rememberTextEdit: TextBuffer.prototype._rememberTextEdit,
+    _rawTextOffset: TextBuffer.prototype._rawTextOffset,
+    _updateTextRepresentation: TextBuffer.prototype._updateTextRepresentation,
 
-    _getTextRepresentation:function(base){
-        var visibleText = this.textarea.value;
-        if (this.textRepresentation !== null &&
-            this.textRepresentation.base === base &&
-            this.textRepresentation.visibleText === visibleText)
-            return this.textRepresentation.rawText;
-        return visibleText;
-    },
-
-    _setTextRepresentation:function(text, base){
-        this.textEdit = null;
-        this.textarea.value = text;
-        if (this._isTextBase(base)) {
-            this.textRepresentation = {
-                base: base,
-                rawText: text,
-                visibleText: this.textarea.value
-            };
-        } else {
-            this.textRepresentation = null;
-        }
-    },
-
-    _relabelTextRepresentation:function(oldBase, newBase){
-        if (this.textRepresentation !== null &&
-            this.textRepresentation.base === oldBase &&
-            this.textRepresentation.visibleText === this.textarea.value &&
-            this._isTextBase(newBase))
-            this.textRepresentation.base = newBase;
-    },
-
-    _rememberTextEdit:function(event){
-        this.textEdit = null;
-        if (!event || !/^(insert|delete)/.test(event.inputType))
-            return;
-        var start = this.textarea.selectionStart;
-        var end = this.textarea.selectionEnd;
-        if (typeof start !== "number" || typeof end !== "number")
-            return;
-        // Keep the original caret: word/line deletion lengths are only
-        // known after the browser has performed the edit.
-        this.textEdit = {start: start, end: end, inputType: event.inputType, visibleText: this.textarea.value};
-    },
-
-    _rawTextOffset:function(rawText, visibleOffset){
-        var rawOffset = 0;
-        for (var i = 0; i < visibleOffset; i++) {
-            if (rawText.charAt(rawOffset) === "\r" && rawText.charAt(rawOffset + 1) === "\n")
-                rawOffset++;
-            rawOffset++;
-        }
-        return rawOffset;
-    },
-
-    _updateTextRepresentation:function(){
-        var previous = this.textRepresentation;
-        var edit = this.textEdit;
-        this.textEdit = null;
-        if (previous === null || previous.base !== this.getSelectedBase()) {
-            this.textRepresentation = null;
-            return;
-        }
-        var oldText = previous.visibleText;
-        var newText = this.textarea.value;
-        var startLimit = oldText.length;
-        var endLimit = oldText.length;
-        if (edit !== null && edit.visibleText === oldText) {
-            var removedLength = oldText.length - newText.length;
-            if (edit.start === edit.end && /^delete/.test(edit.inputType) && removedLength > 0) {
-                var deleteStart = edit.start;
-                var deleteEnd = edit.end;
-                if (/Backward$/.test(edit.inputType))
-                    deleteStart = Math.max(0, deleteEnd - removedLength);
-                else if (/Forward$/.test(edit.inputType))
-                    deleteEnd = Math.min(oldText.length, deleteStart + removedLength);
-                else if (typeof this.textarea.selectionStart === "number" &&
-                    this.textarea.selectionStart === this.textarea.selectionEnd) {
-                    // Non-directional deletions (e.g. an entire soft line)
-                    // leave the caret at the beginning of the removed range.
-                    deleteStart = this.textarea.selectionStart;
-                    deleteEnd = deleteStart + removedLength;
-                }
-                if (oldText.slice(0, deleteStart) + oldText.slice(deleteEnd) === newText) {
-                    edit.start = deleteStart;
-                    edit.end = deleteEnd;
-                }
-            }
-            startLimit = edit.start;
-            endLimit = oldText.length - edit.end;
-        }
-        var start = 0;
-        while (start < Math.min(oldText.length, newText.length, startLimit) &&
-            oldText.charAt(start) === newText.charAt(start))
-            start++;
-        var suffix = 0;
-        while (suffix < Math.min(oldText.length - start, newText.length - start, endLimit) &&
-            oldText.charAt(oldText.length - suffix - 1) === newText.charAt(newText.length - suffix - 1))
-            suffix++;
-        // Only newly edited text uses the textarea's LF line endings.
-        // Preserve raw CR/CRLF bytes in the unchanged prefix and suffix.
-        previous.rawText = previous.rawText.slice(0, this._rawTextOffset(previous.rawText, start)) +
-            newText.slice(start, newText.length - suffix) +
-            previous.rawText.slice(this._rawTextOffset(previous.rawText, oldText.length - suffix));
-        previous.visibleText = newText;
-        var normalizedText = previous.rawText.replace(/\r\n?/g, "\n");
-        if (normalizedText !== newText) {
-            // An edit can join a preserved bare CR to an LF at the edit
-            // boundary. Resync the display so later visible offsets still
-            // map to the correct raw bytes, keeping the caret at that join.
-            var selectionStart = this.textarea.selectionStart;
-            var selectionEnd = this.textarea.selectionEnd;
-            var removed = newText.length - normalizedText.length;
-            this.textarea.value = previous.rawText;
-            previous.visibleText = this.textarea.value;
-            if (typeof selectionStart === "number" && typeof selectionEnd === "number") {
-                this.textarea.selectionStart = selectionStart - (selectionStart > start ? removed : 0);
-                this.textarea.selectionEnd = selectionEnd - (selectionEnd > start ? removed : 0);
-            }
-        }
-    },
-    
     /**
      * Gets the currently selected data mode as a base/numeral system value.
      * @return {String|number} the base currently selected
@@ -306,6 +193,7 @@ jxlate.ui = {
         var text = jxlate.ui._getTextRepresentation(base);
 
         if (text === "") {
+            this._setTextRepresentation("", newbase);
             jxlate.ui.toolbox.switch(newbase);
             return;
         }
@@ -365,7 +253,7 @@ jxlate.ui = {
                 options.attachEvent("onmousewheel", this.events.MouseWheelHandler);// IE 6/7/8
         }
 
-        if (typeof this.toolbox === null) {
+        if (this.toolbox === null || typeof this.toolbox === "undefined") {
             console.error("UI Toolbox module was not ready - the toolbox will not function properly.");
 
         } else {
@@ -420,7 +308,7 @@ jxlate.ui = {
     setDlLink:function(data, filename){
         var linkElem = this.fileDownTrigger;
         if (navigator.msSaveBlob) {
-            linkElem.setAttribute('onclick', "jxlate.ui.ieDownloadData(atob('"+btoa(data)+"'),'"+filename+"')");
+            linkElem.onclick = function(){jxlate.ui.ieDownloadData(data, filename);};
         }else{
             var dlData = this.getDataBlob(data);
             var dlURL = window.URL.createObjectURL(dlData);
@@ -462,49 +350,40 @@ jxlate.ui = {
     
     
     addFileObject: function(f){
-        console.log("addfileobj "+f);
         var reader = new FileReader();
         var this0 = this;
-        reader.onload = (function(theFile) {
-		return function(e) {
-                        console.log("reader onload");
-
-                        window.g_debug_event=e;
-                        window.g_debug_target=e.target;
-                        window.g_debug_result=e.target.result;
-                        
-                        var result=null;
-                        if(typeof e.target.result === "undefined" || e.target.result===null){
-                            result=e.target.content;//IE11
-                        }else{
-                            result=e.target.result;
-                        }
-                        
-                        if(result instanceof ArrayBuffer){
-                            var binaryData = "";
-                            var bytes = new Uint8Array(e.target.result);
-                            var length = bytes.byteLength;
-                            for (var i = 0; i < length; i++) binaryData += String.fromCharCode(bytes[i]);
-                            result = binaryData;
-                        }
-                        
-                        this0.setInputFromDatastring(result);
-                        
-			//console.log('x ',result);
-			//setTimeout(processData,250);
-		};
-	})(f);
-        
-        if (navigator.msSaveBlob) {
+        var sequence = ++this.fileReadSequence;
+        var failed = function(error){
+            if (sequence === this0.fileReadSequence && error !== "no entry")
+                alert("This file could not be imported in the selected mode.\n\n" + error);
+        };
+        reader.onload = function(e){
+            if (sequence !== this0.fileReadSequence)
+                return;
+            try {
+                var result = e.target.result;
+                if (result === null || typeof result === "undefined")
+                    result = e.target.content;
+                if (Object.prototype.toString.call(result) === "[object ArrayBuffer]") {
+                    var bytes = new Uint8Array(result);
+                    var chunks = [];
+                    for (var i = 0; i < bytes.length; i += 8192)
+                        chunks.push(String.fromCharCode.apply(null, bytes.subarray(i, i + 8192)));
+                    result = chunks.join("");
+                }
+                if (typeof result !== "string")
+                    throw "file reader did not return byte data";
+                this0.setInputFromDatastring(result);
+            } catch (error) {
+                failed(error);
+            }
+        };
+        reader.onerror = function(){failed(reader.error || "file read failed");};
+        try {
             reader.readAsArrayBuffer(f);
-        }else{
-            reader.readAsBinaryString(f);
+        } catch (error) {
+            failed(error);
         }
-        //readAsArrayBuffer
-        
-        
-        
-        //reader.readAsText(f);
     },
     
     handleFileSelectEvent: function(evt){
@@ -566,6 +445,8 @@ jxlate.ui = {
                         jxlate.ui.mode_bases[newmode]
                     );
                     console.log('text to text conversion has been deprecated. performing no action');
+                    if (jxlate.ui.toolbox)
+                        jxlate.ui.toolbox.switch(jxlate.ui.getSelectedBase());
                     return;
                 }
                 try {
@@ -622,7 +503,7 @@ jxlate.ui = {
          */
         iso8859info: function () {
             alert("This mode displays ISO-8859-1 (Latin-1) text - single bytes 00-FF (256)\n" +
-                    "If you input unicode into this mode, it will be interpreted as two bytes.\n" +
+                    "Characters outside that range are rejected when converting or exporting.\n" +
                     "Use UCS-2 (Unicode code point values) or UTF-8 modes instead for unicode."
                     );
         }
