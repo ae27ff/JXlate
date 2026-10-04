@@ -28,10 +28,8 @@ jxlate.formatter = {
             return s.split("");//strings are split by char
         } else if (base === "ue" || base === "ucs2" || base === "utf8") {
             return [s];//urlencode is handled all was 1 item passed to a function
-        } else if (base == 2) {
-            return s.replace(/\s/g, '').match(/.{1,8}/g) || [];//strip spaces and split into 8-bit entries for binary.
-        } else if (base == 16) {
-            return s.replace(/[a-z]/g, function(c){return c.toUpperCase();}).replace(/\s/g, '').match(/.{1,2}/g) || [];//strip spaces and split into 2-digit entries for hex
+        } else if (base == 2 || base == 16) {
+            return this.byteInput2buffer(s, Number(base));
         } else if (base === "32c") {
             return [s.replace(/[\s-]/g, '').replace(/[a-z]/g, function(c){return c.toUpperCase();})
                 .replace(/O/g, "0").replace(/[IL]/g, "1")];
@@ -46,11 +44,49 @@ jxlate.formatter = {
             if (s.substr(-2, 2) !== "~>")
                 s += "~>";
             return [s];//single item to pass to decoder.
+        } else if (base === "mc") {
+            // Accept typographic dots/dashes and adjacent word slashes used in pasted Morse charts.
+            s = s.replace(/[\u00b7\u2022\u2219\u22c5]/g, '.').replace(/[\u2010-\u2015\u2212]/g, '-').replace(/\//g, ' / ').trim();
+            return s === "" ? [] : s.split(/\s+/);
         }
-        s = s.replace(/\s+/g, ' ').trim();
+        s = s.trim();
         if (s === "")
             return [];
-        return s.replace(/[a-z]/g, function(c){return c.toUpperCase();}).split(" ");//all other items are split by spaces.
+        // Commas and leading plus signs are presentation syntax for numeric lists, not numeral digits.
+        this.checkCommaValues(s);
+        return s.replace(/[a-z]/g, function(c){return c.toUpperCase();}).split(/[\s,]+/).map(function(token){return token.replace(/^\+/, '');});
+    },
+
+    checkCommaValues: function (s) {
+        if (s.split(',').some(function(value){return value.trim() === "";}))
+            throw "a comma-separated list must not contain empty values";
+    },
+
+    byteInput2buffer: function (s, base) {
+        s = s.replace(/[a-z]/g, function(c){return c.toUpperCase();}).trim();
+        if (s === "")
+            return [];
+        this.checkCommaValues(s);
+        var escaped = base === 16 && s.indexOf('\\') >= 0;
+        var explicit = escaped || /[,+]/.test(s) || (base === 16 ? /0X/.test(s) : /0B/.test(s));
+        if (!explicit) {
+            // Preserve whitespace-grouped byte streams; commas or prefixes explicitly delimit individual values.
+            return s.replace(/\s/g, '').match(base === 16 ? /.{1,2}/g : /.{1,8}/g) || [];
+        }
+        if (escaped) {
+            // Accept complete C-style hexadecimal byte escapes without evaluating pasted code.
+            if (!/^\\X[0-9A-F]{2}(?:[\s,]*\\X[0-9A-F]{2})*$/.test(s))
+                throw "hexadecimal escapes must use \\x followed by two hexadecimal digits";
+            s = s.replace(/\\X([0-9A-F]{2})/g, '$1 ');
+        }
+        // Accept base-specific prefixes as byte notation while retaining digit and byte-range validation.
+        return s.split(/[\s,]+/).filter(function(token){return token !== "";}).map(function(token){
+            token = token.replace(/^\+/, '').replace(base === 16 ? /^0X/ : /^0B/, '');
+            var value = jxlate.translator.numeral2dec(token, base);
+            if (value > 255)
+                throw "byte value must be between 0 and 255";
+            return jxlate.translator.dec2numeral(value, base);
+        });
     },
 
     /**

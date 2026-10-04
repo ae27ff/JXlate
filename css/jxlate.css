@@ -21,6 +21,12 @@ html,body { margin: 0;}
 
 ul.options{list-style-type: none; padding:0px; margin:0px;}
 
+.input-options { padding: 4px; font-size: 9pt; font-family: Verdana,Kartika; line-height: 150%; text-align: left; }
+.input-options summary { cursor: pointer; }
+.input-options label { color: #ccc; padding: 0; border: 0; margin: 4px 0; }
+.input-options select { width: 100%; background: #222; color: #fff; font-size: inherit; }
+.input-options input[type=checkbox] { appearance: auto; }
+
 .header{ font-family:Candara; background-color: #3F3F3F; font-weight:bold; text-align:center; }
 
 li{

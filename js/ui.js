@@ -243,6 +243,7 @@ jxlate.ui = {
 
         this.fileUpTrigger = document.getElementById('ui-addfile-trigger');
         this.fileDownTrigger = document.getElementById('ui-downloadfile-trigger');
+        this.events.UpdateInputOptions();
         
         var options = document.getElementById("options");
         if(this.display!=="lite"){
@@ -427,6 +428,18 @@ jxlate.ui = {
      * An object containing all supported event-functions of the UI
      */
     events: {
+
+        UpdateInputOptions: function () {
+            var alphabet = document.getElementById('base64-alphabet');
+            var forgiving = document.getElementById('url-forgiving');
+            var form = document.getElementById('url-form');
+            if (alphabet)
+                jxlate.translator.base64Alphabet = alphabet.value;
+            if (forgiving)
+                jxlate.translator.urlForgiving = forgiving.checked;
+            if (form)
+                jxlate.translator.urlForm = form.checked;
+        },
         
         /**
          * Polls the data mode (bases) radio box collection for changes, triggers appropriate UI changes, and handles conversion exceptions.
@@ -478,6 +491,10 @@ jxlate.ui = {
         MouseWheelHandler: function (e) {//handle scrollwheel events
             // cross-browser wheel delta
             var e = window.event || e; // old IE support - this looks like an error though...
+            for (var element = e.target || e.srcElement; element; element = element.parentNode) {
+                if (/(^|\s)input-options(\s|$)/.test(element.className))
+                    return true;
+            }
             var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));//calculate the number of steps the wheel has moved. (signed for direction)
 
             var target = -1;

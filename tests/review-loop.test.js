@@ -332,6 +332,9 @@ for (const page of ['index.html', 'lite.html']) {
     for (const id of ['options', 'tbox', 'sidebar', 'lite-menu-button', 'header-title', 'old-header-title',
         'ui-addfile-trigger', 'ui-downloadfile-trigger', 'branding-side']) nodes.set(id, node());
     nodes.set('frmInput', { elements: { text } });
+    nodes.set('base64-alphabet', { value: 'base64uri' });
+    nodes.set('url-forgiving', { checked: false });
+    nodes.set('url-form', { checked: false });
     radioNodes.forEach((radio, i) => nodes.set('rad' + i, radio));
     c.document = {
         getElementById: id => nodes.get(id),
@@ -370,6 +373,26 @@ for (const page of ['index.html', 'lite.html']) {
     assert.equal(initialized.getSelectedBase(), 256);
     assert.equal(initialized.getInputText(), '\u20ac');
     assert.equal(app.alerts.length, 1);
+    const unchangedText = initialized.getInputText();
+    nodes.get('base64-alphabet').value = 'y64';
+    nodes.get('url-forgiving').checked = true;
+    nodes.get('url-form').checked = true;
+    for (const id of ['base64-alphabet', 'url-forgiving', 'url-form']) {
+        const markup = pageHtml.match(new RegExp('<(?:select|input)[^>]*id="' + id + '"[^>]*>'))[0];
+        vm.runInContext(markup.match(/onchange="([^"]+)"/)[1], c);
+    }
+    assert.equal(c.jxlate.translator.base64Alphabet, 'y64');
+    assert.equal(c.jxlate.translator.urlForgiving, true);
+    assert.equal(c.jxlate.translator.urlForm, true);
+    assert.equal(initialized.getInputText(), unchangedText, 'option changes must not rewrite input');
+    assert.equal(initialized.convertText('Zg--', 64, 256), 'f');
+    assert.equal(initialized.convertText('%2b+%25%', 'ue', 256), '+ %%');
+    c.window = {};
+    const beforeWheel = radioNodes.map(radio => radio.checked);
+    initialized.events.MouseWheelHandler({ wheelDelta: 120, target: {
+        className: '', parentNode: { className: 'input-options', parentNode: null }
+    } });
+    assert.deepEqual(radioNodes.map(radio => radio.checked), beforeWheel, 'scrolling input options must not change modes');
     if (page === 'lite.html') {
         assert.equal(toolopen.children[0].title, '');
         assert.equal(toolopen.children[1].textContent, 'text tools');

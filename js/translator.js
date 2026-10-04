@@ -17,6 +17,10 @@ if (typeof jxlate === "undefined") {
          * @type {Array}
          */
         base_charsets: [],
+
+        base64Alphabet: "base64uri",
+        urlForgiving: false,
+        urlForm: false,
         
         /**
          * Initializes the translator object.
@@ -61,7 +65,7 @@ if (typeof jxlate === "undefined") {
 
             if (fromEncoded) {//catch all of the encoded strings coming in that need to be decoded before translation.
                 if (baseFrom === 64)
-                    s = atob(a[0]);
+                    s = this.base64decode(a[0]);
                 else if (baseFrom === "ue")
                     s = this.urldecode(a[0]);
                 else if (baseFrom === "32r")
@@ -119,6 +123,8 @@ if (typeof jxlate === "undefined") {
             var n = prompt("Please enter the radix (base) to convert with. (only 2-36 supported)", "");
             if (n === null)
                 throw "no entry";
+            // Ignore surrounding whitespace and a leading plus in the prompt, matching numeric input notation.
+            n = n.trim().replace(/^\+/, '');
             if (!/^\d+$/.test(n))
                 throw "invalid radix";
             n = parseInt(n);
@@ -281,8 +287,22 @@ if (typeof jxlate === "undefined") {
             return base;
         },
 
+        base64decode: function (s) {
+            s = s.replace(/\s/g, '');
+            // Normalize URI-safe aliases; select Y64 explicitly because its dash padding overlaps URI-safe data.
+            if (this.base64Alphabet === "y64")
+                s = s.replace(/\./g, '+').replace(/_/g, '/').replace(/-/g, '=');
+            else
+                s = s.replace(/-/g, '+').replace(/_/g, '/');
+            return atob(s);
+        },
+
         urldecode: function (s) {
-            if (/%(?![0-9a-f]{2})/i.test(s))
+            // Form decoding is opt-in so a literal plus in a URI component remains a plus by default.
+            if (this.urlForm)
+                s = s.replace(/\+/g, ' ');
+            // Forgiving decoding preserves malformed percent escapes verbatim instead of discarding pasted text.
+            if (!this.urlForgiving && /%(?![0-9a-f]{2})/i.test(s))
                 throw "URL escapes must contain two hexadecimal digits";
             return s.replace(/%([0-9a-f]{2})/gi, function(match, hex){
                 return String.fromCharCode(parseInt(hex, 16));
