@@ -138,6 +138,15 @@ jxlate.ui = {
         var decarr = this.getInputAsDecimalArray();
         var data = "";
         var chunkSize = 8192;
+        for (var i = 0; i < decarr.length; i++) {
+            var value = String(decarr[i]);
+            if (!/^\d+$/.test(value))
+                throw "invalid byte value";
+            var byte = parseInt(value, 10);
+            if (byte > 255)
+                throw "byte value must be between 0 and 255";
+            decarr[i] = byte;
+        }
         for (var i = 0; i < decarr.length; i += chunkSize)
             data += String.fromCharCode.apply(null, decarr.slice(i, i + chunkSize));
         return data;
