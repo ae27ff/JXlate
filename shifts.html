@@ -479,6 +479,12 @@
                 report_txt: function () {
                     this.activeInput = "txt";
                     var input = document.getElementById("txt");
+                    for (var i = 0; i < input.value.length; i++) {
+                        if (input.value.charCodeAt(i) > 255) {
+                            alert("Please enter text with character values from 0 to 255, or enter encoded bytes as decimal or hexadecimal values.");
+                            return;
+                        }
+                    }
                     var values = this.report_update_inputs_txt(input.value);
                     this.report_op_from_select(values.text);
                 },
@@ -567,7 +573,7 @@
         <h2>Byte Shifts/Xor Report v2.1</h2>
         <hr>
         <div id="controls">
-            <input type="text" id="txt" placeholder="Text" oninput="ShiftsTool.activeInput='txt'"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_txt()"> <i>OR</i><br>
+            <input type="text" id="txt" placeholder="Text (Latin-1 bytes)" oninput="ShiftsTool.activeInput='txt'"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_txt()"> <i>OR</i><br>
             <input type="text" id="dec" placeholder="Decimal values" oninput="ShiftsTool.activeInput='dec'"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_dec()"> <i>OR</i><br>
             <input type="text" id="hex" placeholder="Hexadecimal values" oninput="ShiftsTool.activeInput='hex'"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_hex()"> <br>
             <select id="operation-type"  onchange="ShiftsTool.report_unk()">
