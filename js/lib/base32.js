@@ -223,6 +223,12 @@ var Nibbler = function (options) {
 				(input.length % 8 !== 0 || requiredPadding === 0 || input.length - dataLength !== requiredPadding)) {
 				throw 'the base32 padding is invalid';
 			}
+			if (paddingIndex >= 0) {
+				for (var i = paddingIndex; i < input.length; i++) {
+					if (input.charAt(i) !== pad)
+						throw 'the base32 padding is invalid';
+				}
+			}
 		}
 		return translate(input, codeBits, dataBits, true);
 	};
