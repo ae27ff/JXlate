@@ -214,8 +214,15 @@ jxlate.ui.toolbox = {
         action_xor: function(){
             var xor_value = prompt("Enter a number 1-255 to xor against");
             if(xor_value===null) return;
-            xor_value=parseInt(xor_value);
-            if(xor_value===0) return;
+            if (!/^\d+$/.test(xor_value)) {
+                alert("Please enter a whole number from 1 to 255.");
+                return;
+            }
+            xor_value = parseInt(xor_value, 10);
+            if(xor_value<1 || xor_value>255) {
+                alert("Please enter a whole number from 1 to 255.");
+                return;
+            }
             jxlate.ui.toolbox.performDecimalOperation(function(input_value){
                 return input_value ^ xor_value;
             });
@@ -223,8 +230,15 @@ jxlate.ui.toolbox = {
         action_byteshift: function(){
             var shift_value = prompt("Enter a number 1-255 to shift all the bytes with");
             if(shift_value===null) return;
-            shift_value=parseInt(shift_value);
-            if(shift_value===0) return;
+            if (!/^\d+$/.test(shift_value)) {
+                alert("Please enter a whole number from 1 to 255.");
+                return;
+            }
+            shift_value = parseInt(shift_value, 10);
+            if(shift_value<1 || shift_value>255) {
+                alert("Please enter a whole number from 1 to 255.");
+                return;
+            }
             jxlate.ui.toolbox.performDecimalOperation(function(input_value){
                 console.log(input_value + " + " + shift_value + " = "+jxlate.util.modp(input_value + shift_value, 256));
                 return jxlate.util.modp(input_value + shift_value, 256);
