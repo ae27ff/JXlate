@@ -44,7 +44,9 @@ jxlate.formatter = {
                 s += "~>";
             return [s];//single item to pass to decoder.
         }
-        s = s.replace(/\s+/g, ' ');
+        s = s.replace(/\s+/g, ' ').trim();
+        if (s === "")
+            return [];
         return s.toUpperCase().split(" ");//all other items are split by spaces.
     },
 
