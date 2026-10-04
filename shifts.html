@@ -251,6 +251,7 @@
 
 
             var ShiftsTool = {
+                activeInput: "txt",
                 operationRanges: {
                     0: OperationRangeTypes.create("bytes", "Bytes", 0, 255),
                     1: OperationRangeTypes.create("bitshifts", "Bit Shifts", 0, 7),
@@ -476,17 +477,20 @@
                 },
 
                 report_txt: function () {
+                    this.activeInput = "txt";
                     var input = document.getElementById("txt");
                     var values = this.report_update_inputs_txt(input.value);
                     this.report_op_from_select(values.text);
                 },
                 report_dec: function () {
+                    this.activeInput = "dec";
                     var input = document.getElementById("dec");
                     var decimal = input.value.trim();
                     var values = this.report_update_inputs_dec(decimal === "" ? [] : decimal.split(/\s+/));
                     this.report_op_from_select(values.text);
                 },
                 report_hex: function () {
+                    this.activeInput = "hex";
                     var input = document.getElementById("hex");
                     var hexArray = StringUtils.stripWS(input.value).match(/.{1,2}/g) || [];
                     var values = this.report_update_inputs_hex(hexArray);
@@ -494,13 +498,9 @@
                 },
 
                 report_unk: function () {
-                    //var inpt = document.getElementById("txt");
-                    var inpd = document.getElementById("dec");
-                    var inph = document.getElementById("hex");
-
-                    if (inph.value !== "")
+                    if (this.activeInput === "hex")
                         return this.report_hex();
-                    if (inpd.value !== "")
+                    if (this.activeInput === "dec")
                         return this.report_dec();
                     this.report_txt();
                 },
@@ -555,9 +555,9 @@
         <h2>Byte Shifts/Xor Report v2.1</h2>
         <hr>
         <div id="controls">
-            <input type="text" id="txt" placeholder="Text"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_txt()"> <i>OR</i><br>
-            <input type="text" id="dec" placeholder="Decimal values"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_dec()"> <i>OR</i><br>
-            <input type="text" id="hex" placeholder="Hexadecimal values"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_hex()"> <br>
+            <input type="text" id="txt" placeholder="Text" oninput="ShiftsTool.activeInput='txt'"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_txt()"> <i>OR</i><br>
+            <input type="text" id="dec" placeholder="Decimal values" oninput="ShiftsTool.activeInput='dec'"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_dec()"> <i>OR</i><br>
+            <input type="text" id="hex" placeholder="Hexadecimal values" oninput="ShiftsTool.activeInput='hex'"><input type="submit" value="Generate Report" onclick="ShiftsTool.report_hex()"> <br>
             <select id="operation-type"  onchange="ShiftsTool.report_unk()">
 
             </select><br>
