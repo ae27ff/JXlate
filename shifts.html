@@ -486,13 +486,25 @@
                     this.activeInput = "dec";
                     var input = document.getElementById("dec");
                     var decimal = input.value.trim();
-                    var values = this.report_update_inputs_dec(decimal === "" ? [] : decimal.split(/\s+/));
+                    var valuesToParse = decimal === "" ? [] : decimal.split(/\s+/);
+                    for (var i = 0; i < valuesToParse.length; i++) {
+                        if (!/^\d+$/.test(valuesToParse[i]) || Number(valuesToParse[i]) > 255) {
+                            alert("Please enter decimal byte values from 0 to 255.");
+                            return;
+                        }
+                    }
+                    var values = this.report_update_inputs_dec(valuesToParse);
                     this.report_op_from_select(values.text);
                 },
                 report_hex: function () {
                     this.activeInput = "hex";
                     var input = document.getElementById("hex");
-                    var hexArray = StringUtils.stripWS(input.value).match(/.{1,2}/g) || [];
+                    var hex = StringUtils.stripWS(input.value);
+                    if (!/^(?:[0-9a-f]{2})*$/i.test(hex)) {
+                        alert("Please enter pairs of hexadecimal digits.");
+                        return;
+                    }
+                    var hexArray = hex.match(/.{2}/g) || [];
                     var values = this.report_update_inputs_hex(hexArray);
                     this.report_op_from_select(values.text);
                 },
