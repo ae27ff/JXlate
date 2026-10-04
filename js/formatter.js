@@ -32,7 +32,10 @@ jxlate.formatter = {
             return s.replace(/\s/g, '').match(/.{1,8}/g) || [];//strip spaces and split into 8-bit entries for binary.
         } else if (base == 16) {
             return s.replace(/[a-z]/g, function(c){return c.toUpperCase();}).replace(/\s/g, '').match(/.{1,2}/g) || [];//strip spaces and split into 2-digit entries for hex
-        } else if (base === "32r" || base === "32h" || base === "32c") {
+        } else if (base === "32c") {
+            return [s.replace(/[\s-]/g, '').replace(/[a-z]/g, function(c){return c.toUpperCase();})
+                .replace(/O/g, "0").replace(/[IL]/g, "1")];
+        } else if (base === "32r" || base === "32h") {
             return [s.replace(/\s/g, '').replace(/[a-z]/g, function(c){return c.toUpperCase();})];//normalize ASCII letter case only.
         } else if (base == 64) {
             return [s.replace(/\s/g, '')];//similar to the above, but for Base64 decoding all as one item.
