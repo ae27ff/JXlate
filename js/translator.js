@@ -63,7 +63,7 @@ if (typeof jxlate === "undefined") {
                 if (baseFrom === 64)
                     s = atob(a[0]);
                 else if (baseFrom === "ue")
-                    s = unescape(a[0]);//I know this is deprecated, but decodeURI does not do what I need.
+                    s = this.urldecode(a[0]);
                 else if (baseFrom === "32r")
                     s = base32rfc.decode(a[0]);
                 else if (baseFrom === "32h")
@@ -139,15 +139,23 @@ if (typeof jxlate === "undefined") {
                 baseFrom = this.radix_prompt();
             if (baseTo === "n")
                 baseTo = this.radix_prompt();
+            if (typeof baseFrom === "string" && /^\d+$/.test(baseFrom))
+                baseFrom = Number(baseFrom);
+            if (typeof baseTo === "string" && /^\d+$/.test(baseTo))
+                baseTo = Number(baseTo);
+            if (!this.isEncodedBase(baseFrom))
+                this.numeralBase(baseFrom);
+            if (!this.isEncodedBase(baseTo))
+                this.numeralBase(baseTo);
 
             var params = this.array_prepareEncodings(a, baseFrom, baseTo);//resolves any encodings before regular numeral conversions.
             a = params[0];//our prep function returns the parameters as an array after it's done, let's get them back where they need to be.
             baseFrom = params[1];
             baseTo = params[2];
 
-            if (baseFrom === 256) {
+            if (!this.isEncodedBase(baseFrom)) {
                 for (var i = 0; i < a.length; i++)
-                    this.numeral2dec(a[i], 256);
+                    this.numeral2dec(a[i], baseFrom);
             }
 
             if (baseFrom === baseTo)
@@ -168,8 +176,7 @@ if (typeof jxlate === "undefined") {
          */
         base2base: function (snum, baseFrom, baseTo) {//convert a numeral of one base system into another base system numeral
             if (baseFrom === baseTo) {
-                if (baseFrom === 256)
-                    this.numeral2dec(snum, 256);
+                this.numeral2dec(snum, baseFrom);
                 return snum;//same base - output the input
             }
             var d = this.numeral2dec(snum, baseFrom);//convert numeral system A to decimal
@@ -183,7 +190,7 @@ if (typeof jxlate === "undefined") {
          * @return {Number} The equivalent decimal value of the input
          */
         numeral2dec: function (snum, sbase) {
-            var base = parseInt(String(sbase).replace(/\D/g, ''));
+            var base = this.numeralBase(sbase);
 
             var d;
             if (base === 10) {
@@ -200,11 +207,14 @@ if (typeof jxlate === "undefined") {
                 return snum.charCodeAt(0);
             }
 
+            snum = String(snum);
+            if (snum.length === 0)
+                throw "empty numeral";
             //Accumulate one digit at a time so every intermediate can be range-checked.
             d = 0;
             for (var i = 0; i < snum.length; i++) {
                 var sdig = snum.substr(i, 1);//current digit of numeral string
-                var n = this.numeraldigit2dec(sdig, sbase);//retrieve the decimal value of the single digit in the numeral system
+                var n = this.numeraldigit2dec(sdig, base);//retrieve the decimal value of the single digit in the numeral system
                 d = d * base + n;
                 if (!isFinite(d) || Math.floor(d) !== d || d > 9007199254740991)
                     throw "number exceeds the safe integer range";
@@ -219,11 +229,13 @@ if (typeof jxlate === "undefined") {
          * @return {String} the equivalent number-string in the given base
          */
         dec2numeral: function (d, sbase) {
-            var base = parseInt(String(sbase).replace(/\D/g, ''));//replace any non-digit chars and cast/interpret to an Integer.
+            var base = this.numeralBase(sbase);
 
             if (!isFinite(d) || Math.floor(d) !== d || Math.abs(d) > 9007199254740991)
                 throw "number exceeds the safe integer range";
 
+            if (d < 0)
+                throw "numerals must be non-negative";
             if (base === 10)
                 return d.toString();//decimal to decimal, nothing to do except to ensure a String
             if (base === 256) {
@@ -240,7 +252,6 @@ if (typeof jxlate === "undefined") {
                 d = Math.floor(d / base);//remove the last numeral digit from the integer (value-wise)
                 snum = sdig + snum;//prepend because the last digit we process will be the most significant.
             }
-            console.log(sbase + " " + base);
             return (snum === '') ? this.base_charsets[base][0] : snum;
         },
 
@@ -252,10 +263,30 @@ if (typeof jxlate === "undefined") {
          * @return {Number} the equivalent decimal value of the input digit.
          */
         numeraldigit2dec: function (sdig, base) {//retrieve the decimal value of a single digit in a numeral system
+            base = this.numeralBase(base);
+            if (base === 256 || typeof sdig !== "string" || sdig.length !== 1)
+                throw "invalid numeral digit";
             var idx = this.base_charsets[base].indexOf(sdig);
             if (idx === -1)
                 throw "invalid digit '" + sdig + "' for base " + base;
             return idx;
+        },
+
+        numeralBase: function (base) {
+            if (typeof base === "string" && /^\d+$/.test(base))
+                base = Number(base);
+            if (typeof base !== "number" || Math.floor(base) !== base ||
+                (base !== 256 && (base < 2 || base > 36)))
+                throw "unsupported numeral base";
+            return base;
+        },
+
+        urldecode: function (s) {
+            if (/%(?![0-9a-f]{2})/i.test(s))
+                throw "URL escapes must contain two hexadecimal digits";
+            return s.replace(/%([0-9a-f]{2})/gi, function(match, hex){
+                return String.fromCharCode(parseInt(hex, 16));
+            });
         },
 
         /**
