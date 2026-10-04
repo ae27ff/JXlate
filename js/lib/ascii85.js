@@ -54,9 +54,9 @@ var ascii85 = this.ascii85 = (function () {
     var out_array = [];
     for (var i=0, n=bytes.length; i < n; i+=4) {
       var newchars = (
-        (bytes.charCodeAt(i)   << 030) +
-        (bytes.charCodeAt(i+1) << 020) +
-        (bytes.charCodeAt(i+2) << 010) +
+        (bytes.charCodeAt(i)   * 16777216) +
+        (bytes.charCodeAt(i+1) * 65536) +
+        (bytes.charCodeAt(i+2) * 256) +
         (bytes.charCodeAt(i+3)));
       if (newchars === 0) {
         out_array.push(0x7a); // special case: 4 null bytes -> 'z'
