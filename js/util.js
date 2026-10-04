@@ -54,9 +54,5 @@ String.prototype.reverse = function () {
 };
 
 String.prototype.stripWhitespace = function () {
-    return this
-            .replaceAll(" ", "")
-            .replaceAll("\t", "")
-            .replaceAll("\r", "")
-            .replaceAll("\n", "");
+    return this.replace(/\s/g, "");
 };
