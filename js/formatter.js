@@ -31,9 +31,9 @@ jxlate.formatter = {
         } else if (base == 2) {
             return s.replace(/\s/g, '').match(/.{1,8}/g) || [];//strip spaces and split into 8-bit entries for binary.
         } else if (base == 16) {
-            return s.toUpperCase().replace(/\s/g, '').match(/.{1,2}/g) || [];//strip spaces and split into 2-digit entries for hex
+            return s.replace(/[a-z]/g, function(c){return c.toUpperCase();}).replace(/\s/g, '').match(/.{1,2}/g) || [];//strip spaces and split into 2-digit entries for hex
         } else if (base === "32r" || base === "32h" || base === "32c") {
-            return [s.replace(/\s/g, '').toUpperCase()];//strip spaces spaces and uppercase as a single item for Base32 decoding.
+            return [s.replace(/\s/g, '').replace(/[a-z]/g, function(c){return c.toUpperCase();})];//normalize ASCII letter case only.
         } else if (base == 64) {
             return [s.replace(/\s/g, '')];//similar to the above, but for Base64 decoding all as one item.
         } else if (base == 85) {
@@ -47,7 +47,7 @@ jxlate.formatter = {
         s = s.replace(/\s+/g, ' ').trim();
         if (s === "")
             return [];
-        return s.toUpperCase().split(" ");//all other items are split by spaces.
+        return s.replace(/[a-z]/g, function(c){return c.toUpperCase();}).split(" ");//all other items are split by spaces.
     },
 
     /**
@@ -63,11 +63,17 @@ jxlate.formatter = {
         if (base == 256 || base === "ucs2" || base === "utf8") {
             return a.join("");//preserve every code unit so display formatting cannot corrupt later conversions.
         } else if (base == 2) {
-            for (var i = 0; i < a.length; i++)
+            for (var i = 0; i < a.length; i++) {
+                if (!/^[01]{1,8}$/.test(String(a[i])))
+                    throw "binary output requires byte values from 0 to 255";
                 a[i] = this.padZeroes(a[i], 8);//make sure the binary output is in groups of 8 bits all displayed.
+            }
         } else if (base == 16) {
-            for (var j = 0; j < a.length; j++)
+            for (var j = 0; j < a.length; j++) {
+                if (!/^[0-9a-f]{1,2}$/i.test(String(a[j])))
+                    throw "hexadecimal output requires byte values from 0 to 255";
                 a[j] = this.padZeroes(a[j], 2);//make sure hex shows both 2 digits for each byte
+            }
             if(formatHint==="ucs2"){
                return (a.join("").toUpperCase().replace(/\s/g, '').match(/.{1,4}/g) || []).join(" ");
             }
