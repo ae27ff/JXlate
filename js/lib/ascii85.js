@@ -37,6 +37,14 @@ var rstrip = function (string, character) {
   while (string[i - 1] === character) { i--; };
   return string.slice(0, i);
 };
+var ascii85StringFromCodes = function (codes) {
+  var chunks = [];
+  var chunkSize = 8192;
+  for (var i = 0; i < codes.length; i += chunkSize) {
+    chunks.push(String.fromCharCode.apply(String, codes.slice(i, i + chunkSize)));
+  }
+  return chunks.join('');
+};
 
 var ascii85 = this.ascii85 = (function () {
   var ascii85 = {};
@@ -72,7 +80,7 @@ var ascii85 = this.ascii85 = (function () {
                      char4 + 0x21, char5 + 0x21);
     };
     shorten(out_array, padding.length);
-    return '<~' + String.fromCharCode.apply(String, out_array) + '~>'
+    return '<~' + ascii85StringFromCodes(out_array) + '~>'
   };
   ascii85.decode = function (a85text) {
     assertOrBadInput ((a85text.slice(0,2) === '<~') && (a85text.slice(-2) === '~>'), 'Invalid initial/final ascii85 characters');
