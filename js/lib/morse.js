@@ -63,7 +63,7 @@ var morse = {
     /**
      * Decode an array of morse codes to text
      * @param {Array} arr the array of individual morse code strings to decode
-     * @return {String} the corresponding text for the morse codes ("?" is returned for unsupported codes).
+     * @return {String} the corresponding text; unsupported codes are rejected.
      */
     decode: function (arr) {
         var str = "";
@@ -71,7 +71,9 @@ var morse = {
             var idx = morse.codes.indexOf(arr[i]);//find the index in our array
             if (arr[i] === "")
                 continue;
-            str += (idx === -1) ? "?" : morse.character_set[idx];//append the cleartext version (aligned to the same index) if any, if not "?"
+            if (idx === -1)
+                throw "unsupported Morse code: " + arr[i];
+            str += morse.character_set[idx];
         }
         return str;
     },
@@ -79,13 +81,16 @@ var morse = {
     /**
      * Encode an array of text characters to morse codes
      * @param {Array} arr the array of individual characters to encode
-     * @return {String} the corresponding string of morse code and separators (" " is returned for unsupported characters).
+     * @return {String} the corresponding code string; unsupported characters are rejected.
      */
     encode: function (arr) {
         var str = "";
         for (var i = 0, len = arr.length; i < len; i++) {//foreach array item (1 char)
-            idx = morse.character_set.indexOf(arr[i].toUpperCase());//find the index in our charset string
-            str += (idx === -1) ? " " : morse.codes[idx] + " ";//append the morse translation if any, if not " "
+            var character = arr[i].toUpperCase();
+            var idx = character.length === 1 ? morse.character_set.indexOf(character) : -1;
+            if (idx === -1)
+                throw "unsupported Morse character: " + arr[i];
+            str += morse.codes[idx] + " ";
         }
         return str;
     }
