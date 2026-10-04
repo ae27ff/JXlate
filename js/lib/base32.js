@@ -92,6 +92,18 @@ var Nibbler = function (options) {
 		codeBits = options.codeBits;
 		keyString = options.keyString;
 		arrayData = options.arrayData;
+		if (typeof dataBits !== 'number' || dataBits % 1 !== 0 || dataBits < 1 || dataBits > 16 ||
+			typeof codeBits !== 'number' || codeBits % 1 !== 0 || codeBits < 1 || codeBits > dataBits ||
+			typeof keyString !== 'string' || keyString.length !== Math.pow(2, codeBits) ||
+			(pad !== '' && (typeof pad !== 'string' || pad.length !== 1 || keyString.indexOf(pad) >= 0))) {
+			throw 'invalid encoder options';
+		}
+		var seen = Object.create(null);
+		for (i = 0; i < keyString.length; i += 1) {
+			if (seen[keyString.charAt(i)])
+				throw 'encoder alphabet contains duplicate characters';
+			seen[keyString.charAt(i)] = true;
+		}
 
 		// bitmasks
 		mag = Math.max(dataBits, codeBits);
@@ -160,8 +172,9 @@ var Nibbler = function (options) {
 				} else {
 					byteIn = input.charCodeAt(i);
 				}
-				if ((byteIn | max) !== max) {
-					throw byteIn + " is outside the range 0-" + max;
+				var dataMax = Math.pow(2, dataBits) - 1;
+				if (typeof byteIn !== 'number' || !isFinite(byteIn) || Math.floor(byteIn) !== byteIn || byteIn < 0 || byteIn > dataMax) {
+					throw byteIn + " is outside the range 0-" + dataMax;
 				}
 			}
 
@@ -211,26 +224,24 @@ var Nibbler = function (options) {
 	 * Decode.  Input and output are strings.
 	 */
 	decode = function (input) {
-		if (pad !== '') {
-			var paddingIndex = input.indexOf(pad);
-			var dataLength = (paddingIndex < 0) ? input.length : paddingIndex;
-			var remainder = dataLength % group;
-			var decodedLength = Math.floor(remainder * codeBits / dataBits);
-			// A partial group must be the encoding of a whole number of
-			// data units. Derive its shape from this instance's bit widths.
-			if (Math.ceil(decodedLength * dataBits / codeBits) !== remainder) {
-				throw 'the final encoded group has an invalid length';
-			}
-			var requiredPadding = (group - remainder) % group;
-			if (paddingIndex >= 0 &&
-				(input.length % group !== 0 || requiredPadding === 0 || input.length - dataLength !== requiredPadding)) {
-				throw 'the encoded padding is invalid';
-			}
-			if (paddingIndex >= 0) {
-				for (var i = paddingIndex; i < input.length; i++) {
-					if (input.charAt(i) !== pad)
-						throw 'the encoded padding is invalid';
-				}
+		var paddingIndex = pad === '' ? -1 : input.indexOf(pad);
+		var dataLength = (paddingIndex < 0) ? input.length : paddingIndex;
+		var remainder = dataLength % group;
+		var decodedLength = Math.floor(remainder * codeBits / dataBits);
+		// A partial group must be the encoding of a whole number of
+		// data units. Derive its shape from this instance's bit widths.
+		if (Math.ceil(decodedLength * dataBits / codeBits) !== remainder) {
+			throw 'the final encoded group has an invalid length';
+		}
+		var requiredPadding = (group - remainder) % group;
+		if (paddingIndex >= 0 &&
+			(input.length % group !== 0 || requiredPadding === 0 || input.length - dataLength !== requiredPadding)) {
+			throw 'the encoded padding is invalid';
+		}
+		if (paddingIndex >= 0) {
+			for (var i = paddingIndex; i < input.length; i++) {
+				if (input.charAt(i) !== pad)
+					throw 'the encoded padding is invalid';
 			}
 		}
 		return translate(input, codeBits, dataBits, true);
