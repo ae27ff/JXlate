@@ -27,6 +27,7 @@ jxlate.ui = {
      * @type {Object|null}
      */
     textRepresentation: null,
+    textEdit: null,
     
     /**
      * UI element used for local file importing
@@ -92,6 +93,7 @@ jxlate.ui = {
     },
 
     _setTextRepresentation:function(text, base){
+        this.textEdit = null;
         this.textarea.value = text;
         if (this._isTextBase(base)) {
             this.textRepresentation = {
@@ -112,8 +114,78 @@ jxlate.ui = {
             this.textRepresentation.base = newBase;
     },
 
-    _invalidateTextRepresentation:function(){
-        this.textRepresentation = null;
+    _rememberTextEdit:function(event){
+        this.textEdit = null;
+        if (!event || !/^(insert|delete)/.test(event.inputType))
+            return;
+        var start = this.textarea.selectionStart;
+        var end = this.textarea.selectionEnd;
+        if (typeof start !== "number" || typeof end !== "number")
+            return;
+        // Anchor deletion to the character actually removed, even when
+        // repeated characters make a plain prefix/suffix comparison ambiguous.
+        if (start === end && event.inputType === "deleteContentBackward")
+            start = Math.max(0, start - 1);
+        if (start === end && event.inputType === "deleteContentForward")
+            end = Math.min(this.textarea.value.length, end + 1);
+        this.textEdit = {start: start, end: end, visibleText: this.textarea.value};
+    },
+
+    _rawTextOffset:function(rawText, visibleOffset){
+        var rawOffset = 0;
+        for (var i = 0; i < visibleOffset; i++) {
+            if (rawText.charAt(rawOffset) === "\r" && rawText.charAt(rawOffset + 1) === "\n")
+                rawOffset++;
+            rawOffset++;
+        }
+        return rawOffset;
+    },
+
+    _updateTextRepresentation:function(){
+        var previous = this.textRepresentation;
+        var edit = this.textEdit;
+        this.textEdit = null;
+        if (previous === null || previous.base !== this.getSelectedBase()) {
+            this.textRepresentation = null;
+            return;
+        }
+        var oldText = previous.visibleText;
+        var newText = this.textarea.value;
+        var startLimit = oldText.length;
+        var endLimit = oldText.length;
+        if (edit !== null && edit.visibleText === oldText) {
+            startLimit = edit.start;
+            endLimit = oldText.length - edit.end;
+        }
+        var start = 0;
+        while (start < Math.min(oldText.length, newText.length, startLimit) &&
+            oldText.charAt(start) === newText.charAt(start))
+            start++;
+        var suffix = 0;
+        while (suffix < Math.min(oldText.length - start, newText.length - start, endLimit) &&
+            oldText.charAt(oldText.length - suffix - 1) === newText.charAt(newText.length - suffix - 1))
+            suffix++;
+        // Only newly edited text uses the textarea's LF line endings.
+        // Preserve raw CR/CRLF bytes in the unchanged prefix and suffix.
+        previous.rawText = previous.rawText.slice(0, this._rawTextOffset(previous.rawText, start)) +
+            newText.slice(start, newText.length - suffix) +
+            previous.rawText.slice(this._rawTextOffset(previous.rawText, oldText.length - suffix));
+        previous.visibleText = newText;
+        var normalizedText = previous.rawText.replace(/\r\n?/g, "\n");
+        if (normalizedText !== newText) {
+            // An edit can join a preserved bare CR to an LF at the edit
+            // boundary. Resync the display so later visible offsets still
+            // map to the correct raw bytes, keeping the caret at that join.
+            var selectionStart = this.textarea.selectionStart;
+            var selectionEnd = this.textarea.selectionEnd;
+            var removed = newText.length - normalizedText.length;
+            this.textarea.value = previous.rawText;
+            previous.visibleText = this.textarea.value;
+            if (typeof selectionStart === "number" && typeof selectionEnd === "number") {
+                this.textarea.selectionStart = selectionStart - (selectionStart > start ? removed : 0);
+                this.textarea.selectionEnd = selectionEnd - (selectionEnd > start ? removed : 0);
+            }
+        }
     },
     
     /**
@@ -253,10 +325,12 @@ jxlate.ui = {
             this.mainForm = document.getElementById('frmInput');
             this.textarea = this.mainForm.elements["text"];
             this.textRepresentation = null;
-            if (this.textarea.addEventListener)
-                this.textarea.addEventListener("input", this.events.InvalidateTextRepresentation, false);
+            if (this.textarea.addEventListener) {
+                this.textarea.addEventListener("beforeinput", this.events.RememberTextEdit, false);
+                this.textarea.addEventListener("input", this.events.UpdateTextRepresentation, false);
+            }
             else if (this.textarea.attachEvent)
-                this.textarea.attachEvent("oninput", this.events.InvalidateTextRepresentation);
+                this.textarea.attachEvent("oninput", this.events.UpdateTextRepresentation);
             this.setModeState(0);
             this.textarea.value = "";//clearing old form input
             this.textarea.focus();
@@ -482,8 +556,11 @@ jxlate.ui = {
             }
         },
 
-        InvalidateTextRepresentation: function(){
-            jxlate.ui._invalidateTextRepresentation();
+        RememberTextEdit: function(event){
+            jxlate.ui._rememberTextEdit(event);
+        },
+        UpdateTextRepresentation: function(){
+            jxlate.ui._updateTextRepresentation();
         },
         
         /**
