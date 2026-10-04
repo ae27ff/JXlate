@@ -145,6 +145,10 @@ if (typeof jxlate === "undefined") {
             baseFrom = params[1];
             baseTo = params[2];
 
+            if (baseFrom === 256) {
+                for (var i = 0; i < a.length; i++)
+                    this.numeral2dec(a[i], 256);
+            }
 
             if (baseFrom === baseTo)
                 return a;//the from and to bases are the same - no conversion necessary!
@@ -163,8 +167,11 @@ if (typeof jxlate === "undefined") {
          * @return {String} The equivalent numeral string in the final base
          */
         base2base: function (snum, baseFrom, baseTo) {//convert a numeral of one base system into another base system numeral
-            if (baseFrom === baseTo)
+            if (baseFrom === baseTo) {
+                if (baseFrom === 256)
+                    this.numeral2dec(snum, 256);
                 return snum;//same base - output the input
+            }
             var d = this.numeral2dec(snum, baseFrom);//convert numeral system A to decimal
             return this.dec2numeral(d, baseTo);//convert decimal to numeral system B
         },
@@ -187,8 +194,11 @@ if (typeof jxlate === "undefined") {
                     throw "number exceeds the safe integer range";
                 return d;
             }
-            if (base === 256)
-                return snum.charCodeAt(0);//single byte to decimal, easy enough.
+            if (base === 256) {
+                if (typeof snum !== "string" || snum.length !== 1 || snum.charCodeAt(0) > 255)
+                    throw "Latin-1 text must contain byte values from 0 to 255; use UTF-8 or UCS-2 for Unicode text";
+                return snum.charCodeAt(0);
+            }
 
             //Accumulate one digit at a time so every intermediate can be range-checked.
             d = 0;

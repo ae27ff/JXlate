@@ -16,17 +16,12 @@ function iso88591_to_utf8(s) {
     return decodeURIComponent(escape(s));
 }
 function ucs2_to_iso88591(s) {
-    var hex = "";
-    var uchars = s.split("");
-    console.log(s);
-    console.log(uchars);
+    var bytes = "";
     for (var i = 0; i < s.length; i++) {
-        var c = s.charAt(i);
-        var codeUnitHex = jxlate.ui.convertText(c, 256, 16);
-        hex += ("0000" + codeUnitHex).slice(-4);//UCS-2 is two bytes per UTF-16 code unit.
+        var codeUnit = s.charCodeAt(i);
+        bytes += String.fromCharCode(codeUnit >>> 8, codeUnit & 255);
     }
-
-    return jxlate.ui.convertToBytesNF(hex, 16);
+    return bytes;
 }
 function iso88591_to_ucs2(s) {
     if (s.length % 2 !== 0)
