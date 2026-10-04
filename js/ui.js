@@ -40,6 +40,7 @@ jxlate.ui = {
      * @type HTMLElement
      */
     fileDownTrigger:null,
+    downloadObjectURL:null,
     
     /**
      * Defines the type of layout displayed by the UI.
@@ -423,8 +424,17 @@ jxlate.ui = {
         }else{
             var dlData = this.getDataBlob(data);
             var dlURL = window.URL.createObjectURL(dlData);
-            linkElem.href = dlURL;
-            linkElem.setAttribute('download', filename);
+            try {
+                linkElem.setAttribute('download', filename);
+                linkElem.href = dlURL;
+            } catch (error) {
+                window.URL.revokeObjectURL(dlURL);
+                throw error;
+            }
+            var previousURL = this.downloadObjectURL;
+            this.downloadObjectURL = dlURL;
+            if (previousURL !== null)
+                window.URL.revokeObjectURL(previousURL);
         }
     },
     
