@@ -29,6 +29,8 @@ function ucs2_to_iso88591(s) {
     return jxlate.ui.convertToBytesNF(hex, 16);
 }
 function iso88591_to_ucs2(s) {
+    if (s.length % 2 !== 0)
+        throw "UCS-2 data must contain an even number of bytes";
     var hex = jxlate.ui.convertText(s, 256, 16);
     hex = hex.replaceAll(" ", "");
     var esc = "";
