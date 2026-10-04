@@ -14,7 +14,7 @@ function loadApp() {
         document: { readyState: 'loading', addEventListener() {} }
     });
     for (const file of ['core', 'util', 'lib/unicode', 'lib/base32',
-        'lib/ascii85', 'formatter', 'translator', 'ui', 'toolbox']) {
+        'lib/ascii85', 'lib/text-buffer', 'formatter', 'translator', 'ui', 'toolbox']) {
         vm.runInContext(fs.readFileSync(path.join(root, 'js', file + '.js'), 'utf8'), context);
     }
     context.jxlate.translator.init();
