@@ -134,10 +134,8 @@ jxlate.ui = {
         var a = jxlate.formatter.input2buffer(text, baseFrom);
         return jxlate.translator.array_base2base(a, baseFrom, 10);
     },
-    getInputAsDatastring:function(){
+    getInputAsByteArray:function(){
         var decarr = this.getInputAsDecimalArray();
-        var data = "";
-        var chunkSize = 8192;
         for (var i = 0; i < decarr.length; i++) {
             var value = String(decarr[i]);
             if (!/^\d+$/.test(value))
@@ -147,6 +145,12 @@ jxlate.ui = {
                 throw "byte value must be between 0 and 255";
             decarr[i] = byte;
         }
+        return decarr;
+    },
+    getInputAsDatastring:function(){
+        var decarr = this.getInputAsByteArray();
+        var data = "";
+        var chunkSize = 8192;
         for (var i = 0; i < decarr.length; i += chunkSize)
             data += String.fromCharCode.apply(null, decarr.slice(i, i + chunkSize));
         return data;

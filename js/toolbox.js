@@ -316,13 +316,16 @@ jxlate.ui.toolbox = {
 
 
     performDecimalOperation:function(func){
-        var base = jxlate.ui.getSelectedBase();
-        var decimal_array = jxlate.ui.getInputAsDecimalArray();
-        console.log(decimal_array);
-        for(var i=0;i<decimal_array.length;i++){
-            decimal_array[i] = func(parseInt(decimal_array[i]),i);
+        try {
+            var base = jxlate.ui.getSelectedBase();
+            var decimal_array = jxlate.ui.getInputAsByteArray();
+            for(var i=0;i<decimal_array.length;i++){
+                decimal_array[i] = func(decimal_array[i],i);
+            }
+            jxlate.ui.setInputFromDecimalArray(decimal_array, base);
+        } catch (error) {
+            alert("Unable to edit bytes: " + error);
         }
-        jxlate.ui.setInputFromDecimalArray(decimal_array, base);
     },
 
     /**

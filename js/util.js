@@ -11,11 +11,10 @@ if (typeof jxlate === "undefined") {
 jxlate.util = {
     init: function () {},
     modp: function (n, d) {//modulo that causes smaller negatives (|n|<d) to count from the righthand side (max value) instead of the stock behavior.
-        //console.log(n,d);
-        while (n < 0)
-            n += d;
-        //console.log(n%d);
-        return (n % d);
+        if (!isFinite(n) || !isFinite(d) || d <= 0)
+            throw "modulo requires a finite value and a positive finite divisor";
+        var remainder = n % d;
+        return remainder < 0 ? remainder + d : (remainder === 0 ? 0 : remainder);
     },
     stobuf: function(str) {
         var buf = new ArrayBuffer(str.length);
