@@ -299,7 +299,7 @@
                                 binaryString = bit + binaryString.substr(0,binaryString.length-1);
                             }
                         }
-                        binary = binaryString.match(/.{1,8}/g);
+                        binary = binaryString.match(/.{1,8}/g) || [];
                         charCodes = ShiftsTool.binArrayToDecArray(binary);
                         return StringUtils.fromCharCodes(charCodes);
                     }),
@@ -482,12 +482,13 @@
                 },
                 report_dec: function () {
                     var input = document.getElementById("dec");
-                    var values = this.report_update_inputs_dec(input.value.split(" "));
+                    var decimal = input.value.trim();
+                    var values = this.report_update_inputs_dec(decimal === "" ? [] : decimal.split(/\s+/));
                     this.report_op_from_select(values.text);
                 },
                 report_hex: function () {
                     var input = document.getElementById("hex");
-                    var hexArray = StringUtils.stripWS(input.value).match(/.{1,2}/g);
+                    var hexArray = StringUtils.stripWS(input.value).match(/.{1,2}/g) || [];
                     var values = this.report_update_inputs_hex(hexArray);
                     this.report_op_from_select(values.text);
                 },

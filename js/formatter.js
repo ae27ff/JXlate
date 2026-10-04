@@ -29,9 +29,9 @@ jxlate.formatter = {
         } else if (base === "ue" || base === "ucs2" || base === "utf8") {
             return [s];//urlencode is handled all was 1 item passed to a function
         } else if (base == 2) {
-            return s.replace(/\s/g, '').match(/.{1,8}/g);//strip spaces and split into 8-bit entries for binary.
+            return s.replace(/\s/g, '').match(/.{1,8}/g) || [];//strip spaces and split into 8-bit entries for binary.
         } else if (base == 16) {
-            return s.toUpperCase().replace(/\s/g, '').match(/.{1,2}/g);//strip spaces and split into 2-digit entries for hex
+            return s.toUpperCase().replace(/\s/g, '').match(/.{1,2}/g) || [];//strip spaces and split into 2-digit entries for hex
         } else if (base === "32r" || base === "32h" || base === "32c") {
             return [s.replace(/\s/g, '').toUpperCase()];//strip spaces spaces and uppercase as a single item for Base32 decoding.
         } else if (base == 64) {
