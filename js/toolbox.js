@@ -283,7 +283,15 @@ jxlate.ui.toolbox = {
             var shift = prompt("Please enter the caesar shift value", "13");
             if (shift === null)
                 return;
-            shift = parseInt(shift);
+            if (!/^-?\d+$/.test(shift)) {
+                alert("Please enter a whole number within the safe integer range.");
+                return;
+            }
+            shift = parseInt(shift, 10);
+            if (!isFinite(shift) || Math.abs(shift) > 9007199254740991) {
+                alert("Please enter a whole number within the safe integer range.");
+                return;
+            }
             if (shift === 0)
                 return;
             jxlate.ui.toolbox.textarea.value = Caesar(1, jxlate.ui.toolbox.textarea.value, shift);
