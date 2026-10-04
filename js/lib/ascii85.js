@@ -89,6 +89,7 @@ var ascii85 = this.ascii85 = (function () {
     a85text = a85text.replace(/z/g, '!!!!!');
     assertOrBadInput(!(/[^\x21-\x75]/.test(a85text)), 'Input contains out-of-range characters.');
     assertOrBadInput(a85text.length % 5 !== 1, 'The final ascii85 group must contain at least two characters.');
+    var unpaddedLength = a85text.length;
     var padding = '\x75\x75\x75\x75\x75'.slice((a85text.length % 5) || 5);
     a85text += padding; // pad with 'u'
     var newchars, out_array = [];
@@ -100,6 +101,8 @@ var ascii85 = this.ascii85 = (function () {
         ((a85text.charCodeAt(i+2) - 0x21) * pow2) +
         ((a85text.charCodeAt(i+3) - 0x21) * pow1) +
         ((a85text.charCodeAt(i+4) - 0x21)));
+      if (i + 5 <= unpaddedLength)
+        assertOrBadInput(newchars <= 4294967295, 'The ascii85 group exceeds four bytes.');
       out_array.push(
         (newchars >> 030) & 0xFF,
         (newchars >> 020) & 0xFF,
