@@ -118,7 +118,7 @@ var ascii85 = this.ascii85 = (function () {
         (newchars)        & 0xFF);
     };
     shorten(out_array, padding.length);
-    return String.fromCharCode.apply(String, out_array);
+    return ascii85StringFromCodes(out_array);
   };
   return ascii85;
 })();
