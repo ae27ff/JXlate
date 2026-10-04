@@ -34,6 +34,8 @@ function Caesar(encdec, text, inc, key, alphabet)
       alphabet = b;
    }
 
+   inc = ((inc % alphabet.length) + alphabet.length) % alphabet.length;
+
    for (i = 0; i < text.length; i++)
    {
       b = text.charAt(i);
