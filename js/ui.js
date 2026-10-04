@@ -122,13 +122,9 @@ jxlate.ui = {
         var end = this.textarea.selectionEnd;
         if (typeof start !== "number" || typeof end !== "number")
             return;
-        // Anchor deletion to the character actually removed, even when
-        // repeated characters make a plain prefix/suffix comparison ambiguous.
-        if (start === end && event.inputType === "deleteContentBackward")
-            start = Math.max(0, start - 1);
-        if (start === end && event.inputType === "deleteContentForward")
-            end = Math.min(this.textarea.value.length, end + 1);
-        this.textEdit = {start: start, end: end, visibleText: this.textarea.value};
+        // Keep the original caret: word/line deletion lengths are only
+        // known after the browser has performed the edit.
+        this.textEdit = {start: start, end: end, inputType: event.inputType, visibleText: this.textarea.value};
     },
 
     _rawTextOffset:function(rawText, visibleOffset){
@@ -154,6 +150,26 @@ jxlate.ui = {
         var startLimit = oldText.length;
         var endLimit = oldText.length;
         if (edit !== null && edit.visibleText === oldText) {
+            var removedLength = oldText.length - newText.length;
+            if (edit.start === edit.end && /^delete/.test(edit.inputType) && removedLength > 0) {
+                var deleteStart = edit.start;
+                var deleteEnd = edit.end;
+                if (/Backward$/.test(edit.inputType))
+                    deleteStart = Math.max(0, deleteEnd - removedLength);
+                else if (/Forward$/.test(edit.inputType))
+                    deleteEnd = Math.min(oldText.length, deleteStart + removedLength);
+                else if (typeof this.textarea.selectionStart === "number" &&
+                    this.textarea.selectionStart === this.textarea.selectionEnd) {
+                    // Non-directional deletions (e.g. an entire soft line)
+                    // leave the caret at the beginning of the removed range.
+                    deleteStart = this.textarea.selectionStart;
+                    deleteEnd = deleteStart + removedLength;
+                }
+                if (oldText.slice(0, deleteStart) + oldText.slice(deleteEnd) === newText) {
+                    edit.start = deleteStart;
+                    edit.end = deleteEnd;
+                }
+            }
             startLimit = edit.start;
             endLimit = oldText.length - edit.end;
         }
